@@ -1,0 +1,29 @@
+{
+  "name": "badminton-management",
+  "version": "1.0.0",
+  "main": "index.js",
+ "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "npm start --prefix backend", 
+    "client": "npm start --prefix frontend"   
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Thasnim12/badminton-management.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Thasnim12/badminton-management/issues"
+  },
+  "homepage": "https://github.com/Thasnim12/badminton-management#readme",
+  "description": "",
+  "dependencies": {
+    "concurrently": "^9.1.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  }
+}
