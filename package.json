@@ -21,6 +21,7 @@
   "homepage": "https://github.com/Thasnim12/badminton-management#readme",
   "description": "",
   "dependencies": {
+    "antd": "^5.23.3",
     "concurrently": "^9.1.2",
     "mongodb": "^6.13.0"
   },
