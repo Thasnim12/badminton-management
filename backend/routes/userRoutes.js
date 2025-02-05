@@ -1,5 +1,11 @@
 const express = require('express')
+const { userLogin,userRegister,verifyOtp,userLogout } = require('../controllers/userController')
 
-const router = express.Router();
+const userroute = express.Router();
 
-router.post('/login',userLogin)
+userroute.post('/register',userRegister)
+userroute.post('/login',userLogin)
+userroute.post('/verify-otp',verifyOtp)
+userroute.post('/logout',userLogout)
+
+module.exports = userroute
