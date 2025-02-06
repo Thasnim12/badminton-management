@@ -4,7 +4,7 @@ const donationSchema = mongoose.Schema({
     donor_id: { 
         type: mongoose.Schema.Types.ObjectId, 
         ref: 'User', 
-        required: true 
+        required: false
     },
     donor_name: { 
         type: String, 

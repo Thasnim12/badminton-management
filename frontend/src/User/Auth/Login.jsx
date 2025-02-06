@@ -14,6 +14,9 @@ import Footer from "../Global/Footer";
 import { useLoginUserMutation } from "../../Slices/UserApi";
 import * as Yup from "yup";
 import { Formik, Field, Form, ErrorMessage } from "formik";
+import { useDispatch,useSelector } from "react-redux";
+import { setUserCredentials } from "../../Slices/UserSlice";
+
 
 // Validation schema using Yup
 const validationSchema = Yup.object({
@@ -33,16 +36,28 @@ const Login = () => {
   const navigate = useNavigate();
   const [loginUser, { isLoading: isLoggingIn, error: loginError }] =
     useLoginUserMutation();
+    const dispatch = useDispatch();
 
   const handleSubmit = async (values) => {
     const { email, password } = values;
     try {
       const response = await loginUser({ email, password }).unwrap();
-      console.log("Login successful:", response);
-      navigate("/dashboard"); // Redirect to dashboard or home page
+      console.log(response)
+      if(response.user){
+        const user = response.user;
+        const name = user.name
+        const email = user.email
+        const phoneno = user.phoneno
+        const role = user.role
+        console.log(user,'user')
+        
+        dispatch(setUserCredentials({ name,email,phoneno,role }))
+        console.log("Login successful:", response);
+        navigate("/"); // Redirect to dashboard or home page
+      }
+      
     } catch (error) {
       console.error("Login failed:", error);
-      alert("Login failed. Please check your credentials.");
     }
   };
 

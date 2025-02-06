@@ -8,6 +8,7 @@ const sendOTP = require('../helper/otpHelper')
 const userRegister = async (req, res) => {
     try {
         const { name, email, password, confirmPassword, phoneno, address, profileImage } = req.body;
+        console.log(req.body,'req-body')
 
         if (!name || !email || !password || !confirmPassword || !phoneno) {
             return res.status(400).json({ message: "missing required fields!" })
@@ -21,6 +22,12 @@ const userRegister = async (req, res) => {
 
         if (userExist) {
             return res.status(402).json({ message: 'User already exists' });
+        }
+
+        const userwithPhone = await User.findOne({phoneno})
+
+        if(userwithPhone){
+            return res.status(200).json({message:"user with this phoneno exists!"})
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -42,7 +49,7 @@ const userRegister = async (req, res) => {
         const token = generateUserToken(res, user._id);
 
         const userData = await User.findById(user._id)
-            .select('-password -_id')
+            .select('-password')
             .lean();
 
         return res.status(200).json({ message: 'Successfully completed registration', user: userData, token });

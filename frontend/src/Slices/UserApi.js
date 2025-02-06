@@ -5,18 +5,18 @@ export const userApi = createApi({
   endpoints: (builder) => ({
 
     registerUser: builder.mutation({
-      query: (userData) => ({
+      query: (data) => ({
         url: '/register', 
         method: 'POST',
-        body: userData,
+        body: data,
       }),
     }),
 
     loginUser: builder.mutation({
-      query: (loginData) => ({
+      query: (data) => ({
         url: '/login', 
         method: 'POST',
-        body: loginData,
+        body: data,
       }),
     }),
 
@@ -28,9 +28,26 @@ export const userApi = createApi({
         body: otpData,
       }),
     }),
+
+    createDonation: builder.mutation({
+      query: (data) => ({
+        url: '/donation',
+        method: 'POST',
+        body: data,
+      }),
+    }),
+
+    verifyDonation: builder.mutation({
+      query: (data) => ({
+        url: '/verify-donation',
+        method: 'POST',
+        body: data,
+      }),
+    }),
+
   }),
 });
 
-export const { useRegisterUserMutation, useLoginUserMutation, useVerifyOtpMutation } = userApi;
+export const { useRegisterUserMutation, useLoginUserMutation, useVerifyOtpMutation, useCreateDonationMutation, useVerifyDonationMutation } = userApi;
 
 export default userApi;

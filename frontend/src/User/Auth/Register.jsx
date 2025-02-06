@@ -28,10 +28,13 @@ import {
 import Header from "../Global/Header";
 import Footer from "../Global/Footer";
 import { useSnackbar } from "notistack";
+import { useDispatch, useSelector } from "react-redux";
+import { setUserCredentials } from "../../Slices/UserSlice";
+
 
 const validationSchema = Yup.object({
   name: Yup.string().required("Full Name is required"),
-  mobile: Yup.string()
+  phoneno: Yup.string()
     .matches(/^[0-9]{10}$/, "Invalid mobile number")
     .required("Mobile number is required"),
   email: Yup.string().email("Invalid email").required("Email is required"),
@@ -52,32 +55,32 @@ const Register = () => {
   const { enqueueSnackbar } = useSnackbar(); // for notifications
   const [openOtpModal, setOpenOtpModal] = useState(false);
   const [otp, setOtp] = useState("");
+  const [ userId,setUserId ] = useState("")
+  const dispatch = useDispatch();
+  const { control,handleSubmit,formState: { errors },reset } = useForm({resolver: yupResolver(validationSchema)});
 
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-    reset,
-  } = useForm({
-    resolver: yupResolver(validationSchema),
-  });
+  const [registerUser, { isLoading: isRegistering, error: registerError }] = useRegisterUserMutation();
+  const [verifyOtp, { isLoading: isVerifyingOtp, error: otpError }] = useVerifyOtpMutation();
 
-  const [registerUser, { isLoading: isRegistering, error: registerError }] =
-    useRegisterUserMutation();
-  const [verifyOtp, { isLoading: isVerifyingOtp, error: otpError }] =
-    useVerifyOtpMutation();
 
   const handleRegistration = async (data) => {
     try {
+
       const response = await registerUser({
         name: data.name,
         mobile: data.mobile,
         email: data.email,
         password: data.password,
+        phoneno: data.phoneno,
+        confirmPassword: data.confirmPassword
       }).unwrap();
-
+       if(response){
+        const user = response.user
+        console.log(user,'user')
+        setUserId(user._id)
+       }
       console.log("Registration successful:", response);
-      setOpenOtpModal(true); // Open OTP modal after registration
+      setOpenOtpModal(true);
     } catch (error) {
       console.error("Registration failed:", error);
       enqueueSnackbar("Registration failed. Please try again.", {
@@ -90,8 +93,10 @@ const Register = () => {
     event.preventDefault();
 
     try {
-      const response = await verifyOtp({ otp }).unwrap();
-      if (response.success) {
+      const response = await verifyOtp({ userId,otp }).unwrap();
+      if (response.status === 'verified') {
+        const { name,email,phoneno } = response.data;
+        dispatch(setUserCredentials({ name,email,phoneno }))
         enqueueSnackbar("Registration successful!", { variant: "success" });
         navigate("/login");
       } else {
@@ -153,7 +158,7 @@ const Register = () => {
               />
 
               <Controller
-                name="mobile"
+                name="phoneno"
                 control={control}
                 render={({ field }) => (
                   <TextField
