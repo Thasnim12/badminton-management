@@ -64,7 +64,7 @@ const AboutSection = styled(Box)({
 });
 
 const InvolvedSection = styled(Box)({
-  padding: "60px 0",
+  padding: "60px 50px",
 });
 
 const ContactSection = styled(Box)({
@@ -211,7 +211,7 @@ const HomePage = () => {
           How You Can Get Involved
         </Typography>
         <Grid container spacing={4}>
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid item xs={12} md={4}>
             <PaperCard>
               <Typography variant="h6">Participate</Typography>
               <Typography variant="body1">
@@ -225,7 +225,7 @@ const HomePage = () => {
               </Link>
             </PaperCard>
           </Grid>
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid item xs={12} md={4}>
             <PaperCard>
               <Typography variant="h6">Sponsor</Typography>
               <Typography variant="body1">
@@ -239,7 +239,7 @@ const HomePage = () => {
               </Link>
             </PaperCard>
           </Grid>
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid item xs={12} md={4}>
             <PaperCard>
               <Typography variant="h6">Donate</Typography>
               <Typography variant="body1">

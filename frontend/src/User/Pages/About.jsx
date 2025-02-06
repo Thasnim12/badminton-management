@@ -25,7 +25,7 @@ const HeroSection = styled(Box)(({ theme }) => ({
 }));
 
 const InvolvedSection = styled(Box)({
-  padding: "60px 0",
+  padding: "60px 50px",
 });
 
 const Section = styled(Box)(({ theme }) => ({
