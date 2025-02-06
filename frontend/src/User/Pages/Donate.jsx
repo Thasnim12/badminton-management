@@ -7,7 +7,8 @@ const Donate = () => {
   const navigate = useNavigate();
   const [amount, setAmount] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("");
-
+  const [currency, setCurrency] = useState("INR");
+  
   const handleDonate = (e) => {
     e.preventDefault();
     alert(`Donation successful! Amount: ₹${amount}, Payment Method: ${paymentMethod}`);

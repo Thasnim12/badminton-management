@@ -40,7 +40,9 @@ const donationSchema = mongoose.Schema({
         beneficiary_name: String,
         account_number: String 
     },
-    transfer_id: String,
+    transfer_id: {
+        type:String,
+    },
     transfer_status: {
         type: String,
         enum: ['pending', 'processed', 'failed'],
