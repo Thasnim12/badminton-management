@@ -18,34 +18,88 @@ import {
   Close as CloseIcon,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
+import { useForm, Controller } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as Yup from "yup";
+import {
+  useRegisterUserMutation,
+  useVerifyOtpMutation,
+} from "../../Slices/UserApi";
 import Header from "../Global/Header";
 import Footer from "../Global/Footer";
+import { useSnackbar } from "notistack";
+
+const validationSchema = Yup.object({
+  name: Yup.string().required("Full Name is required"),
+  mobile: Yup.string()
+    .matches(/^[0-9]{10}$/, "Invalid mobile number")
+    .required("Mobile number is required"),
+  email: Yup.string().email("Invalid email").required("Email is required"),
+  password: Yup.string()
+    .min(6, "Password must be at least 6 characters long")
+    .matches(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+])[A-Za-z\d!@#$%^&*()_+]{6,}$/,
+      "Password must be a Strong password "
+    )
+    .required("Password is required"),
+  confirmPassword: Yup.string()
+    .oneOf([Yup.ref("password"), null], "Passwords must match")
+    .required("Confirm Password is required"),
+});
 
 const Register = () => {
   const navigate = useNavigate();
+  const { enqueueSnackbar } = useSnackbar(); // for notifications
   const [openOtpModal, setOpenOtpModal] = useState(false);
   const [otp, setOtp] = useState("");
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    const formData = new FormData(event.target);
-    const values = Object.fromEntries(formData.entries());
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm({
+    resolver: yupResolver(validationSchema),
+  });
 
-    console.log("Registration values:", values);
-    // Replace with actual API call for registration
+  const [registerUser, { isLoading: isRegistering, error: registerError }] =
+    useRegisterUserMutation();
+  const [verifyOtp, { isLoading: isVerifyingOtp, error: otpError }] =
+    useVerifyOtpMutation();
 
-    // After successful registration, open OTP modal
-    setOpenOtpModal(true);
+  const handleRegistration = async (data) => {
+    try {
+      const response = await registerUser({
+        name: data.name,
+        mobile: data.mobile,
+        email: data.email,
+        password: data.password,
+      }).unwrap();
+
+      console.log("Registration successful:", response);
+      setOpenOtpModal(true); // Open OTP modal after registration
+    } catch (error) {
+      console.error("Registration failed:", error);
+      enqueueSnackbar("Registration failed. Please try again.", {
+        variant: "error",
+      });
+    }
   };
 
-  const handleOtpSubmit = (event) => {
+  const handleOtpSubmit = async (event) => {
     event.preventDefault();
-    // Replace with actual OTP validation logic
-    if (otp === "123456") { // Example OTP check
-      alert("Registration successful!");
-      navigate("/login"); // Redirect to login or dashboard
-    } else {
-      alert("Invalid OTP. Please try again.");
+
+    try {
+      const response = await verifyOtp({ otp }).unwrap();
+      if (response.success) {
+        enqueueSnackbar("Registration successful!", { variant: "success" });
+        navigate("/login");
+      } else {
+        enqueueSnackbar("Invalid OTP. Please try again.", { variant: "error" });
+      }
+    } catch (error) {
+      console.error("OTP validation failed:", error);
+      enqueueSnackbar("Invalid OTP. Please try again.", { variant: "error" });
     }
   };
 
@@ -73,70 +127,117 @@ const Register = () => {
             <Typography variant="h5" component="h1" gutterBottom>
               Sign Up
             </Typography>
-            <form onSubmit={handleSubmit} style={{ width: "100%" }}>
-              <TextField
-                label="Full Name"
+            <form
+              onSubmit={handleSubmit(handleRegistration)}
+              style={{ width: "100%" }}
+            >
+              <Controller
                 name="name"
-                required
-                fullWidth
-                margin="normal"
-                variant="outlined"
-                InputProps={{
-                  startAdornment: <PersonOutline style={{ marginRight: 8 }} />,
-                }}
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    label="Full Name"
+                    fullWidth
+                    margin="normal"
+                    variant="outlined"
+                    error={!!errors.name}
+                    helperText={errors.name?.message}
+                    InputProps={{
+                      startAdornment: (
+                        <PersonOutline style={{ marginRight: 8 }} />
+                      ),
+                    }}
+                  />
+                )}
               />
 
-              <TextField
-                label="Mobile Number"
+              <Controller
                 name="mobile"
-                type="tel"
-                required
-                fullWidth
-                margin="normal"
-                variant="outlined"
-                InputProps={{
-                  startAdornment: <PhoneOutlined style={{ marginRight: 8 }} />,
-                }}
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    label="Mobile Number"
+                    type="tel"
+                    fullWidth
+                    margin="normal"
+                    variant="outlined"
+                    error={!!errors.mobile}
+                    helperText={errors.mobile?.message}
+                    InputProps={{
+                      startAdornment: (
+                        <PhoneOutlined style={{ marginRight: 8 }} />
+                      ),
+                    }}
+                  />
+                )}
               />
 
-              <TextField
-                label="Email"
+              <Controller
                 name="email"
-                type="email"
-                required
-                fullWidth
-                margin="normal"
-                variant="outlined"
-                InputProps={{
-                  startAdornment: <MailOutlined style={{ marginRight: 8 }} />,
-                }}
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    label="Email"
+                    type="email"
+                    fullWidth
+                    margin="normal"
+                    variant="outlined"
+                    error={!!errors.email}
+                    helperText={errors.email?.message}
+                    InputProps={{
+                      startAdornment: (
+                        <MailOutlined style={{ marginRight: 8 }} />
+                      ),
+                    }}
+                  />
+                )}
               />
 
-              <TextField
-                label="Password"
+              <Controller
                 name="password"
-                type="password"
-                required
-                fullWidth
-                margin="normal"
-                variant="outlined"
-                InputProps={{
-                  startAdornment: <LockOutlined style={{ marginRight: 8 }} />,
-                }}
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    label="Password"
+                    type="password"
+                    fullWidth
+                    margin="normal"
+                    variant="outlined"
+                    error={!!errors.password}
+                    helperText={errors.password?.message}
+                    InputProps={{
+                      startAdornment: (
+                        <LockOutlined style={{ marginRight: 8 }} />
+                      ),
+                    }}
+                  />
+                )}
               />
 
-              <TextField
-                label="Confirm Password"
+              <Controller
                 name="confirmPassword"
-                type="password"
-                required
-                fullWidth
-                margin="normal"
-                variant="outlined"
-                InputProps={{
-                  startAdornment: <LockOutlined style={{ marginRight: 8 }} />,
-                }}
-                helperText="Please confirm your password"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    label="Confirm Password"
+                    type="password"
+                    fullWidth
+                    margin="normal"
+                    variant="outlined"
+                    error={!!errors.confirmPassword}
+                    helperText={errors.confirmPassword?.message}
+                    InputProps={{
+                      startAdornment: (
+                        <LockOutlined style={{ marginRight: 8 }} />
+                      ),
+                    }}
+                  />
+                )}
               />
 
               <Button
@@ -145,9 +246,11 @@ const Register = () => {
                 color="primary"
                 fullWidth
                 sx={{ marginTop: 2 }}
+                disabled={isRegistering}
               >
-                Sign Up
+                {isRegistering ? "Registering..." : "Sign Up"}
               </Button>
+
               <div style={{ marginTop: "20px", textAlign: "center" }}>
                 <Typography variant="body2">
                   Already have an account?{" "}
@@ -216,8 +319,9 @@ const Register = () => {
               color="primary"
               fullWidth
               sx={{ marginTop: 2 }}
+              disabled={isVerifyingOtp}
             >
-              Verify OTP
+              {isVerifyingOtp ? "Verifying..." : "Verify OTP"}
             </Button>
           </form>
         </Box>

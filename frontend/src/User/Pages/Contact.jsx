@@ -4,15 +4,10 @@ import { styled } from "@mui/system";
 import Header from "../Global/Header";
 import Footer from "../Global/Footer";
 
-const MainContainer = styled("div")({
-  display: "flex",
-  flexDirection: "column",
-  minHeight: "100vh",
-});
 
 const BlueSection = styled(Box)({
-  width: "100vw",
-  backgroundColor: "#0D47A1", // Aesthetic dark blue
+  width: "100%",
+  backgroundColor: "#0D47A1", 
   padding: "40px 0",
 });
 
@@ -22,7 +17,7 @@ const BlueSectionContent = styled(Box)({
   alignItems: "flex-start",
   maxWidth: "1200px",
   margin: "0 auto",
-  padding: "0 20px",
+
 });
 
 const FormContainer = styled(Paper)({
@@ -43,7 +38,7 @@ const TextContainer = styled(Box)({
 });
 
 const MapSection = styled(Box)({
-  width: "100vw",
+  width: "100%",
   marginLeft: "calc(50% - 50vw)",
   backgroundColor: "#f1f1f1",
   height: "50vh",
@@ -59,7 +54,7 @@ const Contact = () => {
   };
 
   return (
-    <MainContainer>
+    <>
       <Header />
       <BlueSection>
         <BlueSectionContent>
@@ -121,13 +116,16 @@ const Contact = () => {
                 AVK Raja Yadav Trust
               </Typography>
               <Typography variant="body1" paragraph>
-                Address: 1234 Street, City, State, 56789
+                Register Number: R/V/B4/39/2024
               </Typography>
               <Typography variant="body1" paragraph>
-                Phone: +1 (234) 567-890
+                Address: Kalukoorani Village, Vani Bustop, Ramanathapuram, TamilNadu - 623536
               </Typography>
               <Typography variant="body1" paragraph>
-                Email: contact@avktrust.org
+                Phone: +91 6385224527
+              </Typography>
+              <Typography variant="body1" paragraph>
+                Email: avkrajayadavtrust@gmail.com
               </Typography>
             </Box>
           </TextContainer>
@@ -138,7 +136,7 @@ const Contact = () => {
         <Box sx={{ width: "100%", height: "100%" }}>
           <iframe
             title="Location Map"
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3651.0357470481686!2d90.40658691513432!3d23.810219384581113!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3755c73d7a9d1d07%3A0x5a3e7985599236bb!2sDhaka%2C%20Bangladesh!5e0!3m2!1sen!2sus!4v1627557863355!5m2!1sen!2sus"
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3936.8266816348378!2d78.8889145!3d9.3486005!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3b0197260c1fef8f%3A0x6fefc8de3da2cd09!2sVani%20bus%20stop!5e0!3m2!1sen!2sin!4v1738821254996!5m2!1sen!2sin" 
             width="100%"
             height="100%"
             style={{
@@ -151,7 +149,7 @@ const Contact = () => {
         </Box>
       </MapSection>
       <Footer />
-    </MainContainer>
+    </>
   );
 };
 

@@ -2,7 +2,7 @@ import React from "react";
 import { Box, Grid, Typography, Button, Paper, Container } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-
+import { Link } from "react-router-dom";
 import Header from "../Global/Header";
 import Footer from "../Global/Footer";
 
@@ -12,9 +12,8 @@ const ContentWrapper = styled(Box)({
   padding: "0 20px",
 });
 
-const HeroSection = styled(Box)({
-  backgroundImage:
-    'url("https://images.unsplash.com/photo-1617696618050-b0fef0c666af?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D")',
+const HeroSection = styled(Box)(({ theme }) => ({
+  backgroundImage: 'url("/AWINCO BADMINTON COURT ELEVATION.jpg")', // Image path from the public folder
   backgroundSize: "cover",
   backgroundPosition: "center",
   padding: "80px 20px",
@@ -23,6 +22,10 @@ const HeroSection = styled(Box)({
   textAlign: "center",
   width: "100%",
   marginTop: "5px",
+}));
+
+const InvolvedSection = styled(Box)({
+  padding: "60px 0",
 });
 
 const Section = styled(Box)(({ theme }) => ({
@@ -108,8 +111,8 @@ const AboutUs = () => {
                 src="https://content.jdmagicbox.com/comp/mumbai/i2/022pxx22.xx22.181021114020.f3i2/catalogue/vv-kuvale-badminton-academy-mumbai-taeqviawfi-250.jpg"
                 alt="Badminton Court"
                 sx={{
-                  width: "100%", // Adjust the width to make it smaller
-                  maxWidth: "500px", // Limit max size
+                  width: "100%",
+                  maxWidth: "500px",
                   borderRadius: "8px",
                   boxShadow: "0px 4px 6px rgba(0,0,0,0.1)",
                 }}
@@ -122,7 +125,7 @@ const AboutUs = () => {
       <Section>
         <Container maxWidth="lg">
           <Grid container spacing={4} alignItems="center">
-          <Grid item xs={12} md={5} display="flex" justifyContent="center">
+            <Grid item xs={12} md={5} display="flex" justifyContent="center">
               <Box
                 component="img"
                 src="https://t3.ftcdn.net/jpg/02/09/43/80/360_F_209438048_bqYPR1SZJx583icNF2fasiwfnttqMZZn.jpg"
@@ -148,57 +151,59 @@ const AboutUs = () => {
                 build a more compassionate, supportive world.
               </Typography>
             </Grid>
-
           </Grid>
         </Container>
       </Section>
 
-      <Section>
-        <Container maxWidth="lg">
-          <Typography variant="h4" gutterBottom>
-            How You Can Get Involved
-          </Typography>
-          <Grid container spacing={4} justifyContent="center">
-            <Grid item xs={12} md={4}>
-              <PaperCard>
-                <Typography variant="h6">Participate</Typography>
-                <Typography variant="body1" paragraph>
-                  Join our tournaments and show your skills on the court while
-                  helping those in need.
-                </Typography>
+      <InvolvedSection>
+        <Typography variant="h4" gutterBottom align="center">
+          How You Can Get Involved
+        </Typography>
+        <Grid container spacing={4}>
+          <Grid item xs={12} md={4}>
+            <PaperCard>
+              <Typography variant="h6">Participate</Typography>
+              <Typography variant="body1">
+                Join our tournaments and show your skills on the court while
+                helping those in need.
+              </Typography>
+              <Link to="/register">
                 <Button variant="contained" color="primary">
-                  Participate Now
+                  Join now
                 </Button>
-              </PaperCard>
-            </Grid>
-            <Grid item xs={12} md={4}>
-              <PaperCard>
-                <Typography variant="h6">Sponsor</Typography>
-                <Typography variant="body1" paragraph>
-                  Become a sponsor of our tournaments and show your support for
-                  a good cause.
-                </Typography>
+              </Link>
+            </PaperCard>
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <PaperCard>
+              <Typography variant="h6">Sponsor</Typography>
+              <Typography variant="body1">
+                Become a sponsor of our tournaments and show your support for a
+                good cause.
+              </Typography>
+              <Link to="/donate">
                 <Button variant="contained" color="primary">
-                  Become a Sponsor
+                  Sponsor
                 </Button>
-              </PaperCard>
-            </Grid>
-            <Grid item xs={12} md={4}>
-              <PaperCard>
-                <Typography variant="h6">Donate</Typography>
-                <Typography variant="body1" paragraph>
-                  Even if you can’t participate in the tournaments, your
-                  donations will go a long way in making a difference in
-                  someone’s life.
-                </Typography>
+              </Link>
+            </PaperCard>
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <PaperCard>
+              <Typography variant="h6">Donate</Typography>
+              <Typography variant="body1">
+                Even if you can’t participate in the tournaments, your donations
+                will go a long way in making a difference in someone’s life.
+              </Typography>
+              <Link to="/donate">
                 <Button variant="contained" color="primary">
                   Donate Now
                 </Button>
-              </PaperCard>
-            </Grid>
+              </Link>
+            </PaperCard>
           </Grid>
-        </Container>
-      </Section>
+        </Grid>
+      </InvolvedSection>
 
       <Section>
         <Container maxWidth="lg">
@@ -208,16 +213,20 @@ const AboutUs = () => {
           <Typography variant="body1" paragraph>
             We provide financial support for students to continue their
             education, ensuring that no one is held back due to financial
-            constraints.
+            constraints.We believe every student deserves the opportunity to
+            reach their full potential, and we are here to help make that
+            possible. Together, we can build a brighter future for the next
+            generation of leaders, innovators, and change-makers.
           </Typography>
+
+          <Link to="/donate">
+                <Button variant="contained" color="primary">
+                  Make a change
+                </Button>
+              </Link>
         </Container>
       </Section>
 
-      <Section>
-        <Button variant="contained" color="primary" size="large" href="/donate">
-          Make a Difference Today
-        </Button>
-      </Section>
       <Footer />
     </>
   );
