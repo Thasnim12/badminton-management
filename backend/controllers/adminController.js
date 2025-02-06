@@ -14,7 +14,7 @@ const adminLogin = async (req, res) => {
         }
 
         const admin = await Admin.findOne({ name });
-        console.log(admin,'admin')
+        console.log(admin, 'admin')
 
         if (admin) {
             const validPasskey = await bcrypt.compare(passkey, admin.passkey);
@@ -25,6 +25,8 @@ const adminLogin = async (req, res) => {
 
             admin.lastLogin = new Date();
             await admin.save();
+
+            console.log(admin._id, 'id')
 
             const token = generateAdminToken(res, admin._id);
 
@@ -49,7 +51,7 @@ const adminLogin = async (req, res) => {
             await newAdmin.save();
 
             const token = generateAdminToken(res, newAdmin._id);
-            console.log(token,'token')
+            console.log(token, 'token')
 
             return res.status(200).json({
                 admin: newAdmin,
@@ -95,9 +97,39 @@ const getAllusers = async (req, res) => {
     }
 }
 
+const manageUsers = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const user = await User.findById(id)
+
+        if (!user) {
+            return res.status(400).json({ message: "user not found" })
+        }
+
+        const updatedUser = await User.findByIdAndUpdate(
+            id,
+            { is_blocked: !user.is_blocked },
+            { new: true }
+        );
+
+        return res.status(200).json({
+            message: `User ${updatedUser.is_blocked ? 'blocked' : 'unblocked'} successfully`,
+            user: updatedUser
+        });
+
+    }
+    catch (error) {
+        console.error(error.message);
+        return res.status(500).json({ message: error.message });
+    }
+}
+
+
+
 
 module.exports = {
     adminLogin,
     adminLogout,
-    getAllusers
+    getAllusers,
+    manageUsers
 }

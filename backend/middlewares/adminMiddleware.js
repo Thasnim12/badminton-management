@@ -5,6 +5,7 @@ const Admin = require('../models/adminModel')
 
 const authenticateAdmin = async (req, res, next) => {
     const token = req.cookies.adminjwt;
+    console.log(req.cookies,'cookies')
     console.log(token,'tok')
 
     if (token) {

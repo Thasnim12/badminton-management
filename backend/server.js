@@ -1,6 +1,6 @@
 const express = require('express')
 const dotenv = require('dotenv')
-const cookieParser = require('cookie-parser')
+const cookieParser = require('cookie-parser');
 const connectDB = require('./connections/dbConnection')
 const userroute = require('./routes/userRoutes')
 const adminroute = require('./routes/adminRoutes')
