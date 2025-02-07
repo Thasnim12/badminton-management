@@ -1,10 +1,19 @@
-// Header.js
-import React from 'react';
-import { AppBar, Toolbar, Typography, IconButton, Menu, MenuItem, Avatar } from '@mui/material';
-import { AccountCircle, Menu as MenuIcon } from '@mui/icons-material';
+import React from "react";
+import {
+  AppBar, Toolbar, Typography, IconButton,
+  Menu, MenuItem, Avatar, Stack
+} from "@mui/material";
+import { AccountCircle, Menu as MenuIcon } from "@mui/icons-material";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { useLogoutadminMutation } from "../../Slices/AdminApi";
+import { adminlogout } from "../../Slices/AdminSlice";
 
 const Header = ({ onMenuClick }) => {
   const [anchorEl, setAnchorEl] = React.useState(null);
+  const [logout] = useLogoutadminMutation();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const handleMenuClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -14,6 +23,14 @@ const Header = ({ onMenuClick }) => {
     setAnchorEl(null);
   };
 
+  const handleLogout = async () => {
+      await logout().unwrap()
+      dispatch(adminlogout());
+      navigate('/admin/login')
+  }
+
+  
+
   return (
     <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
       <Toolbar>
@@ -21,42 +38,37 @@ const Header = ({ onMenuClick }) => {
           <MenuIcon />
         </IconButton>
         <Typography variant="h6" sx={{ flexGrow: 1 }}>
-       Admin Dashboard
+          Admin Dashboard
         </Typography>
-        {/* <div>
-          <IconButton
-            size="large"
-            edge="end"
-            color="inherit"
-            onClick={handleMenuClick}
-            aria-label="account of current user"
-            aria-controls="menu-appbar"
-            aria-haspopup="true"
-          >
-            <Avatar alt="User" />
-          </IconButton>
-          <Menu
-            id="menu-appbar"
-            anchorEl={anchorEl}
-            anchorOrigin={{
-              vertical: 'top',
-              horizontal: 'right',
-            }}
-            keepMounted
-            transformOrigin={{
-              vertical: 'top',
-              horizontal: 'right',
-            }}
-            open={Boolean(anchorEl)}
-            onClose={handleCloseMenu}
-          >
-            <MenuItem onClick={handleCloseMenu}>Profile</MenuItem>
-            <MenuItem onClick={handleCloseMenu}>Logout</MenuItem>
-          </Menu>
-        </div> */}
+
+        {/* User Avatar and Dropdown */}
+        <IconButton size="large" edge="end" color="inherit" onClick={handleMenuClick}>
+          <Avatar alt="Admin" src="/static/images/avatar/1.jpg" />
+        </IconButton>
+
+        {/* Dropdown Menu */}
+        <Menu
+          id="menu-appbar"
+          anchorEl={anchorEl}
+          anchorOrigin={{
+            vertical: "bottom",  // Opens below the avatar
+            horizontal: "right",
+          }}
+          transformOrigin={{
+            vertical: "top",  // Positions the menu correctly
+            horizontal: "right",
+          }}
+          open={Boolean(anchorEl)}
+          onClose={handleCloseMenu}
+          sx={{ mt: 1 }} // Adds a small margin for spacing
+        >
+          <MenuItem onClick={handleCloseMenu}>Profile</MenuItem>
+          <MenuItem onClick={handleLogout}>Logout</MenuItem>
+        </Menu>
       </Toolbar>
     </AppBar>
   );
+
 };
 
 export default Header;

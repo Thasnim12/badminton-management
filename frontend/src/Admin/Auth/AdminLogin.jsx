@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import {
   TextField,
   Button,
@@ -14,47 +14,54 @@ import {
   VisibilityOff,
 } from "@mui/icons-material"; // Added Visibility icons
 import { useNavigate } from "react-router-dom";
+import { setCredentials } from "../../Slices/AdminSlice";
+import { useDispatch,useSelector } from "react-redux";
+
 
 import { useLoginadminMutation } from "../../Slices/AdminApi";
 import * as Yup from "yup";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import { useSnackbar } from "notistack";
-
 // Validation schema using Yup
 const validationSchema = Yup.object({
   name: Yup.string()
     .min(3, "Name must be at least 3 characters long")
     .required("Name is required"),
-  password: Yup.string()
-    // .min(6, "Password must be at least 6 characters long")
-    // .matches(
-    //   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+])[A-Za-z\d!@#$%^&*()_+]{6,}$/,
-    //   "Password must be a strong password. It should contain at least one special character, one number, and one capital letter."
-    // )
-    .required("Password is required"),
+    passkey: Yup.string().required("Password is required"),
 });
 
 const AdminLogin = () => {
+
   const navigate = useNavigate();
   const [loginAdmin, { isLoading: isLoggingIn, error: loginError }] =
     useLoginadminMutation();
-  const { enqueueSnackbar } = useSnackbar(); 
+  const { enqueueSnackbar } = useSnackbar();
+  const disaptch = useDispatch();
+
+
+  const adminInfo = useSelector((state)=>state.adminAuth)
+
 
   const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (values) => {
-    const { name, password } = values;
+    const { name, passkey } = values;
     try {
-      const response = await loginAdmin({ name, password }).unwrap();
-      console.log("Admin login successful:", response);
-      navigate("/admin"); // Redirect to the admin dashboard or home page
+      const response = await loginAdmin({ name, passkey }).unwrap();
+      if(response.admin){
+        const admin = response.admin;
+        const name = admin.name;
+        disaptch(setCredentials({ name }))
+        navigate('/admin')
+      }
     } catch (error) {
       console.error("Admin login failed:", error);
       enqueueSnackbar("Admin login failed. Please check your credentials.", {
-        variant: "error", // Show error notification
+        variant: "error",
       });
     }
   };
+
 
   return (
     <div>
@@ -80,7 +87,7 @@ const AdminLogin = () => {
               Admin Log In
             </Typography>
             <Formik
-              initialValues={{ name: "", password: "" }}
+              initialValues={{ name: "", passkey: "" }}
               validationSchema={validationSchema}
               onSubmit={handleSubmit}
             >
@@ -107,7 +114,7 @@ const AdminLogin = () => {
 
                   <div style={{ position: "relative" }}>
                     <Field
-                      name="password"
+                      name="passkey"
                       type={showPassword ? "text" : "password"}
                       as={TextField}
                       label="Password"
@@ -127,8 +134,8 @@ const AdminLogin = () => {
                           </Button>
                         ),
                       }}
-                      error={touched.password && !!errors.password} // Show error state
-                      helperText={touched.password && errors.password} // Show error message
+                      error={touched.passkey && !!errors.passkey} // Show error state
+                      helperText={touched.passkey && errors.passkey} // Show error message
                     />
                   </div>
 

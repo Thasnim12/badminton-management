@@ -3,6 +3,9 @@ import { AppBar, Toolbar, Button, Typography, IconButton, Drawer, List, ListItem
 import MenuIcon from "@mui/icons-material/Menu";
 import { Link } from "react-router-dom";
 import { useTheme } from "@mui/material/styles";
+import Avatar from '@mui/material/Avatar';
+import Stack from '@mui/material/Stack';
+
 
 const Header = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -90,6 +93,8 @@ const Header = () => {
           ))}
         </List>
       </Drawer>
+
+      
     </AppBar>
   );
 };

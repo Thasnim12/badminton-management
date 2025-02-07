@@ -1,9 +1,14 @@
 const bcrypt = require('bcryptjs')
 const mongoose = require('mongoose')
+const { OAuth2Client } = require('google-auth-library');
 const User = require('../models/userModel')
 const generateUserToken = require('../authentication/generateUserToken')
 const Otp = require('../models/otpModel')
 const sendOTP = require('../helper/otpHelper')
+
+const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
+const client = new OAuth2Client(CLIENT_ID);
 
 const userRegister = async (req, res) => {
     try {
@@ -204,6 +209,55 @@ const userLogout = async (req, res) => {
     }
 }
 
+const googleLogin = async(req,res) =>{
+    try {
+
+        const { code } = req.body;
+
+        const tokenClient = new OAuth2Client(CLIENT_ID, CLIENT_SECRET, 'http://localhost:3000'); 
+        const { tokens } = await tokenClient.getToken({ code });
+        const idToken = tokens.id_token;
+
+
+        const ticket = await client.verifyIdToken({
+            idToken: idToken,
+            audience: CLIENT_ID,
+        });
+
+        const payload = ticket.getPayload();
+        const googleId = payload['sub'];
+        const email = payload['email'];
+        const name = payload['name'];
+
+        let user = await User.findOne({ googleId });
+
+        if (!user) {
+            user = await User.findOne({ email });
+            if (!user) {
+                user = new User({
+                    googleId,
+                    name,
+                    email,
+                });
+                await user.save();
+            }
+        }
+        
+        const generatedtoken = generateUserToken(res, user._id);
+
+        const userToSend = {  
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+        };
+
+        return res.status(200).json({user:userToSend, token:generatedtoken})
+    }
+    catch(error){
+        console.error(error.message);
+        return res.status(500).json({ message: error.message });
+    }
+}
 
 
 
@@ -211,5 +265,6 @@ module.exports = {
     userRegister,
     userLogin,
     verifyOtp,
-    userLogout
+    userLogout,
+    googleLogin
 }

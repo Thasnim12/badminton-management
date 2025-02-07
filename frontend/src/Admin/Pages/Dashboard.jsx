@@ -1,7 +1,10 @@
-import React from "react";
+import React,{ useEffect } from "react";
 import { Box, Typography, Grid, Paper, CircularProgress } from "@mui/material";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, AreaChart, Area } from "recharts";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import Layout from "../Global/Layouts";
+
 
 const barChartData = [
   { month: "Jan", 2019: 30, 2020: 50 },
@@ -22,6 +25,15 @@ const areaChartData = [
 ];
 
 const Dashboard = () => {
+  const adminInfo = useSelector((state)=>state.adminAuth)
+  const navigate = useNavigate();
+
+  useEffect(()=>{
+    if(!adminInfo){
+      navigate('/admin/login')
+    }
+  },[])
+  
   return (
     <Layout>
       <Box sx={{ padding: 4 }}>

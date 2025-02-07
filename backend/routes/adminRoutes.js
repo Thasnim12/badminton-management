@@ -9,7 +9,7 @@ adminroute.get('/users',authenticateAdmin,getAllusers)
 
 
 adminroute.post('/login',adminLogin)
-adminroute.post('/logout',adminLogout)
-adminroute.post('/users',manageUsers)
+adminroute.post('/logout',authenticateAdmin,adminLogout)
+adminroute.patch('/users/:userId',authenticateAdmin,manageUsers)
 
 module.exports = adminroute

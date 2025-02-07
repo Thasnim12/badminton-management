@@ -99,8 +99,10 @@ const getAllusers = async (req, res) => {
 
 const manageUsers = async (req, res) => {
     try {
-        const { id } = req.params;
-        const user = await User.findById(id)
+        const { userId } = req.params;
+        console.log(req.params,'params')
+        const id = new mongoose.Types.ObjectId(userId);
+        const user = await User.findById({_id:id })
 
         if (!user) {
             return res.status(400).json({ message: "user not found" })
