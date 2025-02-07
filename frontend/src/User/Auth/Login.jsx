@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   TextField,
   Button,
@@ -7,18 +7,22 @@ import {
   Container,
   Link,
 } from "@mui/material";
-import { LockOutlined, MailOutlined } from "@mui/icons-material";
+import {
+  LockOutlined,
+  MailOutlined,
+  Visibility,
+  VisibilityOff,
+} from "@mui/icons-material"; // Added Visibility icons
 import { useNavigate } from "react-router-dom";
-import Header from "../Global/Header";
-import Footer from "../Global/Footer";
+
 import { useLoginUserMutation } from "../../Slices/UserApi";
 import * as Yup from "yup";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import { useDispatch, useSelector } from "react-redux";
 import { setUserCredentials } from "../../Slices/UserSlice";
 import { useSnackbar } from "notistack";
-import { useSnackbar } from "notistack";
-
+import Header from "../Global/Header";
+import Footer from "../Global/Footer";
 // Validation schema using Yup
 const validationSchema = Yup.object({
   email: Yup.string()
@@ -28,7 +32,7 @@ const validationSchema = Yup.object({
     .min(6, "Password must be at least 6 characters long")
     .matches(
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+])[A-Za-z\d!@#$%^&*()_+]{6,}$/,
-      "Password must be a strong password"
+      "Password must be a strong password. It should contain at least one special character, one number, and one capital letter."
     )
     .required("Password is required"),
 });
@@ -39,6 +43,11 @@ const Login = () => {
     useLoginUserMutation();
     const dispatch = useDispatch();
     const { enqueueSnackbar } = useSnackbar();
+
+  const [showPassword, setShowPassword] = useState(false); // State for password visibility
+
+
+  const [showPassword, setShowPassword] = useState(false); // State for password visibility
 
   const handleSubmit = async (values) => {
     const { email, password } = values;
@@ -119,10 +128,10 @@ const Login = () => {
                     />
                   </div>
 
-                  <div>
+                  <div style={{ position: "relative" }}>
                     <Field
                       name="password"
-                      type="password"
+                      type={showPassword ? "text" : "password"}
                       as={TextField}
                       label="Password"
                       variant="outlined"
@@ -131,6 +140,14 @@ const Login = () => {
                       InputProps={{
                         startAdornment: (
                           <LockOutlined style={{ marginRight: 8 }} />
+                        ),
+                        endAdornment: (
+                          <Button
+                            onClick={() => setShowPassword((prev) => !prev)}
+                            style={{ background: "transparent" }}
+                          >
+                            {showPassword ? <Visibility /> : <VisibilityOff />}
+                          </Button>
                         ),
                       }}
                       error={touched.password && !!errors.password} // Show error state
@@ -152,7 +169,9 @@ const Login = () => {
                   <div style={{ marginTop: "20px", textAlign: "center" }}>
                     <Typography variant="body2">
                       Don't have an account?{" "}
-                      <Link onClick={() => navigate("/register")}>Sign up here</Link>
+                      <Link onClick={() => navigate("/register")}>
+                        Sign up here
+                      </Link>
                     </Typography>
                   </div>
                 </Form>
@@ -161,7 +180,6 @@ const Login = () => {
           </Card>
         </Container>
       </div>
-
       <Footer />
     </div>
   );

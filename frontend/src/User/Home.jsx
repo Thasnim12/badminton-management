@@ -105,7 +105,6 @@ const HomePage = () => {
   const onSubmit = (data) => {
     console.log("Form Data:", data);
     alert("Your message has been submitted!");
-
   };
   return (
     <>
@@ -225,6 +224,45 @@ const HomePage = () => {
         </Container>
       </Section>
 
+      <Section>
+        <Container maxWidth="lg">
+          <Grid container spacing={4} alignItems="center">
+            <Grid item xs={12} md={5} display="flex" justifyContent="center">
+              <Box
+                component="img"
+                src="https://t3.ftcdn.net/jpg/00/38/59/44/360_F_38594431_y0XRoIsqk7hj1VLv8WzNFuccl2OTmpia.jpg"
+                alt="Online Badminton Court Booking in Chennai"
+                sx={{
+                  width: "80%", // Adjust the width to make it smaller
+                  maxWidth: "500px", // Limit max size
+                  borderRadius: "8px",
+                  boxShadow: "0px 4px 6px rgba(0,0,0,0.1)",
+                }}
+              />
+            </Grid>
+
+            <Grid item xs={12} md={7}>
+              <Typography variant="h4" gutterBottom>
+                Online Badminton Court Booking for You
+              </Typography>
+              <Typography variant="body1" paragraph>
+                Looking for somewhere to play Badminton? Our Association is a
+                perfect indoor badminton court for both men and women. We offer
+                online badminton court booking facilities at competitive prices.
+                Now it’s time to get together with your friends or family and
+                organize a badminton match. Whether you play regularly or just
+                like to get out from time to time, our online booking program is
+                the perfect way to enjoy a game at a reasonable price. Just book
+                your desired session, show up, and play!
+              </Typography>
+              <Button variant="contained" color="primary" href="/book-now">
+                Book Now
+              </Button>
+            </Grid>
+          </Grid>
+        </Container>
+      </Section>
+
       {/* Get Involved Section */}
       <InvolvedSection>
         <Typography variant="h4" gutterBottom align="center">
@@ -286,10 +324,12 @@ const HomePage = () => {
                 Scholarships for Education
               </Typography>
               <Typography variant="body1" paragraph>
-                Providing financial support for students to continue their
-                education. Your contributions help fund scholarships that enable
-                students to reach their full potential and pursue their academic
-                goals.
+                We provide financial support for students to continue their
+                education, ensuring that no one is held back due to financial
+                constraints.We believe every student deserves the opportunity to
+                reach their full potential, and we are here to help make that
+                possible. Together, we can build a brighter future for the next
+                generation of leaders, innovators, and change-makers.
               </Typography>
               <Link to="/donate">
                 <Button variant="contained" color="primary">
@@ -375,21 +415,27 @@ const HomePage = () => {
                   We'd love to hear from you! Please fill out the form, and we
                   will get back to you as soon as possible.
                 </Typography>
-                <Typography variant="h6" gutterBottom>
-                  Court Info
-                </Typography>
-                <Typography variant="body1" paragraph>
-                  AVK Raja Yadav Trust
-                </Typography>
-                <Typography variant="body1" paragraph>
-                  Address: 1234 Street, City, State, 56789
-                </Typography>
-                <Typography variant="body1" paragraph>
-                  Phone: +1 (234) 567-890
-                </Typography>
-                <Typography variant="body1" paragraph>
-                  Email: contact@avktrust.org
-                </Typography>
+                <Box mt={2}>
+                  <Typography variant="h6" gutterBottom>
+                    Court Info
+                  </Typography>
+                  <Typography variant="body1" paragraph>
+                    AVK Raja Yadav Trust
+                  </Typography>
+                  <Typography variant="body1" paragraph>
+                    Register Number: R/V/B4/39/2024
+                  </Typography>
+                  <Typography variant="body1" paragraph>
+                    Address: Kalukoorani Village, Vani Bustop, Ramanathapuram,
+                    TamilNadu - 623536
+                  </Typography>
+                  <Typography variant="body1" paragraph>
+                    Phone: +91 6385224527
+                  </Typography>
+                  <Typography variant="body1" paragraph>
+                    Email: avkrajayadavtrust@gmail.com
+                  </Typography>
+                </Box>
               </Box>
             </Grid>
           </Grid>
