@@ -49,6 +49,8 @@ const Login = () => {
 
   const [showPassword, setShowPassword] = useState(false); // State for password visibility
 
+  const [showPassword, setShowPassword] = useState(false); // State for password visibility
+
   const handleSubmit = async (values) => {
     const { email, password } = values;
     try {
