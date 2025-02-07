@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   TextField,
   Button,
@@ -17,6 +17,7 @@ import { Formik, Field, Form, ErrorMessage } from "formik";
 import { useDispatch, useSelector } from "react-redux";
 import { setUserCredentials } from "../../Slices/UserSlice";
 import { useSnackbar } from "notistack";
+import { useSnackbar } from "notistack";
 
 // Validation schema using Yup
 const validationSchema = Yup.object({
@@ -24,12 +25,12 @@ const validationSchema = Yup.object({
     .email("Invalid email address")
     .required("Email is required"),
   password: Yup.string()
-     .min(6, "Password must be at least 6 characters long")
-     .matches(
-       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+])[A-Za-z\d!@#$%^&*()_+]{6,}$/,
-       "Password must be a Strong password "
-     )
-     .required("Password is required"),
+    .min(6, "Password must be at least 6 characters long")
+    .matches(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+])[A-Za-z\d!@#$%^&*()_+]{6,}$/,
+      "Password must be a strong password"
+    )
+    .required("Password is required"),
 });
 
 const Login = () => {
@@ -61,6 +62,9 @@ const Login = () => {
       console.error("Login failed:", error);
       enqueueSnackbar("Login failed. Please check your credentials.", {
         variant: "error",
+      });
+      enqueueSnackbar("Login failed. Please check your credentials.", {
+        variant: "error", // Show error notification
       });
     }
   };
@@ -94,7 +98,7 @@ const Login = () => {
               validationSchema={validationSchema}
               onSubmit={handleSubmit}
             >
-              {({ isSubmitting }) => (
+              {({ isSubmitting, errors, touched }) => (
                 <Form style={{ width: "100%" }}>
                   <div>
                     <Field
@@ -110,16 +114,8 @@ const Login = () => {
                           <MailOutlined style={{ marginRight: 8 }} />
                         ),
                       }}
-                
-                    />
-                    <ErrorMessage
-                      name="email"
-                      component="div"
-                      style={{
-                        color: "red",
-                        fontSize: "0.875rem",
-                        marginTop: "4px",
-                      }}
+                      error={touched.email && !!errors.email} // Show error state
+                      helperText={touched.email && errors.email} // Show error message
                     />
                   </div>
 
@@ -137,16 +133,8 @@ const Login = () => {
                           <LockOutlined style={{ marginRight: 8 }} />
                         ),
                       }}
-              
-                    />
-                    <ErrorMessage
-                      name="password"
-                      component="div"
-                      style={{
-                        color: "red",
-                        fontSize: "0.875rem",
-                        marginTop: "4px",
-                      }}
+                      error={touched.password && !!errors.password} // Show error state
+                      helperText={touched.password && errors.password} // Show error message
                     />
                   </div>
 

@@ -21,6 +21,7 @@
   "homepage": "https://github.com/Thasnim12/badminton-management#readme",
   "description": "",
   "dependencies": {
+    "@mui/icons-material": "^6.4.3",
     "antd": "^5.23.3",
     "concurrently": "^9.1.2",
     "crypto": "^1.0.1",

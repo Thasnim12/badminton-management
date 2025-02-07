@@ -15,6 +15,9 @@ import Bookings from "./Pages/Bookings";
 import { Link } from "react-router-dom";
 import { Carousel } from "react-responsive-carousel";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
+import * as yup from "yup";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { useForm } from "react-hook-form";
 
 const CarouselWrapper = styled(Box)({
   width: "100%",
@@ -81,12 +84,29 @@ const PaperCard = styled(Paper)({
   textAlign: "center",
 });
 
-const HomePage = () => {
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    alert("Your message has been submitted!");
-  };
+const validationSchema = yup.object().shape({
+  name: yup.string().required("Name is required"),
+  email: yup
+    .string()
+    .email("Enter a valid email")
+    .required("Email is required"),
+  message: yup.string().required("Message is required"),
+});
 
+const HomePage = () => {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    resolver: yupResolver(validationSchema),
+  });
+
+  const onSubmit = (data) => {
+    console.log("Form Data:", data);
+    alert("Your message has been submitted!");
+
+  };
   return (
     <>
       <Header />
@@ -299,7 +319,7 @@ const HomePage = () => {
           <Grid container spacing={4} alignItems="center">
             <Grid item xs={12} md={6}>
               <PaperCard>
-                <form onSubmit={handleSubmit}>
+                <form onSubmit={handleSubmit(onSubmit)}>
                   <Typography variant="h6" gutterBottom>
                     Send Us A Message
                   </Typography>
@@ -308,6 +328,9 @@ const HomePage = () => {
                     label="Your Name"
                     variant="outlined"
                     margin="normal"
+                    {...register("name")}
+                    error={!!errors.name}
+                    helperText={errors.name ? errors.name.message : ""}
                   />
                   <TextField
                     fullWidth
@@ -315,12 +338,9 @@ const HomePage = () => {
                     variant="outlined"
                     type="email"
                     margin="normal"
-                  />
-                  <TextField
-                    fullWidth
-                    label="Subject"
-                    variant="outlined"
-                    margin="normal"
+                    {...register("email")}
+                    error={!!errors.email}
+                    helperText={errors.email ? errors.email.message : ""}
                   />
                   <TextField
                     fullWidth
@@ -329,6 +349,9 @@ const HomePage = () => {
                     multiline
                     rows={4}
                     margin="normal"
+                    {...register("message")}
+                    error={!!errors.message}
+                    helperText={errors.message ? errors.message.message : ""}
                   />
                   <Button
                     variant="contained"
