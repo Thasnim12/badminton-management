@@ -28,11 +28,11 @@ const Dashboard = () => {
   const adminInfo = useSelector((state)=>state.adminAuth)
   const navigate = useNavigate();
 
-  useEffect(()=>{
-    if(!adminInfo){
-      navigate('/admin/login')
-    }
-  },[])
+  // useEffect(()=>{
+  //   if(!adminInfo){
+  //     navigate('/admin/login')
+  //   }
+  // },[])
   
   return (
     <Layout>

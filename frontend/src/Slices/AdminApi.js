@@ -11,6 +11,18 @@ export const adminApi = createApi({
         method: 'GET',
       }),
     }),
+    getAllcourts: builder.query({
+      query: () => ({
+        url: `/courts`,
+        method: 'GET',
+      }),
+    }),
+    getAllslost: builder.query({
+      query: () => ({
+        url: `/slots`,
+        method: 'GET',
+      }),
+    }),
     loginadmin: builder.mutation({
       query: (data) => ({
         url: '/login',
@@ -30,9 +42,45 @@ export const adminApi = createApi({
         method: 'PATCH',
       }),
     }),
+    manageslots: builder.mutation({
+      query: (data) => ({
+        url: `/slots`,
+        method: 'POST',
+        body: data
+      }),
+    }),
+    addcourts: builder.mutation({
+      query: (data) => ({
+        url: `/courts`,
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: data
+      }),
+    }),
+    updatecourts: builder.mutation({
+      query: ({ slotId,...data }) => ({
+        url: `/edit-slots/${slotId}`,
+        method: 'PUT',
+        body: data
+      }),
+    }),
+   
   }),
-});
+});   
 
-export const { useGetAllUsersQuery, useLoginadminMutation, useManageusersMutation, useLogoutadminMutation } = adminApi;
+export const {
+  useGetAllUsersQuery,
+  useLoginadminMutation,
+  useManageusersMutation,
+  useLogoutadminMutation,
+  useManageslotsMutation,
+  useAddcourtsMutation,
+  useGetAllcourtsQuery,
+  useGetAllslostQuery,
+  useUpdatecourtsMutation
+ }
+  = adminApi;
 
 export default adminApi;

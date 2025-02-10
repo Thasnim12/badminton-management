@@ -1,222 +1,208 @@
-import React, { useState } from "react";
-import {
-  Grid,
-  Button,
-  Typography,
-  Paper,
-  Box,
-  TextField,
-  IconButton,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  TableContainer,
-  Modal,
-  Select,
-  MenuItem,
-  InputLabel,
-  FormControl,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-} from "@mui/material";
-import {
-  Add as AddIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  Event as EventIcon,
-} from "@mui/icons-material";
-import { Calendar } from "react-calendar"; // Optional: You can use a calendar package
-import Layout from "../Global/Layouts";
-const ManageCourts = () => {
-  const [openModal, setOpenModal] = useState(false);
-  const [openDialog, setOpenDialog] = useState(false);
-  const [selectedCourt, setSelectedCourt] = useState(null);
-  const [bookingDetails, setBookingDetails] = useState({
-    playerName: "",
-    time: "",
-    courtNumber: "",
+import React, { useState, useEffect } from 'react';
+import Button from '@mui/material/Button';
+import PropTypes from 'prop-types';
+import { Box, Stack, Typography } from '@mui/material';
+import TextField from '@mui/material/TextField';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import { styled } from '@mui/material/styles';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import DialogTitle from '@mui/material/DialogTitle';
+import Collapse from '@mui/material/Collapse';
+import IconButton from '@mui/material/IconButton';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import { useAddcourtsMutation, useGetAllcourtsQuery } from '../../Slices/AdminApi';
+import Layout from '../Global/Layouts';
+import FullScreenDialog from '../Components/ViewCourt';
+
+const SlotManagement = () => {
+
+  const [open, setOpen] = useState(false);
+  const [courtName, setCourtName] = useState('')
+  const [courtImage, setCourtImage] = useState('')
+  const [errorMessage, setErrorMessage] = useState("");
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedcourt,SetSelectedCourt] = useState('')
+
+  const [addcourt] = useAddcourtsMutation();
+  const { data: courts, refetch } = useGetAllcourtsQuery();
+  
+
+
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  const handleOpenDialog = (court) => {
+    SetSelectedCourt(court)
+    setDialogOpen(true);
+  };
+
+  const handleCloseDialog = () => {
+    setDialogOpen(false);
+  };
+
+
+  const VisuallyHiddenInput = styled('input')({
+    clip: 'rect(0 0 0 0)',
+    clipPath: 'inset(50%)',
+    height: 1,
+    overflow: 'hidden',
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    whiteSpace: 'nowrap',
+    width: 1,
   });
-  const [courtBookings, setCourtBookings] = useState([
-    { courtNumber: 1, playerName: "Alice", time: "10:00 AM" },
-    { courtNumber: 2, playerName: "Bob", time: "12:00 PM" },
-  ]);
 
-  const handleModalClose = () => {
-    setOpenModal(false);
-    setBookingDetails({ playerName: "", time: "", courtNumber: "" });
-  };
 
-  const handleDialogClose = () => {
-    setOpenDialog(false);
-  };
+  const handleAddcourt = async () => {
+    console.log('hello')
+    if (!courtName) {
+      setErrorMessage("Please enter a court name and select an image.");
+      return;
+    }
+    setErrorMessage("");
 
-  const handleAddBooking = () => {
-    setCourtBookings([...courtBookings, bookingDetails]);
-    handleModalClose();
-  };
+    const courtData = {
+      court_name: courtName,
+      court_image: courtImage
+    };
 
-  const handleDeleteBooking = (courtNumber) => {
-    setCourtBookings(
-      courtBookings.filter((booking) => booking.courtNumber !== courtNumber)
-    );
-    handleDialogClose();
-  };
 
-  const handleBookingChange = (e) => {
-    const { name, value } = e.target;
-    setBookingDetails({ ...bookingDetails, [name]: value });
+    try {
+      const response = await addcourt(courtData).unwrap();
+      console.log("Court added successfully:", response);
+      setCourtImage("")
+      setCourtName("")
+      handleClose();
+    } catch (error) {
+      console.error("Error adding court:", error.message);
+      setErrorMessage("Failed to add court. Please try again.");
+    }
   };
 
   return (
     <Layout>
-      <Box sx={{ padding: 3 }}>
-        <Typography variant="h4" gutterBottom>
-          Manage Badminton Court Bookings
-        </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', p: 2 }}>
+        <Button variant="contained" onClick={handleClickOpen}>Add court</Button>
+      </Box>
+      <Dialog
+        open={open}
+        onClose={handleClose}
+        PaperProps={{
+          component: 'form',
+          onSubmit: (event) => {
+            event.preventDefault();
+            const formData = new FormData(event.currentTarget);
+            const formJson = Object.fromEntries(formData.entries());
+            const email = formJson.email;
+            console.log(email);
+            handleClose();
+          },
+        }}
+      >
+        <DialogTitle>Add your court name and image to manage your courts and time slots!</DialogTitle>
+        <DialogContent>
+          <Stack direction="column" spacing={2}>
+            <TextField
+              label="Court name"
+              variant="filled"
+              size="small"
+              value={courtName}
+              onChange={(e) => setCourtName(e.target.value)}
+              error={!courtName && errorMessage}
+            />
+            <Button
+              component="label"
+              role={undefined}
+              variant="contained"
+              tabIndex={-1}
+              startIcon={<CloudUploadIcon />}
+            >
+              Upload files
+              <VisuallyHiddenInput
+                type="file"
+                onChange={(event) => setCourtImage(event.target.files[0])}
+                accept="image/*"
+              />
+            </Button>
+          </Stack>
+        </DialogContent>
 
-        {/* Calendar */}
-        <Box
-          sx={{ display: "flex", justifyContent: "center", marginBottom: 3 }}
-        >
-          <Calendar />
-        </Box>
+        <DialogActions>
+          <Button onClick={handleClose}>Cancel</Button>
+          <Button onClick={handleAddcourt}>Add</Button>
+        </DialogActions>
+      </Dialog>
 
-        {/* Court Bookings Table */}
-        <TableContainer component={Paper}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+        <TableContainer component={Paper} sx={{ marginTop: 4, maxWidth: '80%' }}>
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell>Court Number</TableCell>
-                <TableCell>Player Name</TableCell>
-                <TableCell>Booking Time</TableCell>
-                <TableCell>Actions</TableCell>
+                <TableCell><strong>Court Name</strong></TableCell>
+                <TableCell><strong>Image</strong></TableCell>
+                <TableCell><strong>Active</strong></TableCell>
+                <TableCell><strong>View</strong></TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {courtBookings.map((booking, index) => (
-                <TableRow key={index}>
-                  <TableCell>{booking.courtNumber}</TableCell>
-                  <TableCell>{booking.playerName}</TableCell>
-                  <TableCell>{booking.time}</TableCell>
+              {courts?.courts?.map((court) => (
+                <TableRow key={court._id}>
+                  <TableCell>{court.court_name}</TableCell>
                   <TableCell>
-                    <IconButton onClick={() => setSelectedCourt(booking)}>
-                      <EditIcon color="primary" />
-                    </IconButton>
-                    <IconButton
-                      onClick={() => {
-                        setSelectedCourt(booking);
-                        setOpenDialog(true);
-                      }}
+                    {court.court_image ? (
+                      <img
+                        src={court.court_image}
+                        alt={court.court_name}
+                        style={{ width: 80, height: 50, objectFit: 'cover' }}
+                      />
+                    ) : (
+                      "No Image"
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      variant="contained"
+                      color={court.isActive ? "success" : "error"}
                     >
-                      <DeleteIcon color="error" />
-                    </IconButton>
+                      {court.isActive ? "Active" : "Inactive"}
+                    </Button>
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      variant="contained"
+                      onClick={() => handleOpenDialog(court)} 
+                    >
+                      view
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
+
           </Table>
         </TableContainer>
-
-        {/* Add New Booking Button */}
-        <Box sx={{ marginTop: 2, display: "flex", justifyContent: "center" }}>
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={<AddIcon />}
-            onClick={() => setOpenModal(true)}
-          >
-            Add New Booking
-          </Button>
-        </Box>
-
-        {/* Add Booking Modal */}
-        <Modal open={openModal} onClose={handleModalClose}>
-          <Box
-            sx={{
-              position: "absolute",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              width: 400,
-              bgcolor: "background.paper",
-              borderRadius: 2,
-              boxShadow: 24,
-              p: 3,
-            }}
-          >
-            <Typography variant="h6" gutterBottom>
-              Add New Court Booking
-            </Typography>
-            <Divider sx={{ marginBottom: 2 }} />
-            <TextField
-              fullWidth
-              label="Player Name"
-              name="playerName"
-              value={bookingDetails.playerName}
-              onChange={handleBookingChange}
-              margin="normal"
-            />
-            <TextField
-              fullWidth
-              label="Booking Time"
-              name="time"
-              value={bookingDetails.time}
-              onChange={handleBookingChange}
-              margin="normal"
-            />
-            <FormControl fullWidth margin="normal">
-              <InputLabel>Court Number</InputLabel>
-              <Select
-                name="courtNumber"
-                value={bookingDetails.courtNumber}
-                onChange={handleBookingChange}
-                label="Court Number"
-              >
-                {[1, 2, 3, 4].map((number) => (
-                  <MenuItem key={number} value={number}>
-                    Court {number}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <Box
-              sx={{ display: "flex", justifyContent: "flex-end", marginTop: 2 }}
-            >
-              <Button variant="contained" onClick={handleAddBooking}>
-                Add Booking
-              </Button>
-            </Box>
-          </Box>
-        </Modal>
-
-        {/* Delete Booking Confirmation Dialog */}
-        <Dialog open={openDialog} onClose={handleDialogClose}>
-          <DialogTitle>Confirm Delete</DialogTitle>
-          <DialogContent>
-            <Typography>
-              Are you sure you want to delete this booking?
-            </Typography>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleDialogClose} color="primary">
-              Cancel
-            </Button>
-            <Button
-              onClick={() => handleDeleteBooking(selectedCourt?.courtNumber)}
-              color="error"
-            >
-              Delete
-            </Button>
-          </DialogActions>
-        </Dialog>
       </Box>
+      {selectedcourt && <FullScreenDialog dialogOpen={dialogOpen} handleCloseDialog={handleCloseDialog} court={selectedcourt} />}
     </Layout>
   );
 };
 
-export default ManageCourts;
+export default SlotManagement;
