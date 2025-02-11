@@ -51,10 +51,6 @@ const Login = () => {
 
   const [showPassword, setShowPassword] = useState(false);
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 4bffeeb918020e2cdac585e6111dfe3e832998b0
   const handleSubmit = async (values) => {
     const { email, password } = values;
     try {
