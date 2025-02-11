@@ -12,6 +12,9 @@ import { styled } from "@mui/system";
 import Header from "./Global/Header";
 import Footer from "./Global/Footer";
 import Bookings from "./Pages/Bookings";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { Carousel } from "react-responsive-carousel";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
@@ -24,7 +27,7 @@ const CarouselWrapper = styled(Box)({
   height: "400px", // Set the height same as HeroSection
   textAlign: "center",
   overflow: "hidden",
-  marginTop: "5px", // Adjust if needed
+  // marginTop: "5px", // Adjust if needed
 });
 
 const StyledCarousel = styled(Carousel)({
@@ -102,6 +105,27 @@ const HomePage = () => {
     resolver: yupResolver(validationSchema),
   });
 
+  const navigate = useNavigate();
+
+  const isLoggedIn = localStorage.getItem("userInfo");
+
+  const handleBookingClick = () => {
+    if (!isLoggedIn) {
+      toast.error("You need to log in to book a court!", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+      });
+    } else {
+      navigate("/book-now");
+    }
+  };
+
   const onSubmit = (data) => {
     console.log("Form Data:", data);
     alert("Your message has been submitted!");
@@ -119,22 +143,13 @@ const HomePage = () => {
           showThumbs={false}
         >
           <div>
-            <img
-              src="/Carousal1.jpg"
-              alt="Badminton Court"
-            />
+            <img src="/Carousal1.jpg" alt="Badminton Court" />
           </div>
           <div>
-            <img
-              src="/Carousal2.jpg"
-              alt="Training Session"
-            />
+            <img src="/Carousal2.jpg" alt="Training Session" />
           </div>
           <div>
-            <img
-              src="/Carousal3.jpg"
-              alt="Tournaments"
-            />
+            <img src="/Carousal3.jpg" alt="Tournaments" />
           </div>
         </StyledCarousel>
       </CarouselWrapper>
@@ -157,6 +172,8 @@ const HomePage = () => {
           </Typography>
         </Box>
       </QuoteSection>
+
+      <ToastContainer />
 
       {/* About Us Section */}
       <Section>
@@ -255,7 +272,11 @@ const HomePage = () => {
                 the perfect way to enjoy a game at a reasonable price. Just book
                 your desired session, show up, and play!
               </Typography>
-              <Button variant="contained" color="primary" href="/book-now">
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleBookingClick}
+              >
                 Book Now
               </Button>
             </Grid>

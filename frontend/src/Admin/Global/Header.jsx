@@ -20,7 +20,7 @@ const Header = ({ onMenuClick }) => {
   };
 
   const handleCloseMenu = () => {
-    setAnchorEl(null);
+    navigate('/admin/settings')
   };
 
   const handleLogout = async () => {

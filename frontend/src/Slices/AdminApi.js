@@ -6,12 +6,8 @@ export const adminApi = createApi({
   endpoints: (builder) => ({
 
     getAllUsers: builder.query({
-<<<<<<< HEAD
       query: (data) => ({
         url: '/users', 
-=======
-      query: () => ({
-        url: '/users',
         method: 'GET',
       }),
     }),
@@ -24,23 +20,19 @@ export const adminApi = createApi({
     getAllslost: builder.query({
       query: () => ({
         url: `/slots`,
->>>>>>> 59cd390b1544805f619118c20afea7348c137445
         method: 'GET',
       }),
     }),
     loginadmin: builder.mutation({
-<<<<<<< HEAD
         query: (data) => ({
           url: '/login', 
           method: 'POST',
           body: data,
         }),
-=======
       query: (data) => ({
         url: '/login',
         method: 'POST',
         body: data,
->>>>>>> 59cd390b1544805f619118c20afea7348c137445
       }),
     }),
     logoutadmin: builder.mutation({

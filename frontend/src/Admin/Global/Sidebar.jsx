@@ -22,6 +22,10 @@ import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import SettingsIcon from "@mui/icons-material/Settings";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import { useTheme } from "@mui/material/styles";
+import { adminlogout } from "../../Slices/AdminSlice";
+import { useLogoutadminMutation } from "../../Slices/AdminApi";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 const drawerWidth = 290;
 const collapsedDrawerWidth = 80; // Width for collapsed state
@@ -35,6 +39,17 @@ const Sidebar = ({ open, onClose }) => {
   const handleCollapseToggle = () => {
     setCollapsed(!collapsed);
   };
+
+  const [logout] = useLogoutadminMutation();
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+
+    const handleLogout = async () => {
+        await logout().unwrap()
+        dispatch(adminlogout());
+        navigate('/admin/login')
+    }
+  
 
   return (
     <Drawer
@@ -131,7 +146,7 @@ const Sidebar = ({ open, onClose }) => {
           </ListItemIcon>
           {!collapsed && <ListItemText primary="Settings" />}
         </ListItemButton>
-        <ListItemButton >
+        <ListItemButton onClick={handleLogout}>
           <ListItemIcon>
             <ExitToAppIcon />
           </ListItemIcon>
