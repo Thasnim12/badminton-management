@@ -32,11 +32,11 @@ const SlotManagement = () => {
   const [courtImage, setCourtImage] = useState('')
   const [errorMessage, setErrorMessage] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [selectedcourt,SetSelectedCourt] = useState('')
+  const [selectedcourt, SetSelectedCourt] = useState('')
 
   const [addcourt] = useAddcourtsMutation();
   const { data: courts, refetch } = useGetAllcourtsQuery();
-  
+
 
 
 
@@ -100,7 +100,7 @@ const SlotManagement = () => {
   return (
     <Layout>
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', p: 2 }}>
-        <Button variant="contained" onClick={handleClickOpen}>Add court</Button>
+        <Button variant="contained" onClick={handleClickOpen} sx={{ backgroundColor: "#2c387e" }}>Add court</Button>
       </Box>
       <Dialog
         open={open}
@@ -187,8 +187,8 @@ const SlotManagement = () => {
                   </TableCell>
                   <TableCell>
                     <Button
-                      variant="contained"
-                      onClick={() => handleOpenDialog(court)} 
+                      sx={{ backgroundColor: "#2c387e",color:'white' }}
+                      onClick={() => handleOpenDialog(court)}
                     >
                       view
                     </Button>

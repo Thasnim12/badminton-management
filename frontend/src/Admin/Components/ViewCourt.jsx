@@ -1,10 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
     Dialog,
-    ListItemText,
-    ListItemButton,
-    List,
-    Divider,
     AppBar,
     Toolbar,
     IconButton,
@@ -19,68 +15,73 @@ import {
     TableRow,
     TableBody,
     Button,
+    CircularProgress
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import Layout from '../Global/Layouts';
 import { useManageslotsMutation, useGetAllslostQuery } from '../../Slices/AdminApi';
 import ViewSlots from './ViewSlots';
+import moment from 'moment';
 
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
 });
 
 export default function FullScreenDialog({ dialogOpen, handleCloseDialog, court }) {
-    const [slots, setSlots] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [open, setOpen] = useState(false);
-    const [modalMode, setModalMode] = useState("");
-    const [selectedSlot, setSelectedSlot] = useState(null);
-    const [openModal, setOpenModal] = useState(false);
-    const [addSlot] = useManageslotsMutation();
-
-    
+    console.log(court, 'court')
     const [page, setPage] = useState(1);
-    const slotsPerPage = 5; // Number of slots per page
+    const [openModal, setOpenModal] = useState(false);
+    const [selectedSlot, setSelectedSlot] = useState(null);
+    const [modalMode, setModalMode] = useState("");
+    const slotsPerPage = 5;
+    const courtId = court?._id
+    console.log(courtId, 'id')
 
-    const { data: allSlots, isLoading, error } = useGetAllslostQuery(court?._id, {
-        skip: !dialogOpen, // Fetch only when dialog is open
+    const [addSlot] = useManageslotsMutation();
+    const {
+        data,
+        isLoading,
+        error,
+        refetch
+    } = useGetAllslostQuery(courtId, {
+        skip: !courtId,
     });
-    
-      const handleClickOpen = () => {
-        setOpen(true);
-      };
-    
-      const handleClose = () => {
-        setOpen(false);
-      };
 
-      useEffect(() => {
-        if (court) {
-            const addSlotAsync = async () => {
+    const slots = Array.isArray(data?.data) ? data.data : [];
+
+    useEffect(() => {
+        if (courtId && dialogOpen) {
+            let isMounted = true; 
+            const generateSlots = async () => {
                 try {
-                    await addSlot({ courtId: court._id }).unwrap();
-                    console.log("Slot added successfully");
+                    await addSlot({ courtId: courtId }).unwrap();
+                    if (isMounted) refetch(); 
                 } catch (error) {
-                    console.error("Error adding slot:", error);
+                    console.error("Error generating slots:", error);
                 }
             };
     
-            addSlotAsync();
-        }
-    }, [court, addSlot]);
+            generateSlots();
     
+            return () => {
+                isMounted = false;
+            };
+        }
+    }, []); 
     
 
-    useEffect(() => {
-        if (dialogOpen && allSlots) {
-            setSlots(allSlots);
-        }
-    }, [dialogOpen, allSlots]);
-
+    // Pagination handlers
     const handlePageChange = (event, value) => {
         setPage(value);
     };
 
+    console.log(slots, 'slot')
+
+    const indexOfLastSlot = page * slotsPerPage;
+    const indexOfFirstSlot = indexOfLastSlot - slotsPerPage;
+    const currentSlots = slots.slice(indexOfFirstSlot, indexOfLastSlot);
+
+    // Modal handlers
     const handleView = (slot) => {
         setSelectedSlot(slot);
         setModalMode("view");
@@ -93,19 +94,25 @@ export default function FullScreenDialog({ dialogOpen, handleCloseDialog, court 
         setOpenModal(true);
     };
 
-    const indexOfLastSlot = page * slotsPerPage;
-    const indexOfFirstSlot = indexOfLastSlot - slotsPerPage;
-    const currentSlots = slots.slice(indexOfFirstSlot, indexOfLastSlot);
-
     return (
         <Layout>
-            <Dialog fullScreen open={dialogOpen} onClose={handleCloseDialog} TransitionComponent={Transition}>
+            <Dialog
+                fullScreen
+                open={dialogOpen}
+                onClose={handleCloseDialog}
+                TransitionComponent={Transition}
+            >
                 <AppBar sx={{ position: 'relative' }}>
                     <Toolbar>
-                        <IconButton edge="start" color="inherit" onClick={handleCloseDialog} aria-label="close">
+                        <IconButton
+                            edge="start"
+                            color="inherit"
+                            onClick={handleCloseDialog}
+                            aria-label="close"
+                        >
                             <CloseIcon />
                         </IconButton>
-                        <Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">
+                        <Typography sx={{ ml: 2, flex: 1 }} variant="h6">
                             Weekly Slots (Monday - Saturday)
                         </Typography>
                     </Toolbar>
@@ -114,10 +121,14 @@ export default function FullScreenDialog({ dialogOpen, handleCloseDialog, court 
                 <div style={{ padding: 20 }}>
                     <Typography variant="h6">Available Slots</Typography>
 
-                    {loading || isLoading ? (
-                        <Typography>Loading slots...</Typography>
+                    {isLoading ? (
+                        <div style={{ display: 'flex', justifyContent: 'center', padding: 20 }}>
+                            <CircularProgress />
+                        </div>
                     ) : error ? (
-                        <Typography color="error">Error loading slots</Typography>
+                        <Typography color="error">
+                            Error loading slots: {error.message}
+                        </Typography>
                     ) : slots.length > 0 ? (
                         <>
                             <TableContainer component={Paper} sx={{ marginTop: 2 }}>
@@ -127,20 +138,40 @@ export default function FullScreenDialog({ dialogOpen, handleCloseDialog, court 
                                             <TableCell align="center"><b>Date</b></TableCell>
                                             <TableCell align="center"><b>Time</b></TableCell>
                                             <TableCell align="center"><b>Price</b></TableCell>
+                                            <TableCell align="center"><b>Status</b></TableCell>
                                             <TableCell align="center"><b>Actions</b></TableCell>
                                         </TableRow>
                                     </TableHead>
                                     <TableBody>
-                                        {currentSlots.map((slot, index) => (
-                                            <TableRow key={index}>
-                                                <TableCell align="center">{new Date(slot.date).toDateString()}</TableCell>
-                                                <TableCell align="center">{slot.startTime} - {slot.endTime}</TableCell>
-                                                <TableCell align="center">₹0</TableCell>
+                                        {currentSlots.map((slot) => (
+                                            <TableRow key={slot._id}>
                                                 <TableCell align="center">
-                                                    <Button variant="outlined" color="primary" onClick={() => handleView(slot)} sx={{ marginRight: 1 }}>
+                                                    {moment(slot.date).format('DD MMM YYYY')}
+                                                </TableCell>
+                                                <TableCell align="center">
+                                                    {moment(slot.startTime, "HH:mm").format('hh:mm A')} -
+                                                    {moment(slot.endTime, "HH:mm").format('hh:mm A')}
+                                                </TableCell>
+                                                <TableCell align="center">
+                                                    ₹{slot.price || 0}
+                                                </TableCell>
+                                                <TableCell align="center">
+                                                    {slot.isBooked ? 'Booked' : 'Available'}
+                                                </TableCell>
+                                                <TableCell align="center">
+                                                    <Button
+                                                        variant="outlined"
+                                                        color="primary"
+                                                        onClick={() => handleView(slot)}
+                                                        sx={{ marginRight: 1 }}
+                                                    >
                                                         View
                                                     </Button>
-                                                    <Button variant="contained" onClick={() => handleEdit(slot)}>
+                                                    <Button
+                                                        variant="contained"
+                                                        onClick={() => handleEdit(slot)}
+                                                        disabled={slot.isBooked}
+                                                    >
                                                         Edit
                                                     </Button>
                                                 </TableCell>
@@ -164,7 +195,13 @@ export default function FullScreenDialog({ dialogOpen, handleCloseDialog, court 
                     )}
                 </div>
             </Dialog>
-            <ViewSlots open={openModal} handleClose={() => setOpenModal(false)} slot={selectedSlot} mode={modalMode} />
+
+            <ViewSlots
+                open={openModal}
+                handleClose={() => setOpenModal(false)}
+                slot={selectedSlot}
+                mode={modalMode}
+            />
         </Layout>
     );
 }

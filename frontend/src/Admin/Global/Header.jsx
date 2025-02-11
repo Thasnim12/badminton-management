@@ -32,7 +32,7 @@ const Header = ({ onMenuClick }) => {
   
 
   return (
-    <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
+    <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 , backgroundColor: "#2c387e"}}>
       <Toolbar>
         <IconButton edge="start" color="inherit" onClick={onMenuClick} aria-label="menu">
           <MenuIcon />

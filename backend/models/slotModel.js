@@ -6,14 +6,13 @@ const slotSchema = mongoose.Schema({
         ref: 'Court',
         required: true
     },
-    date: {
-        type: Date,
-    },
     startTime: {
-        type: String,
+        type: Date,
+        required: true
     },
     endTime: {
-        type: String,
+        type: Date,
+        required: true
     },
     isBooked: {
         type: Boolean,
@@ -21,7 +20,8 @@ const slotSchema = mongoose.Schema({
     },
     price: {
         type: Number,
-    }
+        required: true
+    },
 }, {
     timestamps: true
 });

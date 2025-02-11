@@ -18,8 +18,8 @@ export const adminApi = createApi({
       }),
     }),
     getAllslost: builder.query({
-      query: () => ({
-        url: `/slots`,
+      query: (courtId) => ({
+        url: `/slots/${courtId}`,
         method: 'GET',
       }),
     }),
@@ -71,6 +71,13 @@ export const adminApi = createApi({
         body: data
       }),
     }),
+    addstaffs: builder.mutation({
+      query: (data) => ({
+        url: `/staffs`,
+        method: 'POST',
+        body: data
+      }),
+    }),
    
   }),
 });   
@@ -84,7 +91,8 @@ export const {
   useAddcourtsMutation,
   useGetAllcourtsQuery,
   useGetAllslostQuery,
-  useUpdatecourtsMutation
+  useUpdatecourtsMutation,
+  useAddstaffsMutation
  }
   = adminApi;
 
