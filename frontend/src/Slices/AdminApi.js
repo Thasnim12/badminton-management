@@ -6,16 +6,16 @@ export const adminApi = createApi({
   endpoints: (builder) => ({
 
     getAllUsers: builder.query({
-      query: () => ({
+      query: (data) => ({
         url: '/users', 
         method: 'GET',
       }),
     }),
     loginadmin: builder.mutation({
-        query: (loginData) => ({
+        query: (data) => ({
           url: '/login', 
           method: 'POST',
-          body: loginData,
+          body: data,
         }),
       }),
 

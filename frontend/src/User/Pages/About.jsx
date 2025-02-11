@@ -13,7 +13,7 @@ const ContentWrapper = styled(Box)({
 });
 
 const HeroSection = styled(Box)(({ theme }) => ({
-  backgroundImage: 'url("/AWINCO BADMINTON COURT ELEVATION.jpg")', // Image path from the public folder
+  backgroundImage: 'url("/Carousal1.jpg")', // Image path from the public folder
   backgroundSize: "cover",
   backgroundPosition: "center",
   padding: "80px 20px",
@@ -47,16 +47,7 @@ const AboutUs = () => {
   return (
     <>
       <Header />
-
-      <HeroSection>
-        <Typography variant="h3" gutterBottom>
-          Welcome to AVK Raja Yadav Trust!
-        </Typography>
-        <Typography variant="h6" gutterBottom>
-          Empowering communities through badminton tournaments for a cause.
-        </Typography>
-      </HeroSection>
-
+      <HeroSection />
       <Section>
         <Container maxWidth="lg">
           <Grid container spacing={4} alignItems="center">

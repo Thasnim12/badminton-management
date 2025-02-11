@@ -1,26 +1,66 @@
 import React from "react";
-import { Box, Typography, Button, Container, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from "@mui/material";
-import Layout from "../Global/Layouts"; // Adjust the import based on where your Layout component is
-import { useGetAllUsersQuery } from "../../Slices/AdminApi"; // Make sure the import path is correct
+import { 
+  Box, 
+  Typography, 
+  Button, 
+  Container, 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableContainer, 
+  TableHead, 
+  TableRow, 
+  Paper,
+  CircularProgress 
+} from "@mui/material";
+import Layout from "../Global/Layouts";
+import { useGetAllUsersQuery } from "../../Slices/AdminApi";
 
 const Users = () => {
-
-  const { data: users = [], isLoading, isError } = useGetAllUsersQuery();
-
+  const { 
+    data: users, 
+    isLoading, 
+    isError, 
+    error 
+  } = useGetAllUsersQuery();
 
   const handleStatusChange = (userId, currentStatus) => {
-    // For simplicity, toggling between 'active' and 'blocked' here.
-    // In real app, you'll want to make an API request to update the user status.
     console.log(`Changing status of user ${userId} to ${currentStatus === "active" ? "blocked" : "active"}`);
   };
 
-  // Show loading or error message
+  // Show loading state
   if (isLoading) {
-    return <Typography>Loading users...</Typography>;
+    return (
+      <Layout>
+        <Container sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
+          <CircularProgress />
+        </Container>
+      </Layout>
+    );
   }
 
+  // Show error state
   if (isError) {
-    return <Typography>Error fetching users.</Typography>;
+    return (
+      <Layout>
+        <Container>
+          <Typography color="error" variant="h6">
+            Error: {error?.data?.message || 'Failed to fetch users'}
+          </Typography>
+        </Container>
+      </Layout>
+    );
+  }
+
+  // Make sure users exists before rendering
+  if (!users) {
+    return (
+      <Layout>
+        <Container>
+          <Typography>No users found.</Typography>
+        </Container>
+      </Layout>
+    );
   }
 
   return (
@@ -30,7 +70,6 @@ const Users = () => {
           <Typography variant="h4">Manage Users</Typography>
         </Box>
 
-        {/* Table for managing users */}
         <TableContainer component={Paper}>
           <Table sx={{ minWidth: 650 }} aria-label="user management table">
             <TableHead>

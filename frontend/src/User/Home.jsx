@@ -120,19 +120,19 @@ const HomePage = () => {
         >
           <div>
             <img
-              src="https://t3.ftcdn.net/jpg/03/10/62/12/360_F_310621281_foEqKBGtGlNWFQRePgdF5BpLOFyTsnzO.jpg"
+              src="/Carousal1.jpg"
               alt="Badminton Court"
             />
           </div>
           <div>
             <img
-              src="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8Q2hhcml0eXxlbnwwfHwwfHx8MA%3D%3D"
+              src="/Carousal2.jpg"
               alt="Training Session"
             />
           </div>
           <div>
             <img
-              src="https://media.istockphoto.com/id/1761333789/photo/badminton-shuttlecocks-and-racket-placed-in-the-corner-of-a-synthetic-field.jpg?s=612x612&w=0&k=20&c=3rr4BZqe1rDWsCe6LF_YPCXZe6Um5jizc6d6n96U1Q4="
+              src="/Carousal3.jpg"
               alt="Tournaments"
             />
           </div>

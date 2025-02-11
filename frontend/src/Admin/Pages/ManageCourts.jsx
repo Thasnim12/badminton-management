@@ -30,8 +30,9 @@ import {
   Delete as DeleteIcon,
   Event as EventIcon,
 } from "@mui/icons-material";
-import { Calendar } from "react-calendar"; // Optional: You can use a calendar package
+import { Calendar } from "react-calendar";
 import Layout from "../Global/Layouts";
+
 const ManageCourts = () => {
   const [openModal, setOpenModal] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
@@ -40,15 +41,31 @@ const ManageCourts = () => {
     playerName: "",
     time: "",
     courtNumber: "",
+    price: "",
   });
+
   const [courtBookings, setCourtBookings] = useState([
     { courtNumber: 1, playerName: "Alice", time: "10:00 AM" },
     { courtNumber: 2, playerName: "Bob", time: "12:00 PM" },
   ]);
 
+  const [courtPrices, setCourtPrices] = useState({
+    1: 50, // Price per hour for Court 1
+    2: 60, // Price per hour for Court 2
+    3: 70, // Price per hour for Court 3
+    4: 80, // Price per hour for Court 4
+  });
+
+  const [courtAvailability, setCourtAvailability] = useState({
+    1: { "2025-02-07": true, "2025-02-08": false }, // Court 1 availability
+    2: { "2025-02-07": true, "2025-02-08": true }, // Court 2 availability
+    3: { "2025-02-07": false, "2025-02-08": true }, // Court 3 availability
+    4: { "2025-02-07": true, "2025-02-08": true }, // Court 4 availability
+  });
+
   const handleModalClose = () => {
     setOpenModal(false);
-    setBookingDetails({ playerName: "", time: "", courtNumber: "" });
+    setBookingDetails({ playerName: "", time: "", courtNumber: "", price: "" });
   };
 
   const handleDialogClose = () => {
@@ -61,15 +78,30 @@ const ManageCourts = () => {
   };
 
   const handleDeleteBooking = (courtNumber) => {
-    setCourtBookings(
-      courtBookings.filter((booking) => booking.courtNumber !== courtNumber)
-    );
+    setCourtBookings(courtBookings.filter((booking) => booking.courtNumber !== courtNumber));
     handleDialogClose();
   };
 
   const handleBookingChange = (e) => {
     const { name, value } = e.target;
     setBookingDetails({ ...bookingDetails, [name]: value });
+  };
+
+  const handlePriceChange = (courtNumber, value) => {
+    setCourtPrices((prevPrices) => ({
+      ...prevPrices,
+      [courtNumber]: value,
+    }));
+  };
+
+  const handleAvailabilityChange = (courtNumber, date, available) => {
+    setCourtAvailability((prevAvailability) => ({
+      ...prevAvailability,
+      [courtNumber]: {
+        ...prevAvailability[courtNumber],
+        [date]: available,
+      },
+    }));
   };
 
   return (
@@ -80,9 +112,7 @@ const ManageCourts = () => {
         </Typography>
 
         {/* Calendar */}
-        <Box
-          sx={{ display: "flex", justifyContent: "center", marginBottom: 3 }}
-        >
+        <Box sx={{ display: "flex", justifyContent: "center", marginBottom: 3 }}>
           <Calendar />
         </Box>
 
@@ -184,9 +214,15 @@ const ManageCourts = () => {
                 ))}
               </Select>
             </FormControl>
-            <Box
-              sx={{ display: "flex", justifyContent: "flex-end", marginTop: 2 }}
-            >
+            <TextField
+              fullWidth
+              label="Price per Hour"
+              name="price"
+              value={bookingDetails.price}
+              onChange={handleBookingChange}
+              margin="normal"
+            />
+            <Box sx={{ display: "flex", justifyContent: "flex-end", marginTop: 2 }}>
               <Button variant="contained" onClick={handleAddBooking}>
                 Add Booking
               </Button>
@@ -198,9 +234,7 @@ const ManageCourts = () => {
         <Dialog open={openDialog} onClose={handleDialogClose}>
           <DialogTitle>Confirm Delete</DialogTitle>
           <DialogContent>
-            <Typography>
-              Are you sure you want to delete this booking?
-            </Typography>
+            <Typography>Are you sure you want to delete this booking?</Typography>
           </DialogContent>
           <DialogActions>
             <Button onClick={handleDialogClose} color="primary">
@@ -214,6 +248,54 @@ const ManageCourts = () => {
             </Button>
           </DialogActions>
         </Dialog>
+
+        {/* Court Pricing Management */}
+        <Box sx={{ marginTop: 3 }}>
+          <Typography variant="h6" gutterBottom>
+            Manage Court Pricing
+          </Typography>
+          {[1, 2, 3, 4].map((courtNumber) => (
+            <Box key={courtNumber} sx={{ display: "flex", alignItems: "center", marginBottom: 2 }}>
+              <Typography variant="body1" sx={{ marginRight: 2 }}>
+                Court {courtNumber} - Price:
+              </Typography>
+              <TextField
+                value={courtPrices[courtNumber]}
+                onChange={(e) => handlePriceChange(courtNumber, e.target.value)}
+                label="Price"
+                type="number"
+                variant="outlined"
+                size="small"
+                sx={{ width: "100px" }}
+              />
+            </Box>
+          ))}
+        </Box>
+
+        {/* Court Availability Management */}
+        <Box sx={{ marginTop: 3 }}>
+          <Typography variant="h6" gutterBottom>
+            Manage Court Availability
+          </Typography>
+          {[1, 2, 3, 4].map((courtNumber) => (
+            <Box key={courtNumber} sx={{ display: "flex", alignItems: "center", marginBottom: 2 }}>
+              <Typography variant="body1" sx={{ marginRight: 2 }}>
+                Court {courtNumber} - Availability:
+              </Typography>
+              <Select
+                value={courtAvailability[courtNumber]["2025-02-07"]}
+                onChange={(e) =>
+                  handleAvailabilityChange(courtNumber, "2025-02-07", e.target.value)
+                }
+                label="Available"
+                sx={{ width: "100px" }}
+              >
+                <MenuItem value={true}>Available</MenuItem>
+                <MenuItem value={false}>Unavailable</MenuItem>
+              </Select>
+            </Box>
+          ))}
+        </Box>
       </Box>
     </Layout>
   );

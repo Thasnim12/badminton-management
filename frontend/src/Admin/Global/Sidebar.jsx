@@ -9,8 +9,6 @@ import {
   IconButton,
   useMediaQuery,
   Avatar,
-  Menu,
-  MenuItem,
   Typography,
   Box,
 } from "@mui/material";
@@ -23,44 +21,35 @@ import SportsTennis from "@mui/icons-material/SportsTennis";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import SettingsIcon from "@mui/icons-material/Settings";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
-import PersonIcon from "@mui/icons-material/Person";
 import { useTheme } from "@mui/material/styles";
 
 const drawerWidth = 290;
+const collapsedDrawerWidth = 80; // Width for collapsed state
 
 const Sidebar = ({ open, onClose }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-  // Profile dropdown state
-  const [anchorEl, setAnchorEl] = useState(null);
-  const handleProfileMenuOpen = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-  const handleProfileMenuClose = () => {
-    setAnchorEl(null);
-  };
+  const [collapsed, setCollapsed] = useState(false); // Manage collapsed state
 
-  // Logout function
-  const handleLogout = () => {
-    console.log("Logging out...");
-    // Add your logout logic here (e.g., clearing auth tokens, redirecting)
+  const handleCollapseToggle = () => {
+    setCollapsed(!collapsed);
   };
 
   return (
     <Drawer
       sx={{
-        width: drawerWidth,
+        width: collapsed ? collapsedDrawerWidth : drawerWidth,
         flexShrink: 0,
         "& .MuiDrawer-paper": {
-          width: drawerWidth,
+          width: collapsed ? collapsedDrawerWidth : drawerWidth,
           boxSizing: "border-box",
         },
       }}
       variant={isMobile ? "temporary" : "persistent"}
       anchor="left"
       open={open}
-      onClose={onClose} 
+      onClose={onClose}
       ModalProps={{
         keepMounted: true,
       }}
@@ -81,29 +70,14 @@ const Sidebar = ({ open, onClose }) => {
             gap: 1,
             cursor: "pointer",
           }}
-          onClick={handleProfileMenuOpen}
         >
           <Avatar sx={{ bgcolor: "primary.main" }}>A</Avatar>
-          <Typography variant="subtitle1">Admin</Typography>
+          <Typography variant="subtitle1">{collapsed ? "" : "Admin"}</Typography> {/* Conditionally show text */}
         </Box>
-        <IconButton onClick={onClose}>
+        <IconButton onClick={handleCollapseToggle}>
           <ChevronLeftIcon />
         </IconButton>
       </Box>
-
-      {/* Profile Dropdown Menu */}
-      {/* <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={handleProfileMenuClose}
-      >
-        <MenuItem onClick={handleProfileMenuClose}>
-          <PersonIcon sx={{ marginRight: 1 }} /> View Profile
-        </MenuItem>
-        <MenuItem onClick={handleLogout}>
-          <ExitToAppIcon sx={{ marginRight: 1 }} /> Logout
-        </MenuItem>
-      </Menu> */}
 
       <Divider />
 
@@ -113,37 +87,37 @@ const Sidebar = ({ open, onClose }) => {
           <ListItemIcon>
             <DashboardIcon />
           </ListItemIcon>
-          <ListItemText primary="Dashboard" />
+          {!collapsed && <ListItemText primary="Dashboard" />}
         </ListItemButton>
         <ListItemButton component="a" href="/admin/users">
           <ListItemIcon>
             <UsersIcon />
           </ListItemIcon>
-          <ListItemText primary="Users" />
+          {!collapsed && <ListItemText primary="Users" />}
         </ListItemButton>
         <ListItemButton component="a" href="/admin/manage-donations">
           <ListItemIcon>
             <DonationsIcon />
           </ListItemIcon>
-          <ListItemText primary="Manage Donations" />
+          {!collapsed && <ListItemText primary="Manage Donations" />}
         </ListItemButton>
         <ListItemButton component="a" href="/admin/manage-bookings">
           <ListItemIcon>
             <BookingsIcon />
           </ListItemIcon>
-          <ListItemText primary="Manage Bookings" />
+          {!collapsed && <ListItemText primary="Manage Bookings" />}
         </ListItemButton>
         <ListItemButton component="a" href="/admin/manage-payments">
           <ListItemIcon>
             <CurrencyRupeeIcon />
           </ListItemIcon>
-          <ListItemText primary="Manage Payments" />
+          {!collapsed && <ListItemText primary="Manage Payments" />}
         </ListItemButton>
         <ListItemButton component="a" href="/admin/manage-courts">
           <ListItemIcon>
             <SportsTennis />
           </ListItemIcon>
-          <ListItemText primary="Manage Courts" />
+          {!collapsed && <ListItemText primary="Manage Courts" />}
         </ListItemButton>
       </List>
 
@@ -155,13 +129,13 @@ const Sidebar = ({ open, onClose }) => {
           <ListItemIcon>
             <SettingsIcon />
           </ListItemIcon>
-          <ListItemText primary="Settings" />
+          {!collapsed && <ListItemText primary="Settings" />}
         </ListItemButton>
-        <ListItemButton onClick={handleLogout}>
+        <ListItemButton >
           <ListItemIcon>
             <ExitToAppIcon />
           </ListItemIcon>
-          <ListItemText primary="Logout" />
+          {!collapsed && <ListItemText primary="Logout" />}
         </ListItemButton>
       </List>
     </Drawer>

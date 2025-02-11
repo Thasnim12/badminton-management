@@ -6,7 +6,7 @@ const Footer = () => (
   <AppBar position="static" sx={{ top: "auto", bottom: 0, backgroundColor: "#333" }}>
     <Toolbar>
       <Typography variant="h6" sx={{ flexGrow: 1, textAlign: "center" }}>
-        © 2025 Your Company Name
+        © 2025 AVK Raja Yadav Trust
       </Typography>
       <Button color="inherit" component={Link} to="/privacy">
         Privacy Policy

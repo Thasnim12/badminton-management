@@ -14,7 +14,7 @@ const ContentWrapper = styled(Box)({
 
 const HeroSection = styled(Box)({
   backgroundImage:
-    'url("https://images.unsplash.com/photo-1617696618050-b0fef0c666af?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D")',
+    'url("/Carousal2.jpg")',
   backgroundSize: "cover",
   backgroundPosition: "center",
   padding: "80px 20px",
@@ -46,15 +46,6 @@ const Bookings = () => {
       <Header />
 
       <HeroSection>
-        <Typography variant="h3" gutterBottom>
-          Play Badminton & Have Fun with Family and Friends!
-        </Typography>
-        <Typography variant="h6" gutterBottom>
-          Book a quality badminton court online at an affordable price.
-        </Typography>
-        <Button variant="contained" color="primary" href="/book-now">
-          Book A Court Now
-        </Button>
       </HeroSection>
 
       <Section>
