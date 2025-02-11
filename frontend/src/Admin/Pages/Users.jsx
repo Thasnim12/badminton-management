@@ -1,71 +1,5 @@
-<<<<<<< HEAD
-import React from "react";
-import { 
-  Box, 
-  Typography, 
-  Button, 
-  Container, 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableContainer, 
-  TableHead, 
-  TableRow, 
-  Paper,
-  CircularProgress 
-} from "@mui/material";
-import Layout from "../Global/Layouts";
-import { useGetAllUsersQuery } from "../../Slices/AdminApi";
 
-const Users = () => {
-  const { 
-    data: users, 
-    isLoading, 
-    isError, 
-    error 
-  } = useGetAllUsersQuery();
-
-  const handleStatusChange = (userId, currentStatus) => {
-    console.log(`Changing status of user ${userId} to ${currentStatus === "active" ? "blocked" : "active"}`);
-  };
-
-  // Show loading state
-  if (isLoading) {
-    return (
-      <Layout>
-        <Container sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
-          <CircularProgress />
-        </Container>
-      </Layout>
-    );
-  }
-
-  // Show error state
-  if (isError) {
-    return (
-      <Layout>
-        <Container>
-          <Typography color="error" variant="h6">
-            Error: {error?.data?.message || 'Failed to fetch users'}
-          </Typography>
-        </Container>
-      </Layout>
-    );
-  }
-
-  // Make sure users exists before rendering
-  if (!users) {
-    return (
-      <Layout>
-        <Container>
-          <Typography>No users found.</Typography>
-        </Container>
-      </Layout>
-    );
-  }
-
-=======
-import React,{ useState } from "react";
+import React, { useState } from "react";
 import { styled } from "@mui/material/styles";
 import {
   Table,
@@ -123,55 +57,12 @@ const Users = () => {
     }
   };
 
->>>>>>> 59cd390b1544805f619118c20afea7348c137445
   return (
     <Layout>
       <Container>
         <Typography variant="h4" sx={{ mb: 3 }}>
           Manage Users
         </Typography>
-
-<<<<<<< HEAD
-        <TableContainer component={Paper}>
-          <Table sx={{ minWidth: 650 }} aria-label="user management table">
-            <TableHead>
-              <TableRow>
-                <TableCell>Name</TableCell>
-                <TableCell>Email</TableCell>
-                <TableCell>Phone Number</TableCell>
-                <TableCell>Status</TableCell>
-                <TableCell>Actions</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {users.map((user) => (
-                <TableRow key={user.id}>
-                  <TableCell>{user.name}</TableCell>
-                  <TableCell>{user.email}</TableCell>
-                  <TableCell>{user.phone}</TableCell>
-                  <TableCell>{user.status === "active" ? "Active" : "Blocked"}</TableCell>
-                  <TableCell>
-                    <Button
-                      variant="contained"
-                      color={user.status === "active" ? "error" : "success"}
-                      onClick={() => handleStatusChange(user.id, user.status)}
-                    >
-                      {user.status === "active" ? "Block" : "Unblock"}
-                    </Button>
-                  </TableCell>
-=======
-        {isLoading && (
-          <Typography align="center">
-            <CircularProgress />
-          </Typography>
-        )}
-
-        {isError && (
-          <Typography color="error" align="center">
-            Error fetching users.
-          </Typography>
-        )}
-
         {!isLoading && !isError && users.length > 0 && (
           <TableContainer component={Paper} sx={{ width: "100%", overflowX: "auto" }}>
             <Table aria-label="User Management Table">
@@ -181,7 +72,6 @@ const Users = () => {
                   <StyledTableCell>Email</StyledTableCell>
                   <StyledTableCell>Phone</StyledTableCell>
                   <StyledTableCell>Actions</StyledTableCell>
->>>>>>> 59cd390b1544805f619118c20afea7348c137445
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -226,7 +116,6 @@ const Users = () => {
           {snackbarMessage}
         </Alert>
       </Snackbar>
-      
     </Layout>
   );
 };

@@ -6,12 +6,8 @@ export const adminApi = createApi({
   endpoints: (builder) => ({
 
     getAllUsers: builder.query({
-<<<<<<< HEAD
       query: (data) => ({
         url: '/users', 
-=======
-      query: () => ({
-        url: '/users',
         method: 'GET',
       }),
     }),
@@ -22,25 +18,21 @@ export const adminApi = createApi({
       }),
     }),
     getAllslost: builder.query({
-      query: () => ({
-        url: `/slots`,
->>>>>>> 59cd390b1544805f619118c20afea7348c137445
+      query: (courtId) => ({
+        url: `/slots/${courtId}`,
         method: 'GET',
       }),
     }),
     loginadmin: builder.mutation({
-<<<<<<< HEAD
         query: (data) => ({
           url: '/login', 
           method: 'POST',
           body: data,
         }),
-=======
       query: (data) => ({
         url: '/login',
         method: 'POST',
         body: data,
->>>>>>> 59cd390b1544805f619118c20afea7348c137445
       }),
     }),
     logoutadmin: builder.mutation({
@@ -79,6 +71,13 @@ export const adminApi = createApi({
         body: data
       }),
     }),
+    addstaffs: builder.mutation({
+      query: (data) => ({
+        url: `/staffs`,
+        method: 'POST',
+        body: data
+      }),
+    }),
    
   }),
 });   
@@ -92,8 +91,9 @@ export const {
   useAddcourtsMutation,
   useGetAllcourtsQuery,
   useGetAllslostQuery,
-  useUpdatecourtsMutation
+  useUpdatecourtsMutation,
+  useAddstaffsMutation
  }
   = adminApi;
 
-export default adminApi;
+export default adminApi
