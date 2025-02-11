@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import {
   TextField,
   Button,
@@ -14,6 +14,9 @@ import {
   VisibilityOff,
 } from "@mui/icons-material"; // Added Visibility icons
 import { useNavigate } from "react-router-dom";
+import { setCredentials } from "../../Slices/AdminSlice";
+import { useDispatch,useSelector } from "react-redux";
+
 
 import { useLoginadminMutation } from "../../Slices/AdminApi";
 import * as Yup from "yup";
@@ -28,10 +31,16 @@ const validationSchema = Yup.object({
 });
 
 const AdminLogin = () => {
+
   const navigate = useNavigate();
   const [loginAdmin, { isLoading: isLoggingIn, error: loginError }] =
     useLoginadminMutation();
   const { enqueueSnackbar } = useSnackbar();
+  const disaptch = useDispatch();
+
+
+  const adminInfo = useSelector((state)=>state.adminAuth)
+
 
   const [showPassword, setShowPassword] = useState(false);
 
@@ -39,8 +48,12 @@ const AdminLogin = () => {
     const { name, passkey } = values;
     try {
       const response = await loginAdmin({ name, passkey }).unwrap();
-      console.log("Admin login successful:", response);
-      navigate("/admin");
+      if(response.admin){
+        const admin = response.admin;
+        const name = admin.name;
+        disaptch(setCredentials({ name }))
+        navigate('/admin')
+      }
     } catch (error) {
       console.error("Admin login failed:", error);
       enqueueSnackbar("Admin login failed. Please check your credentials.", {
@@ -48,6 +61,7 @@ const AdminLogin = () => {
       });
     }
   };
+
 
   return (
     <div>

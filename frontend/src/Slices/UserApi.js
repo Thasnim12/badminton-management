@@ -19,6 +19,14 @@ export const userApi = createApi({
         body: data,
       }),
     }),
+    
+    googleLogin: builder.mutation({
+      query: ({ token }) => ({
+        url: '/google-login', 
+        method: 'POST',
+        body: { token } ,
+      }),
+    }),
 
 
     verifyOtp: builder.mutation({
@@ -48,6 +56,6 @@ export const userApi = createApi({
   }),
 });
 
-export const { useRegisterUserMutation, useLoginUserMutation, useVerifyOtpMutation, useCreateDonationMutation, useVerifyDonationMutation } = userApi;
+export const { useRegisterUserMutation, useLoginUserMutation, useVerifyOtpMutation, useCreateDonationMutation, useVerifyDonationMutation, useGoogleLoginMutation } = userApi;
 
 export default userApi;

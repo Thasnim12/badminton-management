@@ -19,8 +19,9 @@ import ManagePayments from "./Admin/Pages/ManagePayments";
 // import ManageReports from './Admin/Pages/ManageReports';
 import ManageCourts from "./Admin/Pages/ManageCourts";
 import AdminLogin from "./Admin/Auth/AdminLogin";
-import ProtectedAdminRoute from "./Admin/Auth/ProtectedAdminRoute";
 import Settings from "./Admin/Pages/Settings";
+import ProtectedAdmin from "./Admin/Global/ProtectedAdmin";
+import ProtectedRoute from "./User/Global/ProtectedRoutes";
 
 const AppRoutes = () => {
   // const user = useSelector((state) => state.user); // Replace with your actual state management logic
@@ -35,21 +36,25 @@ const AppRoutes = () => {
         <Route path="/donate" element={<Donate />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/about" element={<AboutUs />} />
-        <Route path="/bookings" element={<Bookings />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/book-now" element={<BookingPage />} />
+        <Route path="/book-now" element={<ProtectedRoute element={<BookingPage />} />} />
+        <Route path="/bookings" element={<ProtectedRoute element={<Bookings />} />} />
 
-        {/* Admin Routes */}
-        <Route path="/admin/login" element={<AdminLogin />} />
 
-        <Route path="/admin" element={<Dashboard />} />
-        <Route path="/admin/users" element={<Users />} />
+        <Route path="/admin" element={<ProtectedAdmin element={<Dashboard />} />} />
+        <Route path="/admin/users" element={<ProtectedAdmin element={<Users />} />} />
         <Route path="/admin/manage-donations" element={<ManageDonations />} />
         <Route path="/admin/manage-bookings" element={<ManageBookings />} />
         <Route path="/admin/manage-payments" element={<ManagePayments />} />
         <Route path="/admin/manage-courts" element={<ManageCourts />} />
         <Route path="/admin/settings" element={<Settings />} />
+
+        <Route path="/admin/login" element={<AdminLogin />} />
+
+
+        <Route path="*" element={<Navigate to="/" />} />
+
       </Routes>
     </Router>
   );
