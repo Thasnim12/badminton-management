@@ -3,11 +3,13 @@ import { Navigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 const ProtectedAdmin = ({ element }) => {
-    
-  const user = useSelector((state) => state.adminAuth);
+  const { adminInfo } = useSelector((state) => state.adminAuth);
+  console.log(adminInfo, "user");
+  if (!adminInfo) {
+    return <Navigate to="/admin/login" />;
+  }
 
-  return user ? element : <Navigate to="/admin/login" />
-  
+  return element; // If admin is logged in, render the requested element
 };
 
 export default ProtectedAdmin;

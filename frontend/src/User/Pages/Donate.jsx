@@ -154,7 +154,7 @@ const Donate = () => {
     height: "400px",
     textAlign: "center",
     width: "100%",
-    marginTop: "5px",
+    // marginTop: "5px",
   }));
 
   const Section = styled(Box)(({ theme }) => ({

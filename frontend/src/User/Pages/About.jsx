@@ -21,7 +21,7 @@ const HeroSection = styled(Box)(({ theme }) => ({
   height: "400px",
   textAlign: "center",
   width: "100%",
-  marginTop: "5px",
+  // marginTop: "5px",
 }));
 
 const InvolvedSection = styled(Box)({

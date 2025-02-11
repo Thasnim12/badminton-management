@@ -2,7 +2,9 @@ import React from "react";
 import { Box, Grid, Typography, Button, Paper, Container } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { useNavigate } from "react-router-dom";
 import Header from "../Global/Header";
 import Footer from "../Global/Footer";
 
@@ -13,16 +15,15 @@ const ContentWrapper = styled(Box)({
 });
 
 const HeroSection = styled(Box)({
-  backgroundImage:
-    'url("/Carousal2.jpg")',
+  backgroundImage: 'url("/Carousal2.jpg")',
   backgroundSize: "cover",
   backgroundPosition: "center",
   padding: "80px 20px",
-  height:'400px',
+  height: "400px",
   color: "white",
   textAlign: "center",
   width: "100%",
-  marginTop: "5px",
+  // marginTop: "5px",
 });
 
 const Section = styled(Box)(({ theme }) => ({
@@ -41,12 +42,33 @@ const PaperCard = styled(Paper)({
 });
 
 const Bookings = () => {
+  const navigate = useNavigate();
+
+  const isLoggedIn = localStorage.getItem("userInfo");
+
+  const handleBookingClick = () => {
+    if (!isLoggedIn) {
+      toast.error("You need to log in to book a court!", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+      });
+    } else {
+      navigate("/book-now");
+    }
+  };
   return (
     <>
       <Header />
 
-      <HeroSection>
-      </HeroSection>
+      <HeroSection></HeroSection>
+
+      <ToastContainer />
 
       <Section>
         <Container maxWidth="lg">
@@ -79,6 +101,14 @@ const Bookings = () => {
                 the perfect way to enjoy a game at a reasonable price. Just book
                 your desired session, show up, and play!
               </Typography>
+              <Button
+                variant="contained"
+                color="primary"
+                size="large"
+                onClick={handleBookingClick}
+              >
+                Book Now
+              </Button>
             </Grid>
           </Grid>
         </Container>
@@ -100,6 +130,14 @@ const Bookings = () => {
                 to play on. We offer flexible timing options, ranging from an
                 hour to a whole day of playing.
               </Typography>
+              <Button
+                variant="contained"
+                color="primary"
+                size="large"
+                onClick={handleBookingClick}
+              >
+                Book Now
+              </Button>
             </Grid>
             <Grid item xs={12} md={5} display="flex" justifyContent="center">
               <Box
@@ -145,6 +183,14 @@ const Bookings = () => {
                 night times. We ensure this facility helps every player to play
                 more effectively and accurately.
               </Typography>
+              <Button
+                variant="contained"
+                color="primary"
+                size="large"
+                onClick={handleBookingClick}
+              >
+                Book Now
+              </Button>
             </Grid>
           </Grid>
         </Container>
@@ -200,7 +246,7 @@ const Bookings = () => {
           variant="contained"
           color="primary"
           size="large"
-          href="/book-now"
+          onClick={handleBookingClick}
         >
           Reserve a Court Online
         </Button>

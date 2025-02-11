@@ -38,23 +38,26 @@ const AppRoutes = () => {
         <Route path="/about" element={<AboutUs />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/book-now" element={<ProtectedRoute element={<BookingPage />} />} />
-        <Route path="/bookings" element={<ProtectedRoute element={<Bookings />} />} />
+        <Route path="/book-now" element={<BookingPage />} />
+        <Route path="/bookings" element={<Bookings />} />
 
-
-        <Route path="/admin" element={<ProtectedAdmin element={<Dashboard />} />} />
-        <Route path="/admin/users" element={<ProtectedAdmin element={<Users />} />} />
-        <Route path="/admin/manage-donations" element={<ManageDonations />} />
-        <Route path="/admin/manage-bookings" element={<ManageBookings />} />
-        <Route path="/admin/manage-payments" element={<ManagePayments />} />
-        <Route path="/admin/manage-courts" element={<ManageCourts />} />
-        <Route path="/admin/settings" element={<Settings />} />
+        <Route
+          path="/admin"
+          element={<ProtectedAdmin element={<Dashboard />} />}
+        />
+        <Route
+          path="/admin/users"
+          element={<ProtectedAdmin element={<Users />} />}
+        />
+        <Route path="/admin/manage-donations"  element={<ProtectedAdmin element={<ManageDonations />} />}/>
+        <Route path="/admin/manage-bookings" element={<ProtectedAdmin element={<ManageBookings />} />} />
+        <Route path="/admin/manage-payments"  element={<ProtectedAdmin element={<ManagePayments />} />}/>
+        <Route path="/admin/manage-courts"  element={<ProtectedAdmin element={<ManageCourts />} />}/>
+        <Route path="/admin/settings"  element={<ProtectedAdmin element={<Settings />} />} />
 
         <Route path="/admin/login" element={<AdminLogin />} />
 
-
         <Route path="*" element={<Navigate to="/" />} />
-
       </Routes>
     </Router>
   );

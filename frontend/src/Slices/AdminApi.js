@@ -18,8 +18,13 @@ export const adminApi = createApi({
       }),
     }),
     getAllslost: builder.query({
+<<<<<<< HEAD
+      query: () => ({
+        url: `/slots`,
+=======
       query: (courtId) => ({
         url: `/slots/${courtId}`,
+>>>>>>> 4bffeeb918020e2cdac585e6111dfe3e832998b0
         method: 'GET',
       }),
     }),
