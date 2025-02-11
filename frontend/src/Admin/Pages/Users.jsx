@@ -1,9 +1,4 @@
-<<<<<<< HEAD
-import React,{ useState } from "react";
-=======
-
 import React, { useState } from "react";
->>>>>>> 4bffeeb918020e2cdac585e6111dfe3e832998b0
 import { styled } from "@mui/material/styles";
 import {
   Table,
@@ -67,10 +62,6 @@ const Users = () => {
         <Typography variant="h4" sx={{ mb: 3 }}>
           Manage Users
         </Typography>
-<<<<<<< HEAD
-
-=======
->>>>>>> 4bffeeb918020e2cdac585e6111dfe3e832998b0
         {!isLoading && !isError && users.length > 0 && (
           <TableContainer component={Paper} sx={{ width: "100%", overflowX: "auto" }}>
             <Table aria-label="User Management Table">
