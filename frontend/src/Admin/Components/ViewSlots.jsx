@@ -70,7 +70,7 @@ export default function ViewSlots({ open, handleClose, slot, mode }) {
                         />
                         <TextField
                             label="Price"
-                            value={slot.price}
+                            value={price}
                             fullWidth
                             margin="dense"
                             variant="outlined"

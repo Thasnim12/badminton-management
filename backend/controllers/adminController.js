@@ -1,11 +1,13 @@
 const mongoose = require('mongoose')
 const bcrypt = require('bcryptjs')
+const moment = require('moment')
 const Admin = require('../models/adminModel')
 const User = require('../models/userModel')
 const Court = require('../models/courtModel')
 const Slot = require('../models/slotModel')
 const courtConfig = require('../models/courtConfig')
 const generateAdminToken = require('../authentication/generateAdminToken')
+const Staff = require('../models/staffModel')
 
 
 const adminLogin = async (req, res) => {
@@ -154,12 +156,12 @@ const addCourt = async (req, res) => {
         await newCourt.save();
 
         const newCourtConfig = new courtConfig({
-            court: newCourt._id, 
-            defaultStartHour: 6,  
-            defaultEndHour: 22,   
-            closedDays: [0]       
+            court: newCourt._id,
+            defaultStartHour: 6,
+            defaultEndHour: 22,
+            closedDays: [0]
         });
-        console.log(newCourtConfig,'config')
+        console.log(newCourtConfig, 'config')
 
         await newCourtConfig.save();
 
@@ -187,138 +189,242 @@ const getAllcourts = async (req, res) => {
         return res.status(500).json({ message: error.message });
     }
 }
+
+
 const generateSlots = async (req, res) => {
     try {
-        const { courtId, daysToGenerate = 30 } = req.body;
-        console.log(req.body,'req')
+        const { courtId } = req.body;
+        const today = moment().startOf('day');
+        const endDate = moment(today).add(6, 'days').endOf('day');
 
-        const courtConfigData = await courtConfig.findOne({ court: courtId });
+        const existingSlots = await Slot.find({
+            court: courtId,
+            startTime: { $gte: today.toDate(), $lte: endDate.toDate() }
+        });
 
-        if (!courtConfigData) {
-            return res.status(404).json({ message: 'Court configuration not found' });
+        if (existingSlots.length > 0) {
+            return res.status(200).json({
+                success: true,
+                message: 'Slots already exist',
+                count: existingSlots.length,
+                data: existingSlots
+            });
         }
 
         const slots = [];
-        const startDate = new Date();
-        startDate.setHours(0, 0, 0, 0);
+        const slotMap = new Map();
 
-        for (let i = 0; i < daysToGenerate; i++) {
-            const currentDate = new Date(startDate);
-            currentDate.setDate(currentDate.getDate() + i);
+        for (let day = 0; day < 7; day++) {
+            const currentDate = moment(today).add(day, 'days');
 
-            if (courtConfigData.closedDays.includes(currentDate.getDay())) {
-                continue;
-            }
+            for (let hour = 6; hour < 21; hour++) {
+                const startTime = moment(currentDate).set('hour', hour).set('minute', 0);
+                const endTime = moment(startTime).add(1, 'hour');
 
-            for (let hour = courtConfigData.defaultStartHour; hour < courtConfigData.defaultEndHour; hour++) {
-                const startTime = `${hour.toString().padStart(2, '0')}:00`;
-                const endTime = `${(hour + 1).toString().padStart(2, '0')}:00`;
+                const slotKey = `${courtId}-${startTime.format('YYYY-MM-DD-HH')}`;
 
-                const existingSlot = await Slot.findOne({
-                    court: courtId,
-                    date: currentDate,
-                    startTime,
-                    endTime
-                });
-
-                if (!existingSlot) {
-                    slots.push({
+                if (!slotMap.has(slotKey)) {
+                    const slot = new Slot({
                         court: courtId,
-                        date: currentDate,
-                        startTime,
-                        endTime,
-                        price: courtConfigData.defaultPrice
+                        startTime: startTime.toDate(),
+                        endTime: endTime.toDate(),
+                        price: 500,
+                        isBooked: false
                     });
+
+                    slots.push(slot);
+                    slotMap.set(slotKey, true);
                 }
             }
         }
+
+        await Slot.deleteMany({
+            court: courtId,
+            isBooked: false,
+            startTime: {
+                $gte: today.toDate(),
+                $lt: moment(today).add(7, 'days').toDate()
+            }
+        });
 
         if (slots.length > 0) {
             await Slot.insertMany(slots);
         }
 
-        return res.status(200).json({
-            message: `Slots generated successfully for next ${daysToGenerate} days`,
-            slotsCreated: slots.length
+        res.status(201).json({
+            success: true,
+            message: 'Slots generated successfully',
+            count: slots.length,
+            data: slots
         });
-
     } catch (error) {
-        console.log(error.message);
-        return res.status(500).json({ message: error.message });
+        console.error('Error in generateSlots:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error generating slots',
+            error: error.message
+        });
     }
 };
 
 
 const getAllSlots = async (req, res) => {
     try {
-        const { courtId } = req.query;
+        const { courtId } = req.params;
 
-        let filter = {};
-        if (courtId) {
-            filter.court = courtId;
-        }
+        const today = moment().utc().startOf('day');
+        const endDate = moment(today).add(7, 'days');
 
-        const slots = await Slot.find(filter).sort({ date: 1, startTime: 1 });
+        console.log({ courtId, start: today.format(), end: endDate.format() });
 
-        if (slots.length === 0) {
-            return res.status(404).json({ message: "No slots available" });
-        }
+        const slots = await Slot.find({
+            court: courtId,
+            startTime: { $gte: today.toDate(), $lt: endDate.toDate() }
+        }).sort('startTime');
 
-        return res.status(200).json(slots);
+        const uniqueSlots = Array.from(new Map(slots.map(slot => [slot.startTime.toISOString(), slot])).values());
+
+        res.status(200).json({
+            success: true,
+            data: uniqueSlots.map(slot => ({
+                _id: slot._id,
+                date: slot.startTime,
+                startTime: moment(slot.startTime).format('hh:mm A'),
+                endTime: moment(slot.endTime).format('hh:mm A'),
+                price: slot.price,
+                isBooked: slot.isBooked
+            }))
+        });
     } catch (error) {
-        console.log(error.message);
-        return res.status(500).json({ message: error.message });
+        console.error('Error in getAllSlots:', error);
+        res.status(500).json({ success: false, message: 'Error fetching slots', error: error.message });
     }
 };
 
-const updateSlots = async (req, res) => {
+
+const updateSlot = async (req, res) => {
     try {
         const { slotId } = req.params;
         const { startTime, endTime, price } = req.body;
+        console.log(req.body,'body')
 
-        // Find the current slot
-        const slot = await Slot.findById(slotId);
-        if (!slot) {
-            return res.status(404).json({ message: "Slot not found" });
+        if (!req.body) {
+            return res.status(400).json({
+                success: false,
+                message: "Missing required field: price"
+            });
         }
 
-        // Save old endTime before updating
-        const previousEndTime = slot.endTime;
+        const slotToUpdate = await Slot.findById(slotId);
+        console.log(slotToUpdate,'UPDATE')
+        if (!slotToUpdate) {
+            return res.status(400).json({
+                success: false,
+                message: 'Slot not found'
+            });
+        }
 
-        // Update current slot
-        slot.startTime = startTime;
-        slot.endTime = endTime;
-        slot.price = price;
-        await slot.save();
+        if (slotToUpdate.isBooked) {
+            return res.status(400).json({
+                success: false,
+                message: 'Cannot update a booked slot'
+            });
+        }
 
-        // Find and update the next slot if it exists
-        const nextSlot = await Slot.findOne({
-            courtId: slot.courtId,
-            date: slot.date,
-            startTime: previousEndTime, // Use the old endTime before update
+        // if (startTime || endTime) {
+        //     console.log('time')
+        //     const newStartTime = startTime ? moment(startTime, 'HH:mm A') : moment(slotToUpdate.startTime);
+        //     console.log(newStartTime)
+        //     const newEndTime = endTime ? moment(endTime, 'HH:mm A') : moment(slotToUpdate.endTime);
+
+        //     if (!newStartTime.isValid() || !newEndTime.isValid()) {
+        //         return res.status(400).json({
+        //             success: false,
+        //             message: 'Invalid time format. Please use HH:mm AM/PM format (e.g., "07:00 AM")'
+        //         });
+        //     }
+
+        //     const hour = newStartTime.hour();
+        //     if (hour < 6 || hour >= 21) {
+        //         return res.status(400).json({
+        //             success: false,
+        //             message: 'Slot time must be between 6 AM and 9 PM'
+        //         });
+        //     }
+
+        //     return res.status(400).json({
+        //         success: false,
+        //         message: 'Time updates are not allowed to maintain slot consistency. Only price updates are permitted.'
+        //     });
+        // }
+
+        const updatedSlot = await Slot.findByIdAndUpdate(
+            slotId,
+            { price },
+            { new: true }
+        );
+        console.log(updatedSlot,'SLOT')
+
+        const formattedSlot = {
+            _id: updatedSlot._id,
+            date: updatedSlot.startTime,
+            startTime: moment(updatedSlot.startTime).format('HH:mm'),
+            endTime: moment(updatedSlot.endTime).format('HH:mm'),
+            price: updatedSlot.price,
+            isBooked: updatedSlot.isBooked
+        };
+
+        res.status(200).json({
+            success: true,
+            message: 'Slot price updated successfully',
+            data: formattedSlot
         });
 
-        if (nextSlot) {
-            const newNextEndTime = addOneHour(endTime); // Use the updated endTime
-
-            nextSlot.startTime = endTime;
-            nextSlot.endTime = newNextEndTime;
-            await nextSlot.save();
-        }
-
-        res.status(200).json({ message: "Slot updated successfully", updatedSlot: slot });
     } catch (error) {
-        console.error("Error updating slots:", error);
-        res.status(500).json({ message: "Server error", error: error.message });
+        console.error('Error in updateSlot:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error updating slot',
+            error: error.message
+        });
     }
 };
 
+const addStaff = async(req,res) =>{
+    
+    try{
+    const { name,email,designation,employee_id,joining_date,phoneno } = req.body;
 
-function addOneHour(time) {
-    let [hour, minute] = time.split(":").map(Number);
-    hour = (hour + 1) % 24; // Ensure it stays within 24-hour format
-    return `${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`;
+    if(!name || !email || !designation || !employee_id || !joining_date || !phoneno){
+        return res.status(400).json({message:"missing required fields"})
+    }
+    
+    const existingStaff = await Staff.findOne({ email:email})
+
+    if(existingStaff){
+        return res.status(400).json({message:"staff with same email already exists"})
+    }
+
+    const newStaff = new Staff({
+        name:name,
+        email:email,
+        phoneno:phoneno,
+        designation:designation,
+        employee_id:employee_id,
+        joinging_date:joining_date
+    })
+
+    await newStaff.save();
+
+    return res.status(200).json({message:'user addedd successfully',newStaff})
+
+    }
+    catch(error){
+        console.log(error.message)
+    }
 }
+
+
 
 
 
@@ -334,7 +440,8 @@ module.exports = {
     getAllcourts,
     generateSlots,
     getAllSlots,
-    updateSlots
+    updateSlot,
+    addStaff
 
 
 }

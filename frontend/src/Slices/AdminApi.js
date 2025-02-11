@@ -18,8 +18,13 @@ export const adminApi = createApi({
       }),
     }),
     getAllslost: builder.query({
+<<<<<<< HEAD
       query: () => ({
         url: `/slots`,
+=======
+      query: (courtId) => ({
+        url: `/slots/${courtId}`,
+>>>>>>> 4bffeeb918020e2cdac585e6111dfe3e832998b0
         method: 'GET',
       }),
     }),
@@ -71,6 +76,13 @@ export const adminApi = createApi({
         body: data
       }),
     }),
+    addstaffs: builder.mutation({
+      query: (data) => ({
+        url: `/staffs`,
+        method: 'POST',
+        body: data
+      }),
+    }),
    
   }),
 });   
@@ -84,8 +96,9 @@ export const {
   useAddcourtsMutation,
   useGetAllcourtsQuery,
   useGetAllslostQuery,
-  useUpdatecourtsMutation
+  useUpdatecourtsMutation,
+  useAddstaffsMutation
  }
   = adminApi;
 
-export default adminApi;
+export default adminApi

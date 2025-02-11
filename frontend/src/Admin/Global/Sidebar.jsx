@@ -86,7 +86,7 @@ const Sidebar = ({ open, onClose }) => {
             cursor: "pointer",
           }}
         >
-          <Avatar sx={{ bgcolor: "primary.main" }}>A</Avatar>
+          <Avatar sx={{ backgroundColor: "#2c387e" }}>A</Avatar>
           <Typography variant="subtitle1">{collapsed ? "" : "Admin"}</Typography> {/* Conditionally show text */}
         </Box>
         <IconButton onClick={handleCollapseToggle}>
@@ -110,29 +110,35 @@ const Sidebar = ({ open, onClose }) => {
           </ListItemIcon>
           {!collapsed && <ListItemText primary="Users" />}
         </ListItemButton>
-        <ListItemButton component="a" href="/admin/manage-donations">
+        <ListItemButton component="a" href="/admin/manage-staffs">
           <ListItemIcon>
-            <DonationsIcon />
+            <UsersIcon />
           </ListItemIcon>
-          {!collapsed && <ListItemText primary="Manage Donations" />}
-        </ListItemButton>
-        <ListItemButton component="a" href="/admin/manage-bookings">
-          <ListItemIcon>
-            <BookingsIcon />
-          </ListItemIcon>
-          {!collapsed && <ListItemText primary="Manage Bookings" />}
-        </ListItemButton>
-        <ListItemButton component="a" href="/admin/manage-payments">
-          <ListItemIcon>
-            <CurrencyRupeeIcon />
-          </ListItemIcon>
-          {!collapsed && <ListItemText primary="Manage Payments" />}
+          {!collapsed && <ListItemText primary="Staffs" />}
         </ListItemButton>
         <ListItemButton component="a" href="/admin/manage-courts">
           <ListItemIcon>
             <SportsTennis />
           </ListItemIcon>
-          {!collapsed && <ListItemText primary="Manage Courts" />}
+          {!collapsed && <ListItemText primary="Courts" />}
+        </ListItemButton>
+        <ListItemButton component="a" href="/admin/manage-donations">
+          <ListItemIcon>
+            <DonationsIcon />
+          </ListItemIcon>
+          {!collapsed && <ListItemText primary="Donations" />}
+        </ListItemButton>
+        <ListItemButton component="a" href="/admin/manage-bookings">
+          <ListItemIcon>
+            <BookingsIcon />
+          </ListItemIcon>
+          {!collapsed && <ListItemText primary="Bookings" />}
+        </ListItemButton>
+        <ListItemButton component="a" href="/admin/manage-payments">
+          <ListItemIcon>
+            <CurrencyRupeeIcon />
+          </ListItemIcon>
+          {!collapsed && <ListItemText primary="Payments" />}
         </ListItemButton>
       </List>
 
