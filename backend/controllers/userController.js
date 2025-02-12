@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 const bcrypt = require('bcryptjs')
 const mongoose = require('mongoose')
 const { OAuth2Client } = require('google-auth-library');
@@ -9,22 +8,12 @@ const sendOTP = require('../helper/otpHelper')
 const Court = require('../models/courtModel')
 const Slot = require('../models/slotModel')
 const Addons = require('../models/addonModel')
-=======
-const bcrypt = require("bcryptjs");
-const mongoose = require("mongoose");
-const { OAuth2Client } = require("google-auth-library");
-const User = require("../models/userModel");
-const generateUserToken = require("../authentication/generateUserToken");
-const Otp = require("../models/otpModel");
-const sendOTP = require("../helper/otpHelper");
->>>>>>> c913e5bc4391fe395793c67b02f4e50091105a6b
 
 const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 const client = new OAuth2Client(CLIENT_ID);
 
 const userRegister = async (req, res) => {
-<<<<<<< HEAD
     try {
         const { name, email, password, confirmPassword, phoneno, address, profileImage } = req.body;
         console.log(req.body, 'req-body')
@@ -72,256 +61,195 @@ const userRegister = async (req, res) => {
             .lean();
 
         return res.status(200).json({ message: 'Successfully completed registration', user: userData, token });
-=======
-  try {
-    const {
-      name,
-      email,
-      password,
-      confirmPassword,
-      phoneno,
-      address,
-      profileImage,
-    } = req.body;
-    console.log(req.body, "req-body");
 
-    if (!name || !email || !password || !confirmPassword || !phoneno) {
-      return res.status(400).json({ message: "missing required fields!" });
->>>>>>> c913e5bc4391fe395793c67b02f4e50091105a6b
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({ message: error.message });
     }
-
-    if (password !== confirmPassword) {
-      return res.status(400).json({ message: "Passwords do not match" });
-    }
-
-    const userExist = await User.findOne({ email }).select("-password");
-
-    if (userExist) {
-      return res.status(402).json({ message: "User already exists" });
-    }
-
-    const userwithPhone = await User.findOne({ phoneno });
-
-    if (userwithPhone) {
-      return res
-        .status(200)
-        .json({ message: "user with this phoneno exists!" });
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const user = new User({
-      name,
-      email,
-      phoneno,
-      password: hashedPassword,
-      address,
-      profileImage,
-      role: "user",
-    });
-
-    await user.save();
-
-    await sendOTPVerificationEmail({ id: user._id, email: user.email }, res);
-
-    const token = generateUserToken(res, user._id);
-
-    const userData = await User.findById(user._id).select("-password").lean();
-
-    return res.status(200).json({
-      message: "Successfully completed registration",
-      user: userData,
-      token,
-    });
-  } catch (error) {
-    console.log(error.message);
-    return res.status(500).json({ message: error.message });
-  }
 };
 
 const getUserDetails = async (req, res) => {
-  try {
-    const email = req.body;
+    try {
+        const email = req.body;
 
-    const user = await User.findOne(email).select("-password").lean();
+        const user = await User.findOne(email).select("-password").lean();
 
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        return res
+            .status(200)
+            .json({ message: "User details fetched successfully", user });
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({ message: error.message });
     }
-
-    return res
-      .status(200)
-      .json({ message: "User details fetched successfully", user });
-  } catch (error) {
-    console.log(error.message);
-    return res.status(500).json({ message: error.message });
-  }
 };
 
 const updateUserDetails = async (req, res) => {
     try {
-      const { email, name, mobile, profileImage } = req.body;
+        const { email, name, mobile, profileImage } = req.body;
 
-      console.log("Request Body: ", req.body);
-  
-      const updatedUser = await User.findOneAndUpdate(
-        { email },
-        { name, phoneno: mobile, profileImage },
-        { new: true, runValidators: true } 
-      ).select("-password");
-  
-      // If user is not found
-      if (!updatedUser) {
-        return res.status(404).json({ message: "User not found" });
-      }
-  
-      // Return updated user data
-      return res.status(200).json({
-        message: "User details updated successfully",
-        user: updatedUser,
-      });
+        console.log("Request Body: ", req.body);
+
+        const updatedUser = await User.findOneAndUpdate(
+            { email },
+            { name, phoneno: mobile, profileImage },
+            { new: true, runValidators: true }
+        ).select("-password");
+
+        // If user is not found
+        if (!updatedUser) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        // Return updated user data
+        return res.status(200).json({
+            message: "User details updated successfully",
+            user: updatedUser,
+        });
     } catch (error) {
-      console.log(error.message);
-      return res.status(500).json({ message: error.message });
+        console.log(error.message);
+        return res.status(500).json({ message: error.message });
     }
-  };
-  
+};
+
 const sendOTPVerificationEmail = async ({ id, email }, res) => {
-  try {
-    const otp = `${Math.floor(1000 + Math.random() * 9000)}`;
-    const userId = id;
+    try {
+        const otp = `${Math.floor(1000 + Math.random() * 9000)}`;
+        const userId = id;
 
-    const saltRounds = 10;
-    const hashedOtp = await bcrypt.hash(otp, saltRounds);
+        const saltRounds = 10;
+        const hashedOtp = await bcrypt.hash(otp, saltRounds);
 
-    const newOtpModel = new Otp({
-      _id: userId,
-      otp: hashedOtp,
-      createdAt: Date.now(),
-      expiresAt: Date.now() + 3600000,
-    });
+        const newOtpModel = new Otp({
+            _id: userId,
+            otp: hashedOtp,
+            createdAt: Date.now(),
+            expiresAt: Date.now() + 3600000,
+        });
 
-    await newOtpModel.save();
+        await newOtpModel.save();
 
-    await sendOTP(email, otp);
-  } catch (error) {
-    if (error) {
-      res.status(500).json({ message: error.message });
-      return;
-    } else {
-      res.status(500).json({ message: "An unknown error occurred" });
-      return;
+        await sendOTP(email, otp);
+    } catch (error) {
+        if (error) {
+            res.status(500).json({ message: error.message });
+            return;
+        } else {
+            res.status(500).json({ message: "An unknown error occurred" });
+            return;
+        }
     }
-  }
 };
 
 const verifyOtp = async (req, res) => {
-  try {
-    const { userId, otp } = req.body;
-    console.log(req.body);
+    try {
+        const { userId, otp } = req.body;
+        console.log(req.body);
 
-    if (!userId || !otp) {
-      res.status(400).json({ message: "user ID or OTP is required" });
-      return;
+        if (!userId || !otp) {
+            res.status(400).json({ message: "user ID or OTP is required" });
+            return;
+        }
+
+        const id = new mongoose.Types.ObjectId(userId);
+
+        const OtpVerifyRecords = await Otp.find({ _id: id });
+
+        if (OtpVerifyRecords.length <= 0) {
+            res.status(404).json({
+                message: "Account record doesn't exist or has already been verified",
+            });
+            return;
+        }
+
+        const { expiresAt, otp: hashedOtp } = OtpVerifyRecords[0];
+
+        if (expiresAt.getTime() < Date.now()) {
+            await Otp.deleteMany({ _id: id });
+            res
+                .status(400)
+                .json({ message: "Code has expired, please request again" });
+            return;
+        }
+
+        const validOtp = await bcrypt.compare(otp, hashedOtp);
+
+        if (!validOtp) {
+            res.status(400).json({
+                message: "The provided code is invalid. Please check your inbox",
+            });
+            return;
+        }
+
+        const user = await User.findById(id);
+
+        if (!user) {
+            res.status(404).json({ message: "User record not found" });
+            return;
+        }
+
+        await User.updateOne({ _id: id }, { $set: { is_verified: true } });
+
+        await Otp.deleteMany({ _id: id });
+
+        res.json({
+            status: "verified",
+            name: user.name,
+            email: user.email,
+            phoneno: user.phoneno,
+        });
+        return;
+    } catch (error) {
+        res.status(500).json({
+            status: "Failed",
+            message: error ? error.message : "An unknown error occurred",
+        });
+        return;
     }
-
-    const id = new mongoose.Types.ObjectId(userId);
-
-    const OtpVerifyRecords = await Otp.find({ _id: id });
-
-    if (OtpVerifyRecords.length <= 0) {
-      res.status(404).json({
-        message: "Account record doesn't exist or has already been verified",
-      });
-      return;
-    }
-
-    const { expiresAt, otp: hashedOtp } = OtpVerifyRecords[0];
-
-    if (expiresAt.getTime() < Date.now()) {
-      await Otp.deleteMany({ _id: id });
-      res
-        .status(400)
-        .json({ message: "Code has expired, please request again" });
-      return;
-    }
-
-    const validOtp = await bcrypt.compare(otp, hashedOtp);
-
-    if (!validOtp) {
-      res.status(400).json({
-        message: "The provided code is invalid. Please check your inbox",
-      });
-      return;
-    }
-
-    const user = await User.findById(id);
-
-    if (!user) {
-      res.status(404).json({ message: "User record not found" });
-      return;
-    }
-
-    await User.updateOne({ _id: id }, { $set: { is_verified: true } });
-
-    await Otp.deleteMany({ _id: id });
-
-    res.json({
-      status: "verified",
-      name: user.name,
-      email: user.email,
-      phoneno: user.phoneno,
-    });
-    return;
-  } catch (error) {
-    res.status(500).json({
-      status: "Failed",
-      message: error ? error.message : "An unknown error occurred",
-    });
-    return;
-  }
 };
 
 const userLogin = async (req, res) => {
-  try {
-    const { email, password } = req.body;
+    try {
+        const { email, password } = req.body;
 
-    if (!email || !password) {
-      return res.status(400).json({ message: "missing required fields" });
+        if (!email || !password) {
+            return res.status(400).json({ message: "missing required fields" });
+        }
+
+        const userExist = await User.findOne({ email });
+
+        if (!userExist) {
+            return res.status(402).json({ message: "User dont exists" });
+        }
+
+        if (userExist.is_blocked) {
+            res.status(403).json({ message: "Your account is blocked" });
+            return;
+        }
+
+        const passwordMatch = await bcrypt.compare(password, userExist.password);
+
+        if (!passwordMatch) {
+            res.status(400).json({ message: "Incorrect password" });
+            return;
+        }
+
+        const token = generateUserToken(res, userExist._id);
+        return res.status(200).json({
+            user: userExist,
+            message: "User logged in successfully",
+            token: token,
+        });
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({ message: error.message });
     }
-
-    const userExist = await User.findOne({ email });
-
-    if (!userExist) {
-      return res.status(402).json({ message: "User dont exists" });
-    }
-
-    if (userExist.is_blocked) {
-      res.status(403).json({ message: "Your account is blocked" });
-      return;
-    }
-
-    const passwordMatch = await bcrypt.compare(password, userExist.password);
-
-    if (!passwordMatch) {
-      res.status(400).json({ message: "Incorrect password" });
-      return;
-    }
-
-    const token = generateUserToken(res, userExist._id);
-    return res.status(200).json({
-      user: userExist,
-      message: "User logged in successfully",
-      token: token,
-    });
-  } catch (error) {
-    console.log(error.message);
-    return res.status(500).json({ message: error.message });
-  }
 };
 
 const userLogout = async (req, res) => {
-<<<<<<< HEAD
 
     try {
         res.cookie('adminjwt', '', {
@@ -336,66 +264,24 @@ const userLogout = async (req, res) => {
     }
 }
 
+
 const googleLogin = async (req, res) => {
     try {
-=======
-  try {
-    res.cookie("adminjwt", "", {
-      httpOnly: true,
-      expires: new Date(0),
-    });
-    res.status(200).json({ message: "logout user" });
-  } catch (error) {
-    console.error(error.message);
-    return res.status(500).json({ message: error.message });
-  }
-};
+        const { code } = req.body;
 
-const googleLogin = async (req, res) => {
-  try {
-    const { code } = req.body;
->>>>>>> c913e5bc4391fe395793c67b02f4e50091105a6b
-
-    const tokenClient = new OAuth2Client(
-      CLIENT_ID,
-      CLIENT_SECRET,
-      "http://localhost:3000"
-    );
-    const { tokens } = await tokenClient.getToken({ code });
-    const idToken = tokens.id_token;
-
-<<<<<<< HEAD
         const tokenClient = new OAuth2Client(CLIENT_ID, CLIENT_SECRET, 'http://localhost:3000');
         const { tokens } = await tokenClient.getToken({ code });
         const idToken = tokens.id_token;
-=======
-    const ticket = await client.verifyIdToken({
-      idToken: idToken,
-      audience: CLIENT_ID,
-    });
->>>>>>> c913e5bc4391fe395793c67b02f4e50091105a6b
 
-    const payload = ticket.getPayload();
-    const googleId = payload["sub"];
-    const email = payload["email"];
-    const name = payload["name"];
-
-    let user = await User.findOne({ googleId });
-
-    if (!user) {
-      user = await User.findOne({ email });
-      if (!user) {
-        user = new User({
-          googleId,
-          name,
-          email,
+        const ticket = await client.verifyIdToken({
+            idToken: idToken,
+            audience: CLIENT_ID,
         });
-<<<<<<< HEAD
 
         const payload = ticket.getPayload();
-        const googleId = payload['sub'];
-        const email = payload['email'];
-        const name = payload['name'];
+        const googleId = payload["sub"];
+        const email = payload["email"];
+        const name = payload["name"];
 
         let user = await User.findOne({ googleId });
 
@@ -407,30 +293,51 @@ const googleLogin = async (req, res) => {
                     name,
                     email,
                 });
-                await user.save();
+
+                const payload = ticket.getPayload();
+                const googleId = payload['sub'];
+                const email = payload['email'];
+                const name = payload['name'];
+
+                let user = await User.findOne({ googleId });
+
+                if (!user) {
+                    user = await User.findOne({ email });
+                    if (!user) {
+                        user = new User({
+                            googleId,
+                            name,
+                            email,
+                        });
+                        await user.save();
+                    }
+                }
+
+                const generatedtoken = generateUserToken(res, user._id);
+
+                const userToSend = {
+                    _id: user._id,
+                    name: user.name,
+                    email: user.email,
+                };
+
+                return res.status(200).json({ user: userToSend, token: generatedtoken })
             }
         }
-
-        const generatedtoken = generateUserToken(res, user._id);
-
-        const userToSend = {
-            _id: user._id,
-            name: user.name,
-            email: user.email,
-        };
-
-        return res.status(200).json({ user: userToSend, token: generatedtoken })
     }
     catch (error) {
         console.error(error.message);
         return res.status(500).json({ message: error.message });
     }
-}
+      
+  }
+
+
 
 const getCourts = async (req, res) => {
     try {
         const court = await Court.find({})
-        console.log(court,'court')
+        console.log(court, 'court')
         if (!court) {
             return res.status(400).json({ message: 'no courts found' })
         }
@@ -442,7 +349,7 @@ const getCourts = async (req, res) => {
     }
 }
 
-const getSlots = async(req,res) =>{
+const getSlots = async (req, res) => {
     try {
         const { courtId, date } = req.query;
 
@@ -483,29 +390,7 @@ const getAddons = async (req, res) => {
 };
 
 
-=======
-        await user.save();
-      }
-    }
-
-    const generatedtoken = generateUserToken(res, user._id);
->>>>>>> c913e5bc4391fe395793c67b02f4e50091105a6b
-
-    const userToSend = {
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-    };
-
-    return res.status(200).json({ user: userToSend, token: generatedtoken });
-  } catch (error) {
-    console.error(error.message);
-    return res.status(500).json({ message: error.message });
-  }
-};
-
 module.exports = {
-<<<<<<< HEAD
     userRegister,
     userLogin,
     verifyOtp,
@@ -513,15 +398,7 @@ module.exports = {
     googleLogin,
     getCourts,
     getSlots,
-    getAddons
+    getAddons,
+    getUserDetails,
+    updateUserDetails,
 }
-=======
-  userRegister,
-  userLogin,
-  verifyOtp,
-  userLogout,
-  googleLogin,
-  getUserDetails,
-  updateUserDetails,
-};
->>>>>>> c913e5bc4391fe395793c67b02f4e50091105a6b

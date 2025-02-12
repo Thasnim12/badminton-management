@@ -87,7 +87,6 @@ export const adminApi = createApi({
         body: data
       }),
     }),
-<<<<<<< HEAD
     addaddons: builder.mutation({
       query: (data) => ({
         url: `/addons`,
@@ -95,7 +94,6 @@ export const adminApi = createApi({
         body: data
       }),
     }),
-=======
     GetStaffs: builder.query({
       query: () => '/get-staffs', 
     }),
@@ -116,7 +114,6 @@ export const adminApi = createApi({
       }),
       invalidatesTags: ['Staff'],
     }),
->>>>>>> c913e5bc4391fe395793c67b02f4e50091105a6b
    
   }),
 });   
@@ -132,16 +129,13 @@ export const {
   useGetAllslostQuery,
   useUpdatecourtsMutation,
   useAddstaffsMutation,
-<<<<<<< HEAD
   useAddaddonsMutation,
-  useGetAlladdonsQuery
-=======
+  useGetAlladdonsQuery,
   useGetStaffsQuery,
   useGetDonationsQuery,
   useUpdateStaffMutation,
   useDeleteStaffMutation,
   useGetAdminDetailsQuery,
->>>>>>> c913e5bc4391fe395793c67b02f4e50091105a6b
  }
   = adminApi;
 

@@ -1,9 +1,6 @@
 const express = require('express')
-<<<<<<< HEAD
 const { userLogin,userRegister,verifyOtp,userLogout,googleLogin,getCourts,getSlots,getAddons } = require('../controllers/userController')
-=======
 const { userLogin,userRegister,verifyOtp,userLogout,googleLogin, getUserDetails, updateUserDetails } = require('../controllers/userController')
->>>>>>> c913e5bc4391fe395793c67b02f4e50091105a6b
 const { verifyPayment,createDonation } = require('../controllers/donationController')
 const authenticateUser = require('../middlewares/userMiddleware')
 

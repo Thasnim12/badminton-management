@@ -10,12 +10,9 @@ import Bookings from "./User/Pages/Bookings";
 import Register from "./User/Auth/Register";
 import AboutUs from "./User/Pages/About";
 import BookingPage from "./User/Pages/BookNow";
-<<<<<<< HEAD
 import BookingSummary from "./User/Pages/Confirmbooking";
 import Addons from "./Admin/Pages/Addons";
-=======
 import Profile from "./User/Pages/Profile";
->>>>>>> c913e5bc4391fe395793c67b02f4e50091105a6b
 
 import Dashboard from "./Admin/Pages/Dashboard";
 import Users from "./Admin/Pages/Users";
@@ -50,12 +47,9 @@ const AppRoutes = () => {
         <Route path="/register" element={<Register />} />
         <Route path="/book-now" element={<BookingPage />} />
         <Route path="/bookings" element={<Bookings />} />
-<<<<<<< HEAD
         <Route path="/confirm-bookings" element={<BookingSummary />} />
 
-=======
         <Route path="/profile" element={<Profile />} />
->>>>>>> c913e5bc4391fe395793c67b02f4e50091105a6b
 
         <Route
           path="/admin"
