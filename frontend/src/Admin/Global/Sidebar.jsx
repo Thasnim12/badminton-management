@@ -19,6 +19,7 @@ import BookingsIcon from "@mui/icons-material/Book";
 import CurrencyRupeeIcon from "@mui/icons-material/CurrencyRupee";
 import SportsTennis from "@mui/icons-material/SportsTennis";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import InventoryOutlinedIcon from '@mui/icons-material/InventoryOutlined';
 import SettingsIcon from "@mui/icons-material/Settings";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import { useTheme } from "@mui/material/styles";
@@ -139,6 +140,12 @@ const Sidebar = ({ open, onClose }) => {
             <CurrencyRupeeIcon />
           </ListItemIcon>
           {!collapsed && <ListItemText primary="Payments" />}
+        </ListItemButton>
+        <ListItemButton component="a" href="/admin/manage-addons">
+          <ListItemIcon>
+            <InventoryOutlinedIcon />
+          </ListItemIcon>
+          {!collapsed && <ListItemText primary="Addons" />}
         </ListItemButton>
       </List>
 

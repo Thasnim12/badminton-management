@@ -1,9 +1,27 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 export const userApi = createApi({
   reducerPath: 'userApi',
-  baseQuery: fetchBaseQuery({ baseUrl: 'http://localhost:5000/api/users' }), 
+  baseQuery: fetchBaseQuery({ baseUrl: 'http://localhost:5000/api/users',credentials: 'include' }), 
   endpoints: (builder) => ({
 
+    getAllcourts: builder.query({
+      query: () => ({
+        url: `/get-courts`,
+        method: 'GET',
+      }),
+    }),
+    getSlots: builder.query({
+      query: ({ courtId, date }) => ({
+        url: `/get-slots/?courtId=${courtId}&date=${date}`,
+        method: 'GET',
+      }),
+    }),
+    getAddons: builder.query({
+      query: () => ({
+        url: '/get-addons',
+        method: 'GET',
+      }),
+    }),
     registerUser: builder.mutation({
       query: (data) => ({
         url: '/register', 
@@ -11,7 +29,6 @@ export const userApi = createApi({
         body: data,
       }),
     }),
-
     loginUser: builder.mutation({
       query: (data) => ({
         url: '/login', 
@@ -19,7 +36,6 @@ export const userApi = createApi({
         body: data,
       }),
     }),
-    
     googleLogin: builder.mutation({
       query: ({ token }) => ({
         url: '/google-login', 
@@ -27,8 +43,6 @@ export const userApi = createApi({
         body: { token } ,
       }),
     }),
-
-
     verifyOtp: builder.mutation({
       query: (otpData) => ({
         url: '/verify-otp',
@@ -36,7 +50,6 @@ export const userApi = createApi({
         body: otpData,
       }),
     }),
-
     createDonation: builder.mutation({
       query: (data) => ({
         url: '/donation',
@@ -44,7 +57,6 @@ export const userApi = createApi({
         body: data,
       }),
     }),
-
     verifyDonation: builder.mutation({
       query: (data) => ({
         url: '/verify-donation',
@@ -56,6 +68,15 @@ export const userApi = createApi({
   }),
 });
 
-export const { useRegisterUserMutation, useLoginUserMutation, useVerifyOtpMutation, useCreateDonationMutation, useVerifyDonationMutation, useGoogleLoginMutation } = userApi;
+export const { useRegisterUserMutation, 
+  useLoginUserMutation, 
+  useVerifyOtpMutation, 
+  useCreateDonationMutation, 
+  useVerifyDonationMutation, 
+  useGoogleLoginMutation,
+  useGetSlotsQuery,
+  useGetAllcourtsQuery ,
+  useGetAddonsQuery
+} = userApi;
 
 export default userApi;

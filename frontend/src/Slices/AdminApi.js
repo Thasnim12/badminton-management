@@ -6,7 +6,7 @@ export const adminApi = createApi({
   endpoints: (builder) => ({
 
     getAllUsers: builder.query({
-      query: (data) => ({
+      query: () => ({
         url: '/users', 
         method: 'GET',
       }),
@@ -20,6 +20,12 @@ export const adminApi = createApi({
     getAllslost: builder.query({
       query: (courtId) => ({
         url: `/slots/${courtId}`,
+        method: 'GET',
+      }),
+    }),
+    getAlladdons: builder.query({
+      query: () => ({
+        url: `/addons`,
         method: 'GET',
       }),
     }),
@@ -78,6 +84,13 @@ export const adminApi = createApi({
         body: data
       }),
     }),
+    addaddons: builder.mutation({
+      query: (data) => ({
+        url: `/addons`,
+        method: 'POST',
+        body: data
+      }),
+    }),
    
   }),
 });   
@@ -92,7 +105,9 @@ export const {
   useGetAllcourtsQuery,
   useGetAllslostQuery,
   useUpdatecourtsMutation,
-  useAddstaffsMutation
+  useAddstaffsMutation,
+  useAddaddonsMutation,
+  useGetAlladdonsQuery
  }
   = adminApi;
 

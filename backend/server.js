@@ -1,6 +1,7 @@
 const express = require('express')
 const dotenv = require('dotenv')
 const cors = require('cors')
+const path = require('path')
 const cookieParser = require('cookie-parser');
 const connectDB = require('./connections/dbConnection')
 const userroute = require('./routes/userRoutes')
@@ -21,6 +22,7 @@ const corsOptions = {
 
 app.use(cors(corsOptions)); 
 app.use(express.json());
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 

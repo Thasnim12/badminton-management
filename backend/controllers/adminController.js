@@ -1,6 +1,7 @@
 const mongoose = require('mongoose')
 const bcrypt = require('bcryptjs')
 const moment = require('moment')
+const multer = require('multer');
 const Admin = require('../models/adminModel')
 const User = require('../models/userModel')
 const Court = require('../models/courtModel')
@@ -8,6 +9,8 @@ const Slot = require('../models/slotModel')
 const courtConfig = require('../models/courtConfig')
 const generateAdminToken = require('../authentication/generateAdminToken')
 const Staff = require('../models/staffModel')
+const Addons = require('../models/addonModel')
+const { upload }= require('../helper/multer')
 
 
 const adminLogin = async (req, res) => {
@@ -306,7 +309,7 @@ const updateSlot = async (req, res) => {
     try {
         const { slotId } = req.params;
         const { startTime, endTime, price } = req.body;
-        console.log(req.body,'body')
+        console.log(req.body, 'body')
 
         if (!req.body) {
             return res.status(400).json({
@@ -316,7 +319,7 @@ const updateSlot = async (req, res) => {
         }
 
         const slotToUpdate = await Slot.findById(slotId);
-        console.log(slotToUpdate,'UPDATE')
+        console.log(slotToUpdate, 'UPDATE')
         if (!slotToUpdate) {
             return res.status(400).json({
                 success: false,
@@ -363,7 +366,7 @@ const updateSlot = async (req, res) => {
             { price },
             { new: true }
         );
-        console.log(updatedSlot,'SLOT')
+        console.log(updatedSlot, 'SLOT')
 
         const formattedSlot = {
             _id: updatedSlot._id,
@@ -390,42 +393,92 @@ const updateSlot = async (req, res) => {
     }
 };
 
-const addStaff = async(req,res) =>{
-    
-    try{
-    const { name,email,designation,employee_id,joining_date,phoneno } = req.body;
+const addStaff = async (req, res) => {
 
-    if(!name || !email || !designation || !employee_id || !joining_date || !phoneno){
-        return res.status(400).json({message:"missing required fields"})
+    try {
+        const { name, email, designation, employee_id, joining_date, phoneno } = req.body;
+
+        if (!name || !email || !designation || !employee_id || !joining_date || !phoneno) {
+            return res.status(400).json({ message: "missing required fields" })
+        }
+
+        const existingStaff = await Staff.findOne({ email: email })
+
+        if (existingStaff) {
+            return res.status(400).json({ message: "staff with same email already exists" })
+        }
+
+        const newStaff = new Staff({
+            name: name,
+            email: email,
+            phoneno: phoneno,
+            designation: designation,
+            employee_id: employee_id,
+            joinging_date: joining_date
+        })
+
+        await newStaff.save();
+
+        return res.status(200).json({ message: 'user addedd successfully', newStaff })
+
     }
-    
-    const existingStaff = await Staff.findOne({ email:email})
-
-    if(existingStaff){
-        return res.status(400).json({message:"staff with same email already exists"})
-    }
-
-    const newStaff = new Staff({
-        name:name,
-        email:email,
-        phoneno:phoneno,
-        designation:designation,
-        employee_id:employee_id,
-        joinging_date:joining_date
-    })
-
-    await newStaff.save();
-
-    return res.status(200).json({message:'user addedd successfully',newStaff})
-
-    }
-    catch(error){
+    catch (error) {
         console.log(error.message)
     }
 }
 
 
+const manageAddons = async (req, res) => {
+    upload(req, res, async (err) => {
+        if (err) {
+            return res.status(400).json({ message: err.message });
+        }
 
+        try {
+            const { item_name, item_type, quantity, price } = req.body;
+            const item_image = req.file ? req.file.filename : null;
+
+            if (!item_name || !item_type || !quantity || !price) {
+                return res.status(400).json({ message: "Missing required fields!" });
+            }
+
+            const existingItem = await Addons.findOne({ item_name });
+
+            if (existingItem) {
+                return res.status(400).json({ message: "Item already exists, try adding a new item!" });
+            }
+
+            const newItem = new Addons({
+                item_name,
+                item_type,
+                quantity,
+                price,
+                item_image
+            });
+
+            await newItem.save();
+
+            return res.status(200).json({ message: "Item added successfully", item: newItem });
+        } catch (error) {
+            console.error(error.message);
+            return res.status(500).json({ message: "Server error!" });
+        }
+    });
+};
+
+const getAlladdons = async(req,res) =>{
+    try{
+    const addons = await Addons.find({})
+    if(!addons){
+        return res.status(400).json({message:"no addouns found"})
+    }
+
+    return res.status(200).json({addons:addons})
+    }
+    catch(error){
+        console.log(error.message)
+    }
+}
 
 
 
@@ -441,7 +494,8 @@ module.exports = {
     generateSlots,
     getAllSlots,
     updateSlot,
-    addStaff
-
+    addStaff,
+    manageAddons,
+    getAlladdons
 
 }

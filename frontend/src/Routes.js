@@ -10,6 +10,8 @@ import Bookings from "./User/Pages/Bookings";
 import Register from "./User/Auth/Register";
 import AboutUs from "./User/Pages/About";
 import BookingPage from "./User/Pages/BookNow";
+import BookingSummary from "./User/Pages/Confirmbooking";
+import Addons from "./Admin/Pages/Addons";
 
 import Dashboard from "./Admin/Pages/Dashboard";
 import Users from "./Admin/Pages/Users";
@@ -22,6 +24,9 @@ import AdminLogin from "./Admin/Auth/AdminLogin";
 import Settings from "./Admin/Pages/Settings";
 import ProtectedAdmin from "./Admin/Global/ProtectedAdmin";
 import ProtectedRoute from "./User/Global/ProtectedRoutes";
+
+
+
 
 const AppRoutes = () => {
   // const user = useSelector((state) => state.user); // Replace with your actual state management logic
@@ -40,6 +45,8 @@ const AppRoutes = () => {
         <Route path="/register" element={<Register />} />
         <Route path="/book-now" element={<BookingPage />} />
         <Route path="/bookings" element={<Bookings />} />
+        <Route path="/confirm-bookings" element={<BookingSummary />} />
+
 
         <Route
           path="/admin"
@@ -54,7 +61,7 @@ const AppRoutes = () => {
         <Route path="/admin/manage-payments"  element={<ProtectedAdmin element={<ManagePayments />} />}/>
         <Route path="/admin/manage-courts"  element={<ProtectedAdmin element={<ManageCourts />} />}/>
         <Route path="/admin/settings"  element={<ProtectedAdmin element={<Settings />} />} />
-
+        <Route path="/admin/manage-addons"  element={<ProtectedAdmin element={<Addons />} />} />
         <Route path="/admin/login" element={<AdminLogin />} />
 
         <Route path="*" element={<Navigate to="/" />} />

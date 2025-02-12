@@ -5,6 +5,9 @@ const User = require('../models/userModel')
 const generateUserToken = require('../authentication/generateUserToken')
 const Otp = require('../models/otpModel')
 const sendOTP = require('../helper/otpHelper')
+const Court = require('../models/courtModel')
+const Slot = require('../models/slotModel')
+const Addons = require('../models/addonModel')
 
 const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
@@ -13,7 +16,7 @@ const client = new OAuth2Client(CLIENT_ID);
 const userRegister = async (req, res) => {
     try {
         const { name, email, password, confirmPassword, phoneno, address, profileImage } = req.body;
-        console.log(req.body,'req-body')
+        console.log(req.body, 'req-body')
 
         if (!name || !email || !password || !confirmPassword || !phoneno) {
             return res.status(400).json({ message: "missing required fields!" })
@@ -29,10 +32,10 @@ const userRegister = async (req, res) => {
             return res.status(402).json({ message: 'User already exists' });
         }
 
-        const userwithPhone = await User.findOne({phoneno})
+        const userwithPhone = await User.findOne({ phoneno })
 
-        if(userwithPhone){
-            return res.status(200).json({message:"user with this phoneno exists!"})
+        if (userwithPhone) {
+            return res.status(200).json({ message: "user with this phoneno exists!" })
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -195,7 +198,7 @@ const userLogin = async (req, res) => {
 }
 
 const userLogout = async (req, res) => {
-    
+
     try {
         res.cookie('adminjwt', '', {
             httpOnly: true,
@@ -209,12 +212,12 @@ const userLogout = async (req, res) => {
     }
 }
 
-const googleLogin = async(req,res) =>{
+const googleLogin = async (req, res) => {
     try {
 
         const { code } = req.body;
 
-        const tokenClient = new OAuth2Client(CLIENT_ID, CLIENT_SECRET, 'http://localhost:3000'); 
+        const tokenClient = new OAuth2Client(CLIENT_ID, CLIENT_SECRET, 'http://localhost:3000');
         const { tokens } = await tokenClient.getToken({ code });
         const idToken = tokens.id_token;
 
@@ -242,22 +245,78 @@ const googleLogin = async(req,res) =>{
                 await user.save();
             }
         }
-        
+
         const generatedtoken = generateUserToken(res, user._id);
 
-        const userToSend = {  
+        const userToSend = {
             _id: user._id,
             name: user.name,
             email: user.email,
         };
 
-        return res.status(200).json({user:userToSend, token:generatedtoken})
+        return res.status(200).json({ user: userToSend, token: generatedtoken })
     }
-    catch(error){
+    catch (error) {
         console.error(error.message);
         return res.status(500).json({ message: error.message });
     }
 }
+
+const getCourts = async (req, res) => {
+    try {
+        const court = await Court.find({})
+        console.log(court,'court')
+        if (!court) {
+            return res.status(400).json({ message: 'no courts found' })
+        }
+        return res.status(200).json({ court })
+    }
+    catch (error) {
+        console.error(error.message);
+        return res.status(500).json({ message: error.message });
+    }
+}
+
+const getSlots = async(req,res) =>{
+    try {
+        const { courtId, date } = req.query;
+
+        if (!courtId || !date) {
+            return res.status(400).json({ message: "Court ID and Date are required" });
+        }
+
+        const startOfDay = new Date(date);
+        startOfDay.setHours(0, 0, 0, 0);
+        const endOfDay = new Date(date);
+        endOfDay.setHours(23, 59, 59, 999);
+
+        const slots = await Slot.find({
+            court: courtId,
+            startTime: { $gte: startOfDay, $lte: endOfDay },
+            isBooked: false,
+        });
+
+        res.json(slots);
+    } catch (error) {
+        res.status(500).json({ message: "Error fetching slots", error });
+    }
+}
+
+const getAddons = async (req, res) => {
+    try {
+        const addons = await Addons.find({ quantity: { $gte: 1 } });
+
+        if (!addons.length) {
+            return res.status(404).json({ message: "No add-ons available" });
+        }
+
+        return res.status(200).json({ addons });
+    } catch (error) {
+        console.error("Error fetching add-ons:", error.message);
+        res.status(500).json({ message: "Error fetching add-ons", error });
+    }
+};
+
 
 
 
@@ -266,5 +325,8 @@ module.exports = {
     userLogin,
     verifyOtp,
     userLogout,
-    googleLogin
+    googleLogin,
+    getCourts,
+    getSlots,
+    getAddons
 }
