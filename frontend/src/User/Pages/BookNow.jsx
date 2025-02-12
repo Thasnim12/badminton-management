@@ -150,6 +150,256 @@ const CourtBooking = () => {
                       ))
                     )}
                   </Grid>
+<<<<<<< HEAD
+=======
+                ))}
+              </Grid>
+            </Card>
+
+            {/* Booking Confirmation */}
+            <Card
+              sx={{ padding: 3, marginTop: 3, borderRadius: 3, boxShadow: 2 }}
+            >
+              <Typography variant="h6" gutterBottom sx={{ fontWeight: "bold" }}>
+                Confirm Court Booking
+              </Typography>
+              <Select
+                fullWidth
+                value={selectedCourt}
+                onChange={(e) => setSelectedCourt(e.target.value)}
+                sx={{ marginBottom: 2, borderRadius: 2 }}
+              >
+                <MenuItem value="Court 1">Court 1</MenuItem>
+                <MenuItem value="Court 2">Court 2</MenuItem>
+              </Select>
+              <Select
+                fullWidth
+                value={selectedTime || ""}
+                onChange={(e) => setSelectedTime(e.target.value)}
+                sx={{ marginBottom: 2, borderRadius: 2 }}
+                displayEmpty
+              >
+                <MenuItem value="" disabled>
+                  Select Time Slot
+                </MenuItem>
+                {availableSlots
+                  .filter((slot) => slot.available)
+                  .map((slot) => (
+                    <MenuItem key={slot.time} value={slot.time}>
+                      {slot.time}
+                    </MenuItem>
+                  ))}
+              </Select>
+              <Select
+                fullWidth
+                value={duration}
+                onChange={(e) => setDuration(e.target.value)}
+                sx={{ marginBottom: 2, borderRadius: 2 }}
+              >
+                {[60, 90, 120].map((min) => (
+                  <MenuItem key={min} value={min}>
+                    {min} Minutes
+                  </MenuItem>
+                ))}
+              </Select>
+
+              <Button
+                fullWidth
+                variant="contained"
+                color="primary"
+                sx={{ marginTop: 3 }}
+                onClick={handleBooking}
+              >
+                Book Now
+              </Button>
+            </Card>
+          </Grid>
+
+          <Grid item xs={10} md={3}>
+            {/* Add-On Section */}
+
+            <Card
+              sx={{ padding: 3, marginTop: 3, borderRadius: 3, boxShadow: 2 }}
+            >
+              <Typography variant="h6" gutterBottom sx={{ fontWeight: "bold" }}>
+                Add-Ons
+              </Typography>
+
+              {/* Add-Ons List */}
+              <Grid container spacing={2}>
+                {/* Shuttlecocks */}
+                <Grid item xs={12}>
+                  <Button
+                    fullWidth
+                    variant={
+                      selectedAddOns.shuttlecocks ? "contained" : "outlined"
+                    }
+                    color="primary"
+                    onClick={() => handleAddOnSelection("shuttlecocks", 200)}
+                    sx={{ justifyContent: "space-between", display: "flex" }}
+                  >
+                    <Typography>Shuttlecocks (₹200)</Typography>
+                    {selectedAddOns.shuttlecocks ? "✔" : "+"}
+                  </Button>
+                </Grid>
+
+                {/* Racquet Sale */}
+                <Grid item xs={12}>
+                  <Button
+                    fullWidth
+                    variant={
+                      selectedAddOns.racquetSale ? "contained" : "outlined"
+                    }
+                    color="secondary"
+                    onClick={() => handleAddOnSelection("racquetSale", 500)}
+                    sx={{ justifyContent: "space-between", display: "flex" }}
+                  >
+                    <Typography>Racquet (Buy ₹500)</Typography>
+                    {selectedAddOns.racquetSale ? "✔" : "+"}
+                  </Button>
+                </Grid>
+
+                {/* Racquet Rent */}
+                <Grid item xs={12}>
+                  <Button
+                    fullWidth
+                    variant={
+                      selectedAddOns.racquetRent ? "contained" : "outlined"
+                    }
+                    color="success"
+                    onClick={() => handleAddOnSelection("racquetRent", 100)}
+                    sx={{ justifyContent: "space-between", display: "flex" }}
+                  >
+                    <Typography>Racquet (Rent ₹100)</Typography>
+                    {selectedAddOns.racquetRent ? "✔" : "+"}
+                  </Button>
+                </Grid>
+              </Grid>
+
+              {/* Total Price */}
+              <Typography
+                variant="h6"
+                sx={{ marginTop: 2, fontWeight: "bold" }}
+              >
+                Total Add-On Price: ₹
+                {selectedAddOns.shuttlecocks * 200 +
+                  selectedAddOns.racquetSale * 500 +
+                  selectedAddOns.racquetRent * 100}
+              </Typography>
+            </Card>
+          </Grid>
+
+          <Grid item xs={10} md={3}>
+            {/* Scrollable Booking Summary Section */}
+            <Box
+              sx={{
+                width: "100%",
+                marginTop: 3,
+                borderRadius: 2,
+                border: "1px solid #ddd",
+                padding: 2,
+                backgroundColor: "#f9f9f9",
+                maxHeight: "300px",
+                overflowY: "auto",
+              }}
+            >
+              <Typography variant="h6" gutterBottom sx={{ fontWeight: "bold" }}>
+                Booking Summary
+              </Typography>
+              {bookings.length > 0 ? (
+                bookings.map((booking, index) => (
+                  <Card key={index} sx={{ marginBottom: 2, padding: 2 }}>
+                    <Typography variant="body1">
+                      Court: {booking.selectedCourt}
+                    </Typography>
+                    <Typography variant="body1">
+                      Date: {dayjs(booking.selectedDate).format("MMMM D, YYYY")}
+                    </Typography>
+                    <Typography variant="body1">
+                      Time: {booking.selectedTime}
+                    </Typography>
+                    <Typography variant="body1">
+                      Duration: {booking.duration} minutes
+                    </Typography>
+                    <Typography variant="body1" sx={{ fontWeight: "bold" }}>
+                      Total: ₹{booking.totalPrice}
+                    </Typography>
+                    <Button
+                      color="error"
+                      onClick={() => handleBookingRemoval(index)}
+                      sx={{ marginTop: 2 }}
+                    >
+                      Remove
+                    </Button>
+                  </Card>
+                ))
+              ) : (
+                <Typography>No bookings made yet.</Typography>
+              )}
+
+              {/* Updated Total Price with Add-ons */}
+              <Typography
+                variant="body1"
+                sx={{ fontWeight: "bold", marginTop: 2 }}
+              >
+                Updated Total (including Add-Ons): ₹{calculateTotalPrice()}
+              </Typography>
+
+              {/* Confirm & Pay Button */}
+              {bookings.length > 0 && (
+                <Button
+                  variant="contained"
+                  color="primary"
+                  fullWidth
+                  sx={{ marginTop: 2 }}
+                  onClick={handleOpenPaymentModal}
+                >
+                  Confirm & Pay
+                </Button>
+              )}
+            </Box>
+
+            {/* Payment Modal */}
+            <Modal
+              open={openPaymentModal}
+              onClose={handleClosePaymentModal}
+              closeAfterTransition
+              BackdropComponent={Backdrop}
+              BackdropProps={{
+                timeout: 500,
+              }}
+            >
+              <Fade in={openPaymentModal}>
+                <Box
+                  sx={{
+                    position: "absolute",
+                    top: "50%",
+                    left: "50%",
+                    transform: "translate(-50%, -50%)",
+                    width: 400,
+                    bgcolor: "background.paper",
+                    boxShadow: 24,
+                    p: 4,
+                    borderRadius: 2,
+                  }}
+                >
+                  <Typography variant="h6" gutterBottom>
+                    Payment Details
+                  </Typography>
+                  <Typography variant="body1">
+                    Total Amount: ₹{calculateTotalPrice()}
+                  </Typography>
+
+                  <Button
+                    variant="contained"
+                    color="success"
+                    fullWidth
+                    sx={{ marginTop: 3 }}
+                    onClick={() => alert("Proceeding to Payment Gateway...")}
+                  >
+                    Proceed to Pay
+                  </Button>
+>>>>>>> c913e5bc4391fe395793c67b02f4e50091105a6b
                 </Box>
               </Card>
             </Grid>

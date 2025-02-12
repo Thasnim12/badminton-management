@@ -10,14 +10,19 @@ import Bookings from "./User/Pages/Bookings";
 import Register from "./User/Auth/Register";
 import AboutUs from "./User/Pages/About";
 import BookingPage from "./User/Pages/BookNow";
+<<<<<<< HEAD
 import BookingSummary from "./User/Pages/Confirmbooking";
 import Addons from "./Admin/Pages/Addons";
+=======
+import Profile from "./User/Pages/Profile";
+>>>>>>> c913e5bc4391fe395793c67b02f4e50091105a6b
 
 import Dashboard from "./Admin/Pages/Dashboard";
 import Users from "./Admin/Pages/Users";
 import ManageDonations from "./Admin/Pages/ManageDonations";
 import ManageBookings from "./Admin/Pages/ManageBookings";
 import ManagePayments from "./Admin/Pages/ManagePayments";
+import ManageStaffs from "./Admin/Pages/Staffs";
 // import ManageReports from './Admin/Pages/ManageReports';
 import ManageCourts from "./Admin/Pages/ManageCourts";
 import AdminLogin from "./Admin/Auth/AdminLogin";
@@ -45,8 +50,12 @@ const AppRoutes = () => {
         <Route path="/register" element={<Register />} />
         <Route path="/book-now" element={<BookingPage />} />
         <Route path="/bookings" element={<Bookings />} />
+<<<<<<< HEAD
         <Route path="/confirm-bookings" element={<BookingSummary />} />
 
+=======
+        <Route path="/profile" element={<Profile />} />
+>>>>>>> c913e5bc4391fe395793c67b02f4e50091105a6b
 
         <Route
           path="/admin"
@@ -59,6 +68,7 @@ const AppRoutes = () => {
         <Route path="/admin/manage-donations"  element={<ProtectedAdmin element={<ManageDonations />} />}/>
         <Route path="/admin/manage-bookings" element={<ProtectedAdmin element={<ManageBookings />} />} />
         <Route path="/admin/manage-payments"  element={<ProtectedAdmin element={<ManagePayments />} />}/>
+        <Route path="/admin/manage-staffs"  element={<ProtectedAdmin element={<ManageStaffs />} />}/>
         <Route path="/admin/manage-courts"  element={<ProtectedAdmin element={<ManageCourts />} />}/>
         <Route path="/admin/settings"  element={<ProtectedAdmin element={<Settings />} />} />
         <Route path="/admin/manage-addons"  element={<ProtectedAdmin element={<Addons />} />} />
