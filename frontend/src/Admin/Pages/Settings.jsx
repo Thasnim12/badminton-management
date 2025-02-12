@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   TextField,
   Button,
@@ -14,19 +14,33 @@ import {
   Save as SaveIcon,
   Delete as DeleteIcon,
   Upload as UploadIcon,
+  Visibility,
+  VisibilityOff,
 } from "@mui/icons-material";
 import Layout from "../Global/Layouts";
-const SettingsPage = () => {
-  const [profileImage, setProfileImage] = useState("/default-profile.jpg"); // Default profile image
-  const [formData, setFormData] = useState({
-    name: "John Doe",
-    email: "johndoe@example.com",
-    password: "",
-  });
-  const [isEditing, setIsEditing] = useState(false); // Toggle edit mode
-  const [showImageOptions, setShowImageOptions] = useState(false); // Toggle image options visibility
+import { useGetAdminDetailsQuery } from "../../Slices/AdminApi";
 
-  // Handle profile image change
+const Settings = () => {
+  const { data: user, error, isLoading } = useGetAdminDetailsQuery();
+  const [profileImage, setProfileImage] = useState("/default-profile.jpg");
+  const [formData, setFormData] = useState({
+    name: "",
+    passkey: "",
+  });
+  const [isEditing, setIsEditing] = useState(false);
+  const [showImageOptions, setShowImageOptions] = useState(false);
+  const [showPasskey, setShowPasskey] = useState(false); // To toggle visibility of passkey
+
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        name: user?.name,
+        passkey: user?.passkey,
+      });
+      setProfileImage(user.profileImage || "/default-profile.jpg");
+    }
+  }, [user]);
+
   const handleProfileImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -35,27 +49,21 @@ const SettingsPage = () => {
         setProfileImage(reader.result);
       };
       reader.readAsDataURL(file);
-      setShowImageOptions(false); // Hide options after selecting a new image
+      setShowImageOptions(false);
     }
   };
 
-  // Handle removing profile image
   const handleRemoveImage = () => {
     setProfileImage("/default-profile.jpg");
-    setShowImageOptions(false); // Hide options after removing the image
+    setShowImageOptions(false);
   };
 
-  // Handle form data changes
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+  const handleTogglePasskeyVisibility = () => {
+    setShowPasskey(!showPasskey);
   };
 
-  // Handle saving the updated details
-  const handleSaveChanges = () => {
-    setIsEditing(false);
-    // You can add logic here to save the updated details (e.g., make an API call)
-  };
+  if (isLoading) return <Typography>Loading...</Typography>;
+  if (error) return <Typography>Error loading user details</Typography>;
 
   return (
     <Layout>
@@ -65,7 +73,6 @@ const SettingsPage = () => {
         </Typography>
 
         <Grid container spacing={3} alignItems="center">
-          {/* Profile Image */}
           <Grid
             item
             xs={12}
@@ -82,12 +89,10 @@ const SettingsPage = () => {
                 right: 0,
                 bgcolor: "primary.main",
               }}
-              onClick={() => setShowImageOptions(!showImageOptions)} // Toggle options visibility
+              onClick={() => setShowImageOptions(!showImageOptions)}
             >
               <EditIcon sx={{ color: "white" }} />
             </IconButton>
-
-            {/* Show Image Options (Upload & Remove Buttons) */}
             {showImageOptions && (
               <Box
                 sx={{
@@ -135,63 +140,31 @@ const SettingsPage = () => {
               label="Name"
               name="name"
               value={formData.name}
-              onChange={handleInputChange}
               variant="outlined"
               disabled={!isEditing} // Disable when not in editing mode
             />
           </Grid>
 
-          {/* Email Field */}
+          {/* Passkey Field */}
           <Grid item xs={12}>
             <TextField
               fullWidth
-              label="Email"
-              name="email"
-              value={formData.email}
-              onChange={handleInputChange}
+              label="Passkey"
+              name="passkey"
+              value={formData.passkey}
               variant="outlined"
-              disabled={!isEditing} // Disable when not in editing mode
+              type={showPasskey ? "text" : "password"} // Toggle visibility of passkey
+              disabled
+              InputProps={{
+                endAdornment: (
+                  <IconButton onClick={handleTogglePasskeyVisibility}>
+                    {showPasskey ? <Visibility /> : <VisibilityOff />}
+                  </IconButton>
+                ),
+              }}
             />
-          </Grid>
-
-          {/* Password Field */}
-          <Grid item xs={12}>
-            <TextField
-              fullWidth
-              label="Password"
-              name="password"
-              type="password"
-              value={formData.password}
-              onChange={handleInputChange}
-              variant="outlined"
-              disabled={!isEditing} // Disable when not in editing mode
-            />
-          </Grid>
-
-          {/* Edit/Save Button */}
-          <Grid item xs={12} display="flex" justifyContent="flex-end">
-            {isEditing ? (
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleSaveChanges}
-                startIcon={<SaveIcon />}
-              >
-                Save Changes
-              </Button>
-            ) : (
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={() => setIsEditing(true)}
-                startIcon={<EditIcon />}
-              >
-                Edit Profile
-              </Button>
-            )}
           </Grid>
         </Grid>
-
         {/* Divider */}
         <Divider sx={{ marginTop: 3 }} />
       </Box>
@@ -199,4 +172,4 @@ const SettingsPage = () => {
   );
 };
 
-export default SettingsPage;
+export default Settings;

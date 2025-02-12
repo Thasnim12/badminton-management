@@ -5,6 +5,9 @@ export const adminApi = createApi({
   baseQuery: fetchBaseQuery({ baseUrl: 'http://localhost:5000/api/admin', credentials: 'include' }),
   endpoints: (builder) => ({
 
+    getAdminDetails: builder.query({
+      query: () => '/admin-profile',
+    }),
     getAllUsers: builder.query({
       query: (data) => ({
         url: '/users', 
@@ -44,7 +47,7 @@ export const adminApi = createApi({
     manageusers: builder.mutation({
       query: (userId) => ({
         url: `/users/${userId}`,
-        method: 'PATCH',
+        method: 'PUT',
       }),
     }),
     manageslots: builder.mutation({
@@ -78,6 +81,26 @@ export const adminApi = createApi({
         body: data
       }),
     }),
+    GetStaffs: builder.query({
+      query: () => '/get-staffs', 
+    }),
+    GetDonations: builder.query({
+      query: () => '/get-donations',
+    }),
+    UpdateStaff: builder.mutation({
+      query: (updatedStaff) => ({
+        url: `/staffs/${updatedStaff.employee_id}`, 
+        method: 'PUT',
+        body: updatedStaff,
+      }),
+    }),
+    DeleteStaff: builder.mutation({
+      query: (_id) => ({
+        url: `/staffs/${_id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['Staff'],
+    }),
    
   }),
 });   
@@ -92,7 +115,12 @@ export const {
   useGetAllcourtsQuery,
   useGetAllslostQuery,
   useUpdatecourtsMutation,
-  useAddstaffsMutation
+  useAddstaffsMutation,
+  useGetStaffsQuery,
+  useGetDonationsQuery,
+  useUpdateStaffMutation,
+  useDeleteStaffMutation,
+  useGetAdminDetailsQuery,
  }
   = adminApi;
 

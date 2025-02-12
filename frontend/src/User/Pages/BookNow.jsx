@@ -276,64 +276,75 @@ const CourtBooking = () => {
 
           <Grid item xs={10} md={3}>
             {/* Add-On Section */}
+
             <Card
               sx={{ padding: 3, marginTop: 3, borderRadius: 3, boxShadow: 2 }}
             >
               <Typography variant="h6" gutterBottom sx={{ fontWeight: "bold" }}>
-                Available Add-Ons
+                Add-Ons
               </Typography>
 
-              {/* Shuttlecocks for Sale */}
-              <Typography variant="body1" sx={{ fontWeight: "bold" }}>
-                Shuttlecocks (For Sale) - ₹200 each
-              </Typography>
-              <Button
-                variant={
-                  selectedAddOns.shuttlecocks > 0 ? "contained" : "outlined"
-                }
-                onClick={() => handleAddOnSelection("shuttlecocks", 200)}
-                sx={{ marginTop: 1 }}
-              >
-                {selectedAddOns.shuttlecocks > 0
-                  ? `Added: ${selectedAddOns.shuttlecocks}`
-                  : "Add"}
-              </Button>
-
-              {/* Racquets for Sale and Rent */}
-              <Typography
-                variant="body1"
-                sx={{ fontWeight: "bold", marginTop: 2 }}
-              >
-                Racquet (For Sale or Rent) - ₹500 (Sale), ₹100 (Rent)
-              </Typography>
+              {/* Add-Ons List */}
               <Grid container spacing={2}>
-                <Grid item xs={6}>
+                {/* Shuttlecocks */}
+                <Grid item xs={12}>
                   <Button
+                    fullWidth
                     variant={
-                      selectedAddOns.racquetSale > 0 ? "contained" : "outlined"
+                      selectedAddOns.shuttlecocks ? "contained" : "outlined"
                     }
-                    onClick={() => handleAddOnSelection("racquetSale", 500)}
-                    sx={{ width: "100%" }}
+                    color="primary"
+                    onClick={() => handleAddOnSelection("shuttlecocks", 200)}
+                    sx={{ justifyContent: "space-between", display: "flex" }}
                   >
-                    {selectedAddOns.racquetSale > 0
-                      ? `Added: ${selectedAddOns.racquetSale}`
-                      : "Buy Racquet"}
+                    <Typography>Shuttlecocks (₹200)</Typography>
+                    {selectedAddOns.shuttlecocks ? "✔" : "+"}
                   </Button>
                 </Grid>
-                <Grid item xs={6}>
+
+                {/* Racquet Sale */}
+                <Grid item xs={12}>
                   <Button
+                    fullWidth
                     variant={
-                      selectedAddOns.racquetRent > 0 ? "contained" : "outlined"
+                      selectedAddOns.racquetSale ? "contained" : "outlined"
                     }
-                    onClick={() => handleAddOnSelection("racquetRent", 100)}
-                    sx={{ width: "100%" }}
+                    color="secondary"
+                    onClick={() => handleAddOnSelection("racquetSale", 500)}
+                    sx={{ justifyContent: "space-between", display: "flex" }}
                   >
-                    {selectedAddOns.racquetRent > 0
-                      ? `Added: ${selectedAddOns.racquetRent}`
-                      : "Rent Racquet"}
+                    <Typography>Racquet (Buy ₹500)</Typography>
+                    {selectedAddOns.racquetSale ? "✔" : "+"}
+                  </Button>
+                </Grid>
+
+                {/* Racquet Rent */}
+                <Grid item xs={12}>
+                  <Button
+                    fullWidth
+                    variant={
+                      selectedAddOns.racquetRent ? "contained" : "outlined"
+                    }
+                    color="success"
+                    onClick={() => handleAddOnSelection("racquetRent", 100)}
+                    sx={{ justifyContent: "space-between", display: "flex" }}
+                  >
+                    <Typography>Racquet (Rent ₹100)</Typography>
+                    {selectedAddOns.racquetRent ? "✔" : "+"}
                   </Button>
                 </Grid>
               </Grid>
+
+              {/* Total Price */}
+              <Typography
+                variant="h6"
+                sx={{ marginTop: 2, fontWeight: "bold" }}
+              >
+                Total Add-On Price: ₹
+                {selectedAddOns.shuttlecocks * 200 +
+                  selectedAddOns.racquetSale * 500 +
+                  selectedAddOns.racquetRent * 100}
+              </Typography>
             </Card>
           </Grid>
 
@@ -435,8 +446,7 @@ const CourtBooking = () => {
                     Payment Details
                   </Typography>
                   <Typography variant="body1">
-                    Total Amount: ₹
-                    {calculateTotalPrice()}
+                    Total Amount: ₹{calculateTotalPrice()}
                   </Typography>
 
                   <Button

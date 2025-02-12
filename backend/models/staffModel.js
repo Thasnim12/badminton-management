@@ -15,7 +15,8 @@ const staffSchema = mongoose.Schema({
         type: String
     },
     employee_id: {
-        type: String
+        type: String,
+        unique: true,
     },
     joining_date: {
         type: Date

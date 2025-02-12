@@ -97,6 +97,7 @@ const Donate = () => {
         donor_name: donorName,
         amount,
         currency,
+        paymentMethod,
       }).unwrap();
 
       const { order } = response;
