@@ -97,17 +97,18 @@ const CourtBooking = () => {
           display: "flex",
           flexDirection: "column",
           minHeight: "100vh",
+          backgroundColor:"#dedede",
+          alignItems:"center"
         }}
       >
         <Header />
         <Grid container spacing={2} sx={{ maxWidth: "80%",marginLeft:"10px",padding:'5px' }}>
 
-          <Grid item xs={12} md={4} sx={{ height: "100vh" }}>
+          <Grid item xs={12} md={4} sx={{ height: "100vh" ,marginTop:"3px"}}>
               <DetailsCard />
           </Grid>
 
-          <Grid item xs={12} md={8} container spacing={2}>
-
+          <Grid item xs={12} md={8} container spacing={2} sx={{marginTop:"3px",height:"90vh"}}>
             <Grid item xs={12}>
               <Card sx={{ padding: 3, display: "flex", flexDirection: "column", height: "100%" }}>
                 <Typography variant="h6" fontWeight="bold">Select Court & Date</Typography>

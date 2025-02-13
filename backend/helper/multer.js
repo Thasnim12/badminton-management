@@ -23,4 +23,9 @@ const upload = multer({
     fileFilter: fileFilter 
 }).single('item_image');
 
-module.exports = { upload };
+const bannerUpload = multer({ 
+    storage: storage, 
+    fileFilter: fileFilter 
+}).array('banner_image', 5);
+
+module.exports = { upload,bannerUpload };

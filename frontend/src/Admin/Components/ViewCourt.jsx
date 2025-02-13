@@ -70,7 +70,6 @@ export default function FullScreenDialog({ dialogOpen, handleCloseDialog, court 
     }, []); 
     
 
-    // Pagination handlers
     const handlePageChange = (event, value) => {
         setPage(value);
     };
@@ -81,7 +80,6 @@ export default function FullScreenDialog({ dialogOpen, handleCloseDialog, court 
     const indexOfFirstSlot = indexOfLastSlot - slotsPerPage;
     const currentSlots = slots.slice(indexOfFirstSlot, indexOfLastSlot);
 
-    // Modal handlers
     const handleView = (slot) => {
         setSelectedSlot(slot);
         setModalMode("view");

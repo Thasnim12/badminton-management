@@ -99,12 +99,10 @@ const updateUserDetails = async (req, res) => {
             { new: true, runValidators: true }
         ).select("-password");
 
-        // If user is not found
         if (!updatedUser) {
             return res.status(404).json({ message: "User not found" });
         }
 
-        // Return updated user data
         return res.status(200).json({
             message: "User details updated successfully",
             user: updatedUser,

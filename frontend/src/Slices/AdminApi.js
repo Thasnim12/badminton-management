@@ -32,17 +32,26 @@ export const adminApi = createApi({
         method: 'GET',
       }),
     }),
+    GetStaffs: builder.query({
+      query: () => '/get-staffs', 
+      method: 'GET',
+    }),
+    GetDonations: builder.query({
+      query: () => '/get-donations',
+      method: 'GET',
+    }),
+    viewBanner: builder.query({
+      query: (bannerId) => ({
+        url: `/view-banner/${bannerId}`, 
+        method: 'GET',
+      }),
+    }),
     loginadmin: builder.mutation({
         query: (data) => ({
           url: '/login', 
           method: 'POST',
           body: data,
         }),
-      query: (data) => ({
-        url: '/login',
-        method: 'POST',
-        body: data,
-      }),
     }),
     logoutadmin: builder.mutation({
       query: () => ({
@@ -94,12 +103,6 @@ export const adminApi = createApi({
         body: data
       }),
     }),
-    GetStaffs: builder.query({
-      query: () => '/get-staffs', 
-    }),
-    GetDonations: builder.query({
-      query: () => '/get-donations',
-    }),
     UpdateStaff: builder.mutation({
       query: (updatedStaff) => ({
         url: `/staffs/${updatedStaff.employee_id}`, 
@@ -114,7 +117,28 @@ export const adminApi = createApi({
       }),
       invalidatesTags: ['Staff'],
     }),
-   
+    addBanner:builder.mutation({
+      query:(data) => ({
+        url:'/banner',
+        method:"POST",
+        body: data
+      })
+    }),
+    getAllBanners: builder.query({
+      query: () => ({
+        url: '/banner', 
+      }),
+    }),
+    updateBanner: builder.mutation({
+      query: ({ bannerId, formData }) => ({
+        url: `/banner/${bannerId}`,
+        method: "PUT",
+        body: formData,
+        formData: true,
+      }),
+    }),
+    
+    
   }),
 });   
 
@@ -136,6 +160,10 @@ export const {
   useUpdateStaffMutation,
   useDeleteStaffMutation,
   useGetAdminDetailsQuery,
+  useAddBannerMutation,
+  useGetAllBannersQuery,
+  useLazyViewBannerQuery,
+  useUpdateBannerMutation
  }
   = adminApi;
 
