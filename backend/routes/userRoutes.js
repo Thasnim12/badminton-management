@@ -1,6 +1,5 @@
 const express = require('express')
-const { userLogin,userRegister,verifyOtp,userLogout,googleLogin,getCourts,getSlots,getAddons } = require('../controllers/userController')
-const { userLogin,userRegister,verifyOtp,userLogout,googleLogin, getUserDetails, updateUserDetails } = require('../controllers/userController')
+const { userLogin,userRegister,verifyOtp,userLogout,googleLogin, getUserDetails, updateUserDetails,getCourts,getSlots,getAddons } = require('../controllers/userController')
 const { verifyPayment,createDonation } = require('../controllers/donationController')
 const authenticateUser = require('../middlewares/userMiddleware')
 
