@@ -21,6 +21,7 @@ import {
   Card,
   CardContent,
 } from "@mui/material";
+import BreadcrumbNav from "../Global/Breadcrumb";
 import VolunteerActivismIcon from "@mui/icons-material/VolunteerActivism";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
@@ -89,7 +90,12 @@ const ManageDonations = () => {
   return (
     <Layout>
       <Container sx={{ marginTop: "25px" }}>
-        
+      <BreadcrumbNav
+          links={[
+            { label: "Dashboard", path: "/admin" },
+            { label: "Donations", path: "/admin/manage-donations" },
+          ]}
+        />
 
         {/* Cards for Total Donations, Completed, Pending, and Failed Transactions */}
         <Box
@@ -289,7 +295,11 @@ const ManageDonations = () => {
           </Table>
         </TableContainer>
 
-        <Box sx={{ display: "flex", justifyContent: "center", marginTop: 3 }}>
+        <Box  sx={{
+            display: 'flex',
+            justifyContent: 'center', 
+            marginTop: '20px', 
+          }}>
           <Pagination
             count={Math.ceil(donations.length / rowsPerPage)}
             page={page}
@@ -328,7 +338,7 @@ const ManageDonations = () => {
             )}
           </DialogContent>
           <DialogActions>
-            <Button onClick={handleClose} color="primary">
+            <Button onClick={handleClose}  variant="outlined" color="primary">
               Close
             </Button>
           </DialogActions>

@@ -75,6 +75,7 @@ const Login = () => {
     onSuccess: async (response) => {
       try {
         const result = await googleSignin({ code: response.code }).unwrap();
+
         if (result.user) {
           dispatch(setUserCredentials(result.user));
           setAlertMessage("User logged in successfully");

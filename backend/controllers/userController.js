@@ -8,7 +8,10 @@ const sendOTP = require("../helper/otpHelper");
 const Court = require("../models/courtModel");
 const Slot = require("../models/slotModel");
 const Addons = require("../models/addonModel");
+
 const { profileUpload } = require("../helper/multer");
+const nodemailer = require("nodemailer");
+require("dotenv").config();
 
 const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
@@ -81,38 +84,37 @@ const userRegister = async (req, res) => {
 };
 
 const updateUserDetails = async (req, res) => {
-    profileUpload(req, res, async (err) => {
-      if (err) {
-        return res.status(400).json({ message: err.message });
+  profileUpload(req, res, async (err) => {
+    if (err) {
+      return res.status(400).json({ message: err.message });
+    }
+    try {
+      const { email, name, mobile } = req.body;
+      const profileImage = req.file ? req.file.filename : null;
+
+      console.log("Request Body: ", req.body);
+      console.log("Uploaded File: ", req.file);
+
+      const updatedUser = await User.findOneAndUpdate(
+        { email },
+        { name, phoneno: mobile, profileImage },
+        { new: true, runValidators: true }
+      ).select("-password");
+
+      if (!updatedUser) {
+        return res.status(404).json({ message: "User not found" });
       }
-      try {
-        const { email, name, mobile } = req.body;
-        const profileImage = req.file ? req.file.filename : null; 
-  
-        console.log("Request Body: ", req.body); 
-        console.log("Uploaded File: ", req.file); 
-  
-        const updatedUser = await User.findOneAndUpdate(
-          { email },
-          { name, phoneno: mobile, profileImage },
-          { new: true, runValidators: true }
-        ).select("-password");
-  
-        if (!updatedUser) {
-          return res.status(404).json({ message: "User not found" });
-        }
-  
-        return res.status(200).json({
-          message: "User details updated successfully",
-          user: updatedUser,
-        });
-      } catch (error) {
-        console.log(error.message);
-        return res.status(500).json({ message: error.message });
-      }
-    });
-  };
-  
+
+      return res.status(200).json({
+        message: "User details updated successfully",
+        user: updatedUser,
+      });
+    } catch (error) {
+      console.log(error.message);
+      return res.status(500).json({ message: error.message });
+    }
+  });
+};
 
 const sendOTPVerificationEmail = async ({ id, email }, res) => {
   try {
@@ -264,14 +266,24 @@ const userLogout = async (req, res) => {
 const googleLogin = async (req, res) => {
   try {
     const { code } = req.body;
+    if (!code) {
+      return res
+        .status(400)
+        .json({ message: "Authorization code is required" });
+    }
 
-    const tokenClient = new OAuth2Client(
+    const client = new OAuth2Client(
       CLIENT_ID,
       CLIENT_SECRET,
       "http://localhost:3000"
     );
-    const { tokens } = await tokenClient.getToken({ code });
+
+    const { tokens } = await client.getToken(code);
     const idToken = tokens.id_token;
+
+    if (!idToken) {
+      return res.status(400).json({ message: "Failed to retrieve ID Token" });
+    }
 
     const ticket = await client.verifyIdToken({
       idToken: idToken,
@@ -279,56 +291,34 @@ const googleLogin = async (req, res) => {
     });
 
     const payload = ticket.getPayload();
-    const googleId = payload["sub"];
-    const email = payload["email"];
-    const name = payload["name"];
+    const googleId = payload.sub;
+    const email = payload.email;
+    const name = payload.name;
 
-    let user = await User.findOne({ googleId });
+    let user = await User.findOne({ $or: [{ googleId }, { email }] });
 
     if (!user) {
-      user = await User.findOne({ email });
-      if (!user) {
-        user = new User({
-          googleId,
-          name,
-          email,
-        });
-
-        const payload = ticket.getPayload();
-        const googleId = payload["sub"];
-        const email = payload["email"];
-        const name = payload["name"];
-
-        let user = await User.findOne({ googleId });
-
-        if (!user) {
-          user = await User.findOne({ email });
-          if (!user) {
-            user = new User({
-              googleId,
-              name,
-              email,
-            });
-            await user.save();
-          }
-        }
-
-        const generatedtoken = generateUserToken(res, user._id);
-
-        const userToSend = {
-          _id: user._id,
-          name: user.name,
-          email: user.email,
-        };
-
-        return res
-          .status(200)
-          .json({ user: userToSend, token: generatedtoken });
-      }
+      user = new User({
+        googleId,
+        name,
+        email,
+      });
+      await user.save();
     }
+
+    const generatedToken = generateUserToken(res, user._id);
+
+    return res.status(200).json({
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+      },
+      token: generatedToken,
+    });
   } catch (error) {
-    console.error(error.message);
-    return res.status(500).json({ message: error.message });
+    console.error("Google Login Error:", error.message);
+    return res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
@@ -388,6 +378,48 @@ const getAddons = async (req, res) => {
   }
 };
 
+const sendMessage = async (req, res) => {
+  const { name, email, message } = req.body;
+
+  if (!name || !email || !message) {
+    return res.status(400).json({ error: "All fields are required" });
+  }
+
+  try {
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.USER_EMAIL,
+        pass: process.env.USER_PASSWORD,
+      },
+    });
+
+    const mailOptions = {
+      from: email,
+      to: process.env.USER_EMAIL,
+      subject: `New Contact Form Submission from ${name}`,
+      text: `Name: ${name}\nEmail: ${email}\nMessage:\n${message}`,
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    const newEnquiry = new Enquiry({
+      name,
+      email,
+      message,
+    });
+
+    await newEnquiry.save();
+
+    res.status(200).json({ message: "Message sent successfully!" });
+  } catch (error) {
+    console.error("Error sending email:", error);
+    res.status(500).json({ error: "Failed to send message" });
+  }
+};
+
+
+
 module.exports = {
   userRegister,
   userLogin,
@@ -398,4 +430,5 @@ module.exports = {
   getSlots,
   getAddons,
   updateUserDetails,
+  sendMessage,
 };

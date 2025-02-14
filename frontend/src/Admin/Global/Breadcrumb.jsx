@@ -1,42 +1,55 @@
-import * as React from 'react';
-import Breadcrumbs from '@mui/material/Breadcrumbs';
-import Typography from '@mui/material/Typography';
-import Link from '@mui/material/Link';
-import Stack from '@mui/material/Stack';
-import NavigateNextIcon from '@mui/icons-material/NavigateNext';
+import React from "react";
+import { Breadcrumbs, Link, Typography } from "@mui/material";
+import NavigateNextIcon from "@mui/icons-material/NavigateNext";
+import { useNavigate } from "react-router-dom";
 
-function handleClick(event) {
-  event.preventDefault();
-  console.info('You clicked a breadcrumb.');
-}
-
-export default function CustomSeparator() {
-  const breadcrumbs = [
-    <Link underline="hover" key="1" color="inherit" href="/" onClick={handleClick}>
-      MUI
-    </Link>,
-    <Link
-      underline="hover"
-      key="2"
-      color="inherit"
-      href="/material-ui/getting-started/installation/"
-      onClick={handleClick}
-    >
-      Core
-    </Link>,
-    <Typography key="3" sx={{ color: 'text.primary' }}>
-      Breadcrumb
-    </Typography>,
-  ];
+const BreadcrumbNav = ({ links }) => {
+  const navigate = useNavigate();
 
   return (
-    <Stack spacing={2} sx={{ width: "100%", display:'flex', paddingY: 1 }}>
-      <Breadcrumbs
-        separator={<NavigateNextIcon fontSize="small" />}
-        aria-label="breadcrumb"
-      >
-        {breadcrumbs}
-      </Breadcrumbs>
-    </Stack>
+    <Breadcrumbs
+      color="primary"
+      separator={<NavigateNextIcon fontSize="small" sx={{ color: "gray" }} />}
+      aria-label="breadcrumb"
+      sx={{ marginBottom: "20px" }}
+    >
+      {links.map((link, index) =>
+        index === links.length - 1 ? (
+          <Typography key={index} color="gray">
+            {link.label}
+          </Typography>
+        ) : (
+          <Link
+            key={index}
+            underline="none"
+            color="gray"
+            onClick={() => navigate(link.path)}
+            sx={{
+              cursor: "pointer",
+              position: "relative",
+              "&::after": {
+                content: '""',
+                position: "absolute",
+                left: 0,
+                bottom: -2,
+                width: "100%",
+                height: "2px",
+                backgroundColor: "gray",
+                transform: "scaleX(0)",
+                transformOrigin: "left",
+                transition: "transform 0.3s ease-in-out",
+              },
+              "&:hover::after": {
+                transform: "scaleX(1)",
+              },
+            }}
+          >
+            {link.label}
+          </Link>
+        )
+      )}
+    </Breadcrumbs>
   );
-}
+};
+
+export default BreadcrumbNav;

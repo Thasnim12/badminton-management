@@ -30,6 +30,7 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import Layout from "../Global/Layouts";
+import BreadcrumbNav from "../Global/Breadcrumb";
 
 const ManageStaffs = () => {
   const { data, error, isLoading, refetch } = useGetStaffsQuery();
@@ -105,6 +106,12 @@ const ManageStaffs = () => {
   return (
     <Layout>
       <Container sx={{ marginTop: "25px" }} maxWidth="lg">
+      <BreadcrumbNav
+          links={[
+            { label: "Dashboard", path: "/admin" },
+            { label: "Staffs", path: "/admin/manage-staffs" },
+          ]}
+        />
         <TableContainer
           component={Paper}
           sx={{ boxShadow: 3, borderRadius: 2 }}

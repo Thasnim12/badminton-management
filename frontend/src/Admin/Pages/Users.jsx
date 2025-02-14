@@ -18,14 +18,21 @@ import {
   Card,
   CardContent,
   Grid,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
 } from "@mui/material";
 import GroupIcon from "@mui/icons-material/Group";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import BlockIcon from "@mui/icons-material/Block";
 import Layout from "../Global/Layouts";
+import BreadcrumbNav from "../Global/Breadcrumb";
 import {
   useGetAllUsersQuery,
   useManageusersMutation,
+  useAddUserMutation,
 } from "../../Slices/AdminApi";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
@@ -45,11 +52,11 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 const Users = () => {
   const { data, isLoading, isError, refetch } = useGetAllUsersQuery();
   const [manageUsers] = useManageusersMutation();
+  const [addUsers] = useAddUserMutation();
   const users = data?.users || [];
 
-  // Pagination states
   const [page, setPage] = useState(1);
-  const usersPerPage = 10;
+  const usersPerPage = 7;
   const totalPages = Math.ceil(users.length / usersPerPage);
   const startIndex = (page - 1) * usersPerPage;
   const endIndex = startIndex + usersPerPage;
@@ -76,15 +83,85 @@ const Users = () => {
     }
   };
 
-  // Calculate total, active, and blocked users
+  const [open, setOpen] = useState(false);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    type: "success",
+  });
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phoneno: "",
+  });
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async () => {
+    setSnackbar({ ...snackbar, open: false });
+    if (!formData.name || !formData.email || !formData.phoneno) {
+      setSnackbar({
+        open: true,
+        message: 'Please fill in all the fields.',
+        type: 'error',
+      });
+      return;
+    }
+  
+    if (!validateEmail(formData.email)) {
+      setSnackbar({
+        open: true,
+        message: 'Please enter a valid email address.',
+        type: 'error',
+      });
+      return;
+    }
+  
+    try {
+      const response = await addUsers(formData);
+      if (response?.message) {
+        setSnackbar({
+          open: true,
+          message: response.message || 'User added successfully!',
+          type: response.message === 'User added successfully!' ? 'success' : 'error',
+        });
+      } else {
+        setSnackbar({
+          open: true,
+          message: 'Email or Phone number already exists!',
+          type: 'error',
+        });
+      }
+      setOpen(false); 
+    } catch (error) {
+      setSnackbar({
+        open: true,
+        message: error?.response?.data?.message || 'Error adding user.',
+        type: 'error',
+      });
+    }
+  };
+  
+  const validateEmail = (email) => {
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return emailRegex.test(email);
+  };
+
   const totalUsers = users.length;
   const activeUsers = users.filter((user) => !user.is_blocked).length;
   const blockedUsers = users.filter((user) => user.is_blocked).length;
 
   return (
     <Layout>
-      <Container sx={{marginTop: "25px"}}>
-        {/* Cards for User Counts */}
+      <Container sx={{ marginTop: "25px" }}>
+        <BreadcrumbNav
+          links={[
+            { label: "Dashboard", path: "/admin" },
+            { label: "Users", path: "/admin/users" },
+          ]}
+        />
         <Grid container spacing={3} sx={{ mb: 3 }}>
           <Grid item xs={12} sm={4}>
             <Card>
@@ -127,6 +204,76 @@ const Users = () => {
                 <Typography variant="h4">{blockedUsers}</Typography>
               </CardContent>
             </Card>
+          </Grid>
+          <Grid item xs={16} sm={4}>
+            <Button
+              variant="contained"
+              onClick={() => setOpen(true)}
+              sx={{ backgroundColor: "#2c387e" }}
+            >
+              Add User
+            </Button>
+
+            <Dialog
+              open={open}
+              onClose={() => setOpen(false)}
+              fullWidth
+              maxWidth="sm"
+            >
+              <DialogTitle>Add New User</DialogTitle>
+              <DialogContent>
+                {alert.message && (
+                  <Alert severity={alert.type} sx={{ marginBottom: "16px" }}>
+                    {alert.message}
+                  </Alert>
+                )}
+                <TextField
+                  margin="dense"
+                  label="Name"
+                  name="name"
+                  fullWidth
+                  variant="outlined"
+                  value={formData.name}
+                  onChange={handleChange}
+                />
+                <TextField
+                  margin="dense"
+                  label="Email"
+                  name="email"
+                  fullWidth
+                  variant="outlined"
+                  type="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                />
+                <TextField
+                  margin="dense"
+                  label="Number"
+                  name="phoneno"
+                  fullWidth
+                  variant="outlined"
+                  type="tel"
+                  value={formData.phoneno}
+                  onChange={handleChange}
+                />
+              </DialogContent>
+              <DialogActions>
+                <Button
+                  onClick={() => setOpen(false)}
+                  variant="outlined"
+                  color="primary"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleSubmit}
+                  variant="outlined"
+                  color="primary"
+                >
+                  Submit
+                </Button>
+              </DialogActions>
+            </Dialog>
           </Grid>
         </Grid>
 
@@ -186,24 +333,23 @@ const Users = () => {
           </>
         )}
 
-        {/* Show Message if No Users Found */}
         {!isLoading && !isError && users.length === 0 && (
           <Typography align="center">No users found.</Typography>
         )}
       </Container>
 
       <Snackbar
-        open={snackbarOpen}
+        open={snackbar.open}
         autoHideDuration={3000}
-        onClose={() => setSnackbarOpen(false)}
-        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }} 
       >
         <Alert
-          onClose={() => setSnackbarOpen(false)}
-          severity={snackbarSeverity}
-          variant="filled"
+          onClose={() => setSnackbar({ ...snackbar, open: false })}
+          severity={snackbar.type}
+          sx={{ width: '100%' }}
         >
-          {snackbarMessage}
+          {snackbar.message}
         </Alert>
       </Snackbar>
     </Layout>

@@ -14,6 +14,7 @@ import {
   FormControlLabel,
   FormGroup,
   Typography,
+  Alert,
 } from "@mui/material";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { useAddaddonsMutation } from "../../Slices/AdminApi";
@@ -60,7 +61,9 @@ const Addaddons = ({ openForm, handleClose }) => {
       formDataToSend.append("quantity", formData.quantity);
       formDataToSend.append("price", formData.price);
       formDataToSend.append("item_image", formData.item_image);
-      formData.item_type.forEach((type) => formDataToSend.append("item_type[]", type));
+      formData.item_type.forEach((type) =>
+        formDataToSend.append("item_type[]", type)
+      );
 
       const response = await addons(formDataToSend).unwrap();
       console.log("Addon Added Successfully:", response);
@@ -68,7 +71,9 @@ const Addaddons = ({ openForm, handleClose }) => {
       setSuccessMessage("Addon added successfully!");
       handleClose();
     } catch (error) {
-      setErrorMessage(error.message || "Something went wrong!");
+      const errorMessage =
+        error?.data?.message || error?.message || "Something went wrong!";
+      setErrorMessage(errorMessage);
     }
   };
 
@@ -97,7 +102,6 @@ const Addaddons = ({ openForm, handleClose }) => {
                 label="Item Name"
                 variant="outlined"
                 fullWidth
-                required
                 value={formData.item_name}
                 onChange={handleChange}
               />
@@ -110,7 +114,6 @@ const Addaddons = ({ openForm, handleClose }) => {
                 label="Quantity"
                 variant="outlined"
                 fullWidth
-                required
                 value={formData.quantity}
                 onChange={handleChange}
               />
@@ -123,7 +126,6 @@ const Addaddons = ({ openForm, handleClose }) => {
                 label="Price"
                 variant="outlined"
                 fullWidth
-                required
                 value={formData.price}
                 onChange={handleChange}
               />
@@ -156,56 +158,85 @@ const Addaddons = ({ openForm, handleClose }) => {
             </Grid>
 
             <Grid item xs={12}>
-                <input
-                  accept="image/*"
-                  type="file"
-                  id="file-upload"
-                  style={{ display: "none" }}
-                  onChange={handleFileChange}
-                />
-                <label htmlFor="file-upload">
-                  <Button
-                    component="span"
-                    variant="outlined"
-                    startIcon={<CloudUploadIcon />}
-                    sx={{ backgroundColor: "#2c387e", color: "white" }}
-                  >
-                    Upload Image
-                  </Button>
-                </label>
-                {formData.item_image && (
-                  <Typography variant="body2" color="textSecondary">
-                    {formData.item_image.name}
-                  </Typography>
-                )}
+              <input
+                accept="image/*"
+                type="file"
+                id="file-upload"
+                style={{ display: "none" }}
+                onChange={handleFileChange}
+              />
+              <label htmlFor="file-upload">
+                <Button
+                  component="span"
+                  variant="outlined"
+                  startIcon={<CloudUploadIcon />}
+                  sx={{ backgroundColor: "#2c387e", color: "white" }}
+                >
+                  Upload Image
+                </Button>
+              </label>
+              {formData.item_image && (
+                <Typography variant="body2" color="textSecondary">
+                  {formData.item_image.name}
+                </Typography>
+              )}
             </Grid>
           </Grid>
         </Box>
       </DialogContent>
 
+      {/* Success Alert in Snackbar */}
       <Snackbar
         open={!!successMessage}
         autoHideDuration={3000}
-        message={successMessage}
         onClose={() => setSuccessMessage("")}
-      />
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <Alert
+          onClose={() => setSuccessMessage("")}
+          severity="success"
+          sx={{ width: "100%" }}
+        >
+          {successMessage}
+        </Alert>
+      </Snackbar>
 
-      {/* Error Snackbar */}
+      {/* Error Alert in Snackbar */}
       <Snackbar
         open={!!errorMessage}
         autoHideDuration={4000}
-        message={errorMessage}
         onClose={() => setErrorMessage("")}
-      />
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <Alert
+          onClose={() => setErrorMessage("")}
+          severity="error"
+          sx={{ width: "100%" }}
+        >
+          {errorMessage}
+        </Alert>
+      </Snackbar>
 
       <DialogActions sx={{ p: 2, justifyContent: "center" }}>
-        <Button onClick={handleClose} color="secondary" disabled={isLoading}>
+        <Button
+          onClick={handleClose}
+          variant="outlined"
+          color="primary"
+          disabled={isLoading}
+        >
           Cancel
         </Button>
-        <Button type="submit" sx={{ backgroundColor: "#2c387e", color: "white" }} disabled={isLoading}>
+        <Button
+          type="submit"
+          sx={{ backgroundColor: "#2c387e", color: "white" }}
+          disabled={isLoading}
+        >
           {isLoading ? (
             <Box display="flex" alignItems="center">
-              <CircularProgress size={20} sx={{ color: "white", marginRight: 1 }} />
+              <CircularProgress
+                size={20}
+                sx={{ color: "white", marginRight: 1 }}
+              />
               Adding...
             </Box>
           ) : (

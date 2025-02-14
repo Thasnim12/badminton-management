@@ -137,7 +137,19 @@ export const adminApi = createApi({
         formData: true,
       }),
     }),
-    
+    getMessages: builder.query({
+      query: () => ({
+        url: '/get-message', 
+        method: 'GET',
+      }),
+    }),
+    addUser: builder.mutation({
+      query: (userData) => ({
+        url: "/add-user",
+        method: "POST",
+        body: userData,
+      }),
+    }),
     
   }),
 });   
@@ -163,7 +175,9 @@ export const {
   useAddBannerMutation,
   useGetAllBannersQuery,
   useLazyViewBannerQuery,
-  useUpdateBannerMutation
+  useUpdateBannerMutation,
+  useGetMessagesQuery,
+  useAddUserMutation,
  }
   = adminApi;
 

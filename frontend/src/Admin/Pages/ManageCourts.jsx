@@ -17,6 +17,7 @@ import {
   Table,
   Container,
 } from "@mui/material";
+import BreadcrumbNav from "../Global/Breadcrumb";
 import TextField from "@mui/material/TextField";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
@@ -25,6 +26,7 @@ import DialogTitle from "@mui/material/DialogTitle";
 import IconButton from "@mui/material/IconButton";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import CancelIcon from "@mui/icons-material/Cancel";
 import GroupIcon from "@mui/icons-material/Group";
 import BlockIcon from "@mui/icons-material/Block";
@@ -107,50 +109,75 @@ const SlotManagement = () => {
   return (
     <Layout>
       <Container sx={{ marginTop: "25px" }}>
-        <Grid container spacing={3} sx={{ mb: 3 }}>
-          <Grid item xs={12} sm={4}>
-            <Card>
-              <CardContent>
-                <Typography
-                  variant="h6"
-                  sx={{ display: "flex", alignItems: "center" }}
-                >
-                  <GroupIcon sx={{ mr: 1 }} />
-                  Total Courts
-                </Typography>
-                <Typography variant="h4">{totalCourts}</Typography>
-              </CardContent>
-            </Card>
+        <BreadcrumbNav
+          links={[
+            { label: "Dashboard", path: "/admin" },
+            { label: "Courts", path: "/admin/manage-courts" },
+          ]}
+        />
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            mb: 3,
+          }}
+        >
+          <Grid container spacing={3} sx={{ flexGrow: 1 }}>
+            <Grid item xs={16} sm={4}>
+              <Card>
+                <CardContent>
+                  <Typography
+                    variant="h6"
+                    sx={{ display: "flex", alignItems: "center" }}
+                  >
+                    <GroupIcon sx={{ mr: 1 }} />
+                    Total Courts
+                  </Typography>
+                  <Typography variant="h4">{totalCourts}</Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item xs={16} sm={4}>
+              <Card>
+                <CardContent>
+                  <Typography
+                    variant="h6"
+                    sx={{ display: "flex", alignItems: "center" }}
+                  >
+                    <CheckCircleIcon sx={{ mr: 1 }} />
+                    Active Courts
+                  </Typography>
+                  <Typography variant="h4">{activeCourts}</Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item xs={16} sm={4}>
+              <Card>
+                <CardContent>
+                  <Typography
+                    variant="h6"
+                    sx={{ display: "flex", alignItems: "center" }}
+                  >
+                    <BlockIcon sx={{ mr: 1 }} />
+                    Inactive Courts
+                  </Typography>
+                  <Typography variant="h4">{inactiveCourts}</Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+
+            <Grid item xs={16} sm={4}>
+              <Button
+                variant="contained"
+                onClick={handleClickOpen}
+                sx={{ backgroundColor: "#2c387e" }}
+              >
+                Add court
+              </Button>
+            </Grid>
           </Grid>
-          <Grid item xs={12} sm={4}>
-            <Card>
-              <CardContent>
-                <Typography
-                  variant="h6"
-                  sx={{ display: "flex", alignItems: "center" }}
-                >
-                  <CheckCircleIcon sx={{ mr: 1 }} />
-                  Active Courts
-                </Typography>
-                <Typography variant="h4">{activeCourts}</Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid item xs={12} sm={4}>
-            <Card>
-              <CardContent>
-                <Typography
-                  variant="h6"
-                  sx={{ display: "flex", alignItems: "center" }}
-                >
-                  <BlockIcon sx={{ mr: 1 }} />
-                  Inactive Courts
-                </Typography>
-                <Typography variant="h4">{inactiveCourts}</Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
+        </Box>
 
         <Dialog open={open} onClose={handleClose}>
           <DialogTitle>
@@ -181,8 +208,8 @@ const SlotManagement = () => {
             </Stack>
           </DialogContent>
           <DialogActions>
-            <Button onClick={handleClose}>Cancel</Button>
-            <Button onClick={handleAddcourt}>Add</Button>
+            <Button  variant="outlined" onClick={handleClose}>Cancel</Button>
+            <Button  variant="outlined" onClick={handleAddcourt}>Add</Button>
           </DialogActions>
         </Dialog>
 
@@ -191,7 +218,7 @@ const SlotManagement = () => {
             component={Paper}
             sx={{ marginTop: 4, maxWidth: "80%" }}
           >
-            <Table>
+            <Table sx={{ minWidth: 650 }}>
               <TableHead>
                 <TableRow>
                   <TableCell align="center">Court Name</TableCell>
@@ -224,12 +251,13 @@ const SlotManagement = () => {
                       </Button>
                     </TableCell>
                     <TableCell align="center">
-                      <Button
-                        sx={{ backgroundColor: "#2c387e", color: "white" }}
+                      <IconButton
+                        color="primary"
+                        sx={{ marginRight: 1 }}
                         onClick={() => handleOpenDialog(court)}
                       >
-                        view
-                      </Button>
+                        <VisibilityIcon />
+                      </IconButton>
                     </TableCell>
                   </TableRow>
                 ))}

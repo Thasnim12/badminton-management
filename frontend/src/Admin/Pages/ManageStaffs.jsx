@@ -8,9 +8,11 @@ import {
   DialogTitle,
   Grid,
   CircularProgress,
-  Box
+  Box,
+  Snackbar,
+  Alert,
 } from "@mui/material";
-import { useSnackbar } from 'notistack';
+import { useSnackbar } from "notistack";
 import { useAddstaffsMutation } from "../../Slices/AdminApi";
 
 export default function ManageStaffs({ openForm, handleClose }) {
@@ -44,7 +46,7 @@ export default function ManageStaffs({ openForm, handleClose }) {
     }
 
     // Employee ID validation
-    if (!formData.employee_id || formData.employee_id.trim() === '') {
+    if (!formData.employee_id || formData.employee_id.trim() === "") {
       newErrors.employee_id = "Employee ID is required";
     }
 
@@ -62,45 +64,56 @@ export default function ManageStaffs({ openForm, handleClose }) {
     const staffData = Object.fromEntries(formData.entries());
 
     if (!validateForm(staffData)) {
-      enqueueSnackbar('Please check all required fields', { 
-        variant: 'error',
-        anchorOrigin: { vertical: 'top', horizontal: 'right' }
+      setSnackbar({
+        open: true,
+        message: "Please check all required fields",
+        severity: "error",
       });
       return;
     }
 
     try {
       const response = await addStaff(staffData).unwrap();
-      enqueueSnackbar('Staff added successfully!', { 
-        variant: 'success',
-        anchorOrigin: { vertical: 'top', horizontal: 'right' }
+      setSnackbar({
+        open: true,
+        message: "Staff added successfully!",
+        severity: "success",
       });
       handleClose();
     } catch (error) {
       if (error?.data?.message?.includes("email")) {
-        enqueueSnackbar('Email already exists!', {
-          variant: 'error',
-          anchorOrigin: { vertical: 'top', horizontal: 'right' }
+        setSnackbar({
+          open: true,
+          message: "Email already exists!",
+          severity: "error",
         });
       } else if (error?.data?.message?.includes("employee_id")) {
-        enqueueSnackbar('Employee ID already exists!', {
-          variant: 'error',
-          anchorOrigin: { vertical: 'top', horizontal: 'right' }
+        setSnackbar({
+          open: true,
+          message: "Employee ID already exists!",
+          severity: "error",
         });
       } else {
-        enqueueSnackbar(error?.data?.message || 'Error adding staff', { 
-          variant: 'error',
-          anchorOrigin: { vertical: 'top', horizontal: 'right' }
+        setSnackbar({
+          open: true,
+          message: error?.data?.message || "Error adding staff",
+          severity: "error",
         });
       }
     }
   };
 
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
+
   const handleFieldChange = (field) => {
     if (errors[field]) {
-      setErrors(prev => ({
+      setErrors((prev) => ({
         ...prev,
-        [field]: undefined
+        [field]: undefined,
       }));
     }
   };
@@ -123,9 +136,8 @@ export default function ManageStaffs({ openForm, handleClose }) {
               label="Name"
               variant="outlined"
               fullWidth
-              error={!!errors.name}
-              helperText={errors.name}
-              onChange={() => handleFieldChange('name')}
+
+              onChange={() => handleFieldChange("name")}
             />
           </Grid>
           <Grid item xs={12} sm={6}>
@@ -135,9 +147,8 @@ export default function ManageStaffs({ openForm, handleClose }) {
               type="email"
               variant="outlined"
               fullWidth
-              error={!!errors.email}
-              helperText={errors.email}
-              onChange={() => handleFieldChange('email')}
+
+              onChange={() => handleFieldChange("email")}
             />
           </Grid>
           <Grid item xs={12} sm={6}>
@@ -146,9 +157,8 @@ export default function ManageStaffs({ openForm, handleClose }) {
               label="Phone Number"
               variant="outlined"
               fullWidth
-              error={!!errors.phoneno}
-              helperText={errors.phoneno}
-              onChange={() => handleFieldChange('phoneno')}
+
+              onChange={() => handleFieldChange("phoneno")}
             />
           </Grid>
           <Grid item xs={12} sm={6}>
@@ -157,9 +167,8 @@ export default function ManageStaffs({ openForm, handleClose }) {
               label="Designation"
               variant="outlined"
               fullWidth
-              error={!!errors.designation}
-              helperText={errors.designation}
-              onChange={() => handleFieldChange('designation')}
+
+              onChange={() => handleFieldChange("designation")}
             />
           </Grid>
           <Grid item xs={12} sm={6}>
@@ -168,9 +177,8 @@ export default function ManageStaffs({ openForm, handleClose }) {
               label="Employee ID"
               variant="outlined"
               fullWidth
-              error={!!errors.employee_id}
-              helperText={errors.employee_id}
-              onChange={() => handleFieldChange('employee_id')}
+
+              onChange={() => handleFieldChange("employee_id")}
             />
           </Grid>
           <Grid item xs={12} sm={6}>
@@ -181,31 +189,38 @@ export default function ManageStaffs({ openForm, handleClose }) {
               InputLabelProps={{ shrink: true }}
               variant="outlined"
               fullWidth
-              error={!!errors.joining_date}
-              helperText={errors.joining_date}
-              onChange={() => handleFieldChange('joining_date')}
+
+              onChange={() => handleFieldChange("joining_date")}
             />
           </Grid>
         </Grid>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose} color="secondary" disabled={isLoading}>
+        <Button
+          onClick={handleClose}
+          variant="outlined"
+          color="primary"
+          disabled={isLoading}
+        >
           Cancel
         </Button>
-        <Button 
-          type="submit" 
-          sx={{ 
-            backgroundColor: "#2c387e", 
+        <Button
+          type="submit"
+          sx={{
+            backgroundColor: "#2c387e",
             color: "white",
-            '&:hover': {
-              backgroundColor: "#1a237e"
-            }
-          }} 
+            "&:hover": {
+              backgroundColor: "#1a237e",
+            },
+          }}
           disabled={isLoading}
         >
           {isLoading ? (
             <Box display="flex" alignItems="center">
-              <CircularProgress size={20} sx={{ color: "white", marginRight: 1 }} />
+              <CircularProgress
+                size={20}
+                sx={{ color: "white", marginRight: 1 }}
+              />
               Adding...
             </Box>
           ) : (
@@ -213,6 +228,20 @@ export default function ManageStaffs({ openForm, handleClose }) {
           )}
         </Button>
       </DialogActions>
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <Alert
+          onClose={() => setSnackbar({ ...snackbar, open: false })}
+          severity={snackbar.severity}
+          sx={{ width: "100%" }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Dialog>
   );
 }

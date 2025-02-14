@@ -1,4 +1,4 @@
-import React from "react";
+import { React, useState } from "react";
 import {
   Container,
   Grid,
@@ -7,6 +7,8 @@ import {
   Box,
   Paper,
   TextField,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import { styled } from "@mui/system";
 import Header from "./Global/Header";
@@ -21,6 +23,7 @@ import "react-responsive-carousel/lib/styles/carousel.min.css";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
+import { useSendMessageMutation } from "../Slices/UserApi";
 
 const CarouselWrapper = styled(Box)({
   width: "100%",
@@ -101,6 +104,7 @@ const HomePage = () => {
     register,
     handleSubmit,
     formState: { errors },
+    reset,
   } = useForm({
     resolver: yupResolver(validationSchema),
   });
@@ -126,9 +130,29 @@ const HomePage = () => {
     }
   };
 
-  const onSubmit = (data) => {
-    console.log("Form Data:", data);
-    alert("Your message has been submitted!");
+    const [sendMessage, { isLoading }] = useSendMessageMutation();
+    const [alert, setAlert] = useState({
+      open: false,
+      message: "",
+      severity: "",
+    });
+
+  const onSubmit = async (data) => {
+    try {
+      await sendMessage(data).unwrap();
+      setAlert({
+        open: true,
+        message: "Message sent successfully!",
+        severity: "success",
+      });
+      reset();
+    } catch (error) {
+      setAlert({
+        open: true,
+        message: "Failed to send message!",
+        severity: "error",
+      });
+    }
   };
   return (
     <>
@@ -462,6 +486,19 @@ const HomePage = () => {
           </Grid>
         </Container>
       </ContactSection>
+       <Snackbar
+              open={alert.open}
+              autoHideDuration={3000}
+              onClose={() => setAlert({ ...alert, open: false })}
+              anchorOrigin={{ vertical: "top", horizontal: "right" }} // Position the snackbar at the top right
+            >
+              <Alert
+                severity={alert.severity}
+                onClose={() => setAlert({ ...alert, open: false })}
+              >
+                {alert.message}
+              </Alert>
+            </Snackbar>
       <Footer />
     </>
   );

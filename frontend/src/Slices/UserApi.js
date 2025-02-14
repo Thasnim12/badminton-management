@@ -48,10 +48,10 @@ export const userApi = createApi({
       }),
     }),
     googleLogin: builder.mutation({
-      query: ({ token }) => ({
+      query: ({ code }) => ({
         url: "/google-login",
         method: "POST",
-        body: { token },
+        body:  { code },
       }),
     }),
     verifyOtp: builder.mutation({
@@ -59,6 +59,13 @@ export const userApi = createApi({
         url: "/verify-otp",
         method: "POST",
         body: otpData,
+      }),
+    }),
+    sendMessage: builder.mutation({
+      query: (messageData) => ({
+        url: "/send-message",
+        method: "POST",
+        body: messageData,
       }),
     }),
     createDonation: builder.mutation({
@@ -88,7 +95,8 @@ export const {
   useGetSlotsQuery,
   useGetAllcourtsQuery,
   useGetAddonsQuery,
-  useUpdateProfileMutation
+  useUpdateProfileMutation,
+  useSendMessageMutation,
 } = userApi;
 
 export default userApi;
