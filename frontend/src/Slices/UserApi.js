@@ -111,7 +111,9 @@ export const {
   useGetAddonsQuery,
   useUpdateProfileMutation,
   useCreateBookingMutation,
-  useVerifyBookingMutation
+  useVerifyBookingMutation,
+  useSendMessageMutation,
+  
 } = userApi;
 
 export default userApi;
