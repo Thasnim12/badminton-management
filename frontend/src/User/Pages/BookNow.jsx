@@ -74,13 +74,17 @@ const CourtBooking = () => {
   const { data, isLoading: courtsLoading } = useGetAllcourtsQuery();
   const courts = data?.court || [];
 
-  const { data: slotsData, error, isLoading } = useGetSlotsQuery({
+  const {
+    data: slotsData,
+    error,
+    isLoading,
+  } = useGetSlotsQuery({
     courtId: selectedCourt,
-    date: selectedDate ? selectedDate.format("YYYY-MM-DD") : null
+    date: selectedDate ? selectedDate.format("YYYY-MM-DD") : null,
   });
 
   const { data: addons, isLoading: addonLoading } = useGetAddonsQuery();
-  console.log(addons, 'ad')
+  console.log(addons, "ad");
 
   const slots = slotsData || [];
   console.log(slots, 'slots')
@@ -138,8 +142,10 @@ const CourtBooking = () => {
 
 
   const courtImages = {
-    "Court 1": "https://www.shutterstock.com/image-photo/badminton-court-without-people-night-600nw-2307374507.jpg",
-    "Court 2": "https://content.jdmagicbox.com/comp/def_content/badminton-courts/6-badminton-courts-4-6f9mp.jpg",
+    "Court 1":
+      "https://www.shutterstock.com/image-photo/badminton-court-without-people-night-600nw-2307374507.jpg",
+    "Court 2":
+      "https://content.jdmagicbox.com/comp/def_content/badminton-courts/6-badminton-courts-4-6f9mp.jpg",
   };
 
   const loadRazorpayScript = () => {
@@ -263,7 +269,9 @@ const CourtBooking = () => {
   const handleAddOnToggle = (addOn) => {
     setSelectedAddOns((prev) => {
       const exists = prev.find((item) => item._id === addOn._id);
-      return exists ? prev.filter((item) => item._id !== addOn._id) : [...prev, addOn];
+      return exists
+        ? prev.filter((item) => item._id !== addOn._id)
+        : [...prev, addOn];
     });
   };
 
@@ -308,25 +316,57 @@ const CourtBooking = () => {
 
           <Grid item xs={12} md={8} container spacing={2} sx={{ marginTop: "3px", height: "90vh" }}>
             <Grid item xs={12}>
-              <Card sx={{ padding: 3, display: "flex", flexDirection: "column", height: "100%" }}>
-                <Typography variant="h6" fontWeight="bold">Select Court & Date</Typography>
+              <Card
+                sx={{
+                  padding: 3,
+                  display: "flex",
+                  flexDirection: "column",
+                  height: "100%",
+                }}
+              >
+                <Typography variant="h6" fontWeight="bold">
+                  Select Court & Date
+                </Typography>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <DatePicker value={selectedDate} onChange={setSelectedDate} />
                 </LocalizationProvider>
-                <Select fullWidth value={selectedCourt} onChange={handleCourtChange} sx={{ mt: 2 }}>
-                  {courtsLoading ? <MenuItem disabled>Loading courts...</MenuItem> :
+                <Select
+                  fullWidth
+                  value={selectedCourt}
+                  onChange={handleCourtChange}
+                  sx={{ mt: 2 }}
+                >
+                  {courtsLoading ? (
+                    <MenuItem disabled>Loading courts...</MenuItem>
+                  ) : (
                     courts?.map((court) => (
-                      <MenuItem key={court._id} value={court._id}>{court.court_name}</MenuItem>
+                      <MenuItem key={court._id} value={court._id}>
+                        {court.court_name}
+                      </MenuItem>
                     ))
-                  }
+                  )}
                 </Select>
-                <CardMedia component="img" height="150" image={courtImages[selectedCourt]} sx={{ marginTop: 2 }} />
+                <CardMedia
+                  component="img"
+                  height="150"
+                  image={courtImages[selectedCourt]}
+                  sx={{ marginTop: 2 }}
+                />
               </Card>
             </Grid>
 
             <Grid item xs={12}>
-              <Card sx={{ padding: 3, display: "flex", flexDirection: "column", height: "100%" }}>
-                <Typography variant="h6" fontWeight="bold">Select Time Slot</Typography>
+              <Card
+                sx={{
+                  padding: 3,
+                  display: "flex",
+                  flexDirection: "column",
+                  height: "100%",
+                }}
+              >
+                <Typography variant="h6" fontWeight="bold">
+                  Select Time Slot
+                </Typography>
                 <Box sx={{ overflowY: "auto", maxHeight: 300, mt: 2 }}>
                   <Grid container spacing={1}>
                     {isLoading ? (

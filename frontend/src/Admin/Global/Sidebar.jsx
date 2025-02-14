@@ -19,6 +19,7 @@ import BookingsIcon from "@mui/icons-material/Book";
 import CurrencyRupeeIcon from "@mui/icons-material/CurrencyRupee";
 import SportsTennis from "@mui/icons-material/SportsTennis";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
 import InventoryOutlinedIcon from '@mui/icons-material/InventoryOutlined';
 import ViewCarouselIcon from '@mui/icons-material/ViewCarousel';
 import SettingsIcon from "@mui/icons-material/Settings";
@@ -148,11 +149,17 @@ const Sidebar = ({ open, onClose }) => {
           </ListItemIcon>
           {!collapsed && <ListItemText primary="Addons" />}
         </ListItemButton>
-        <ListItemButton component="a" href="/admin/manage-banner">
+        <ListItemButton component={Link} to="/admin/manage-banner">
           <ListItemIcon>
             <ViewCarouselIcon />
           </ListItemIcon>
           {!collapsed && <ListItemText primary="Banner images" />}
+        </ListItemButton>
+        <ListItemButton component={Link} to="/admin/enquiry">
+          <ListItemIcon>
+            <NotificationsActiveIcon />
+          </ListItemIcon>
+          {!collapsed && <ListItemText primary="Enquiry" />}
         </ListItemButton>
       </List>
 

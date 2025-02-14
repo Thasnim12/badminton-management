@@ -21,7 +21,8 @@ import {
   DialogActions,
   Pagination, // Import MUI Pagination
 } from "@mui/material";
-import CurrencyRupeeOutlinedIcon from '@mui/icons-material/CurrencyRupeeOutlined';
+import BreadcrumbNav from "../Global/Breadcrumb";
+import CurrencyRupeeOutlinedIcon from "@mui/icons-material/CurrencyRupeeOutlined";
 import VolunteerActivismIcon from "@mui/icons-material/VolunteerActivism";
 import EventNoteIcon from "@mui/icons-material/EventNote";
 import Layout from "../Global/Layouts";
@@ -81,53 +82,106 @@ const ManagePayments = () => {
   return (
     <Layout>
       <Container sx={{ marginTop: "25px" }}>
+      <BreadcrumbNav
+          links={[
+            { label: "Dashboard", path: "/admin" },
+            { label: "Payments", path: "/admin/manage-payments" },
+          ]}
+        />
         <Box sx={{ marginBottom: 3 }}>
-          
           {/* Displaying profit cards */}
           <Grid container spacing={3} sx={{ marginBottom: 3 }}>
             <Grid item xs={4}>
-            <Card sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-      <CardContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        <Typography
-          variant="h6"
-          sx={{ display: "flex", alignItems: "center", justifyContent: 'center' }}
-        >
-          <CurrencyRupeeOutlinedIcon sx={{ mr: 1 }} />
-          Total Profit
-        </Typography>
-        <Typography variant="h6">₹{totalProfit}</Typography>
-      </CardContent>
-    </Card>
-  </Grid>
+              <Card
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <CardContent
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                  }}
+                >
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <CurrencyRupeeOutlinedIcon sx={{ mr: 1 }} />
+                    Total Profit
+                  </Typography>
+                  <Typography variant="h6">₹{totalProfit}</Typography>
+                </CardContent>
+              </Card>
+            </Grid>
 
-  <Grid item xs={4}>
-    <Card sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-      <CardContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        <Typography
-          variant="h6"
-          sx={{ display: "flex", alignItems: "center", justifyContent: 'center' }}
-        >
-          <VolunteerActivismIcon sx={{ mr: 1 }} />
-          Profit from Donations
-        </Typography>
-        <Typography variant="h6">₹{donationProfit}</Typography>
-      </CardContent>
-    </Card>
-  </Grid>
+            <Grid item xs={4}>
+              <Card
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <CardContent
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                  }}
+                >
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <VolunteerActivismIcon sx={{ mr: 1 }} />
+                    Profit from Donations
+                  </Typography>
+                  <Typography variant="h6">₹{donationProfit}</Typography>
+                </CardContent>
+              </Card>
+            </Grid>
 
-  <Grid item xs={4}>
-    <Card sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-      <CardContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        <Typography
-          variant="h6"
-          sx={{ display: "flex", alignItems: "center", justifyContent: 'center' }}
-        >
-          <EventNoteIcon sx={{ mr: 1 }} />
-          Profit from Bookings
-        </Typography>
-        <Typography variant="h6">₹{BookingProfit}</Typography>
-      </CardContent>
-    </Card>
+            <Grid item xs={4}>
+              <Card
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <CardContent
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                  }}
+                >
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <EventNoteIcon sx={{ mr: 1 }} />
+                    Profit from Bookings
+                  </Typography>
+                  <Typography variant="h6">₹{BookingProfit}</Typography>
+                </CardContent>
+              </Card>
             </Grid>
           </Grid>
         </Box>
@@ -187,14 +241,21 @@ const ManagePayments = () => {
                   ))}
               </TableBody>
             </Table>
-
-            <Pagination
-              count={Math.ceil(donationHistory.length / donationRowsPerPage)}
-              page={donationPage}
-              onChange={handleDonationChangePage}
-              color="primary"
-              siblingCount={1}
-            />
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                marginTop: "20px",
+              }}
+            >
+              <Pagination
+                count={Math.ceil(donationHistory.length / donationRowsPerPage)}
+                page={donationPage}
+                onChange={handleDonationChangePage}
+                color="primary"
+                siblingCount={1}
+              />
+            </Box>
           </Box>
         )}
 
@@ -225,18 +286,25 @@ const ManagePayments = () => {
               </TableBody>
             </Table>
 
-            {/* MUI Pagination for Bookings */}
-            <Pagination
-              count={Math.ceil(bookingHistory.length / bookingRowsPerPage)}
-              page={bookingPage}
-              onChange={handleBookingChangePage}
-              color="primary"
-              siblingCount={1}
-            />
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                marginTop: "20px",
+              }}
+            >
+              <Pagination
+                count={Math.ceil(bookingHistory.length / bookingRowsPerPage)}
+                page={bookingPage}
+                onChange={handleBookingChangePage}
+                color="primary"
+                siblingCount={1}
+              />
+            </Box>
           </Box>
         )}
 
-        <Dialog open={open} onClose={handleClose}>
+        <Dialog open={open} onClose={handleClose}  maxWidth="md" fullWidth>
           <DialogTitle>Donation Details</DialogTitle>
           <DialogContent>
             {selectedDonation && (
@@ -265,7 +333,7 @@ const ManagePayments = () => {
             )}
           </DialogContent>
           <DialogActions>
-            <Button onClick={handleClose} color="primary">
+            <Button onClick={handleClose}  variant="outlined" color="primary">
               Close
             </Button>
           </DialogActions>

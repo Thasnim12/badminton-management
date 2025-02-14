@@ -170,6 +170,7 @@ const Donate = () => {
       setIsLoading(false);
     }
   };
+  
 
   const HeroSection = styled(Box)(({ theme }) => ({
     backgroundImage: 'url("/Carousal3.jpg")',
@@ -196,10 +197,10 @@ const Donate = () => {
       <Section>
         <Container maxWidth="lg" sx={{ padding: "40px 0" }}>
           <Snackbar
-            open={!!alert} 
-            autoHideDuration={3000} 
-            anchorOrigin={{ vertical: "top", horizontal: "right" }} 
-            onClose={() => setAlert(null)} 
+            open={!!alert}
+            autoHideDuration={3000}
+            anchorOrigin={{ vertical: "top", horizontal: "right" }}
+            onClose={() => setAlert(null)}
           >
             <Alert
               onClose={() => setAlert(null)}
@@ -243,7 +244,7 @@ const Donate = () => {
                         label="Donation Amount"
                         type="number"
                         variant="outlined"
-                         value={amount}
+                        value={amount}
                         onChange={(e) => setAmount(e.target.value)}
                         required
                         inputProps={{ min: "1" }}

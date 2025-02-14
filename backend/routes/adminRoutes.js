@@ -21,7 +21,9 @@ const {
     addBanner,
     getAllBanner,
     viewBanner,
-    editBanner
+    editBanner,
+    getMessages,
+    addUser,
   } = require("../controllers/adminController");
 
   const { bannerUpload,courtUpload } = require('../helper/multer')
@@ -42,7 +44,7 @@ adminroute.get("/get-staffs", authenticateAdmin, getAllStaffs);
 adminroute.get("/get-donations", authenticateAdmin, getAllDonations);
 adminroute.get("/banner", authenticateAdmin, getAllBanner);
 adminroute.get('/view-banner/:bannerId',authenticateAdmin,viewBanner)
-
+adminroute.get("/get-message",authenticateAdmin, getMessages);
 
 adminroute.post("/login", adminLogin);
 adminroute.post("/logout", authenticateAdmin, adminLogout);
@@ -55,6 +57,7 @@ adminroute.put("/staffs/:employee_id", authenticateAdmin, manageStaffs);
 adminroute.delete("/staffs/:id", authenticateAdmin, deleteStaff);
 adminroute.post('/addons',authenticateAdmin,manageAddons)
 adminroute.post('/banner',authenticateAdmin,addBanner)
+adminroute.post('/add-user', authenticateAdmin, addUser)
 adminroute.put('/banner/:bannerId',authenticateAdmin,bannerUpload,editBanner)
 
 

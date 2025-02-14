@@ -22,6 +22,7 @@ import ManageBookings from "./Admin/Pages/ManageBookings";
 import ManagePayments from "./Admin/Pages/ManagePayments";
 import ManageStaffs from "./Admin/Pages/Staffs";
 // import ManageReports from './Admin/Pages/ManageReports';
+import Enquiry from "./Admin/Pages/Enquiry";
 import ManageCourts from "./Admin/Pages/ManageCourts";
 import AdminLogin from "./Admin/Auth/AdminLogin";
 import Settings from "./Admin/Pages/Settings";
@@ -67,6 +68,7 @@ const AppRoutes = () => {
         <Route path="/admin/manage-courts"  element={<ProtectedAdmin element={<ManageCourts />} />}/>
         <Route path="/admin/settings"  element={<ProtectedAdmin element={<Settings />} />} />
         <Route path="/admin/manage-addons"  element={<ProtectedAdmin element={<Addons />} />} />
+        <Route path="/admin/enquiry"  element={<ProtectedAdmin element={<Enquiry />} />} />
         <Route path="/admin/manage-banner" element={<ProtectedAdmin element={<BannerImages/>} />} />
         <Route path="/admin/login" element={<AdminLogin />} />
 

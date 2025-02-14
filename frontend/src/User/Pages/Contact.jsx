@@ -1,12 +1,20 @@
-import React from "react";
-import { Typography, Box, Paper, TextField, Button, Grid } from "@mui/material";
+import { React, useState } from "react";
+import {
+  Typography,
+  Box,
+  TextField,
+  Button,
+  Paper,
+  Snackbar,
+  Alert,
+} from "@mui/material";
 import { styled } from "@mui/system";
 import Header from "../Global/Header";
 import Footer from "../Global/Footer";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-
+import { useSendMessageMutation } from "../../Slices/UserApi";
 // Styling components
 const BlueSection = styled(Box)(() => ({
   width: "100%",
@@ -16,13 +24,13 @@ const BlueSection = styled(Box)(() => ({
 
 const BlueSectionContent = styled(Box)(() => ({
   display: "flex",
-  flexDirection: "column",  // Stack elements on smaller screens
+  flexDirection: "column",
   justifyContent: "space-between",
   alignItems: "flex-start",
   maxWidth: "1200px",
   margin: "0 auto",
   "@media (min-width: 600px)": {
-    flexDirection: "row",  // Keep the content side by side on larger screens
+    flexDirection: "row",
   },
 }));
 
@@ -33,17 +41,17 @@ const FormContainer = styled(Paper)(() => ({
   borderRadius: "8px",
   width: "100%",
   maxWidth: "500px",
-  marginBottom: "20px",  // Add bottom margin for spacing on small screens
+  marginBottom: "20px", // Add bottom margin for spacing on small screens
 }));
 
 const TextContainer = styled(Box)(() => ({
   color: "#fff",
   padding: "20px",
-  textAlign: "left",      // Left-align text for a natural reading flow
+  textAlign: "left", // Left-align text for a natural reading flow
   flexGrow: 1,
-  marginLeft: "0px",      // Remove the left margin on small screens
+  marginLeft: "0px", // Remove the left margin on small screens
   "@media (min-width: 600px)": {
-    marginLeft: "60px",   // Add left margin on larger screens
+    marginLeft: "60px", // Add left margin on larger screens
   },
 }));
 
@@ -56,7 +64,6 @@ const MapSection = styled(Box)(() => ({
   alignItems: "center",
 }));
 
-// Validation Schema using Yup
 const validationSchema = yup.object().shape({
   name: yup.string().required("Name is required"),
   email: yup
@@ -67,20 +74,38 @@ const validationSchema = yup.object().shape({
 });
 
 const Contact = () => {
-  // Using React Hook Form with Yup validation schema
   const {
     register,
     handleSubmit,
     formState: { errors },
+    reset,
   } = useForm({
     resolver: yupResolver(validationSchema),
   });
 
-  // Submit function
-  const onSubmit = (data) => {
-    console.log("Form Data:", data);
-    alert("Your message has been submitted!");
-    // Replace with your actual API call or processing logic
+  const [sendMessage, { isLoading }] = useSendMessageMutation();
+  const [alert, setAlert] = useState({
+    open: false,
+    message: "",
+    severity: "",
+  });
+
+  const onSubmit = async (data) => {
+    try {
+      await sendMessage(data).unwrap();
+      setAlert({
+        open: true,
+        message: "Message sent successfully!",
+        severity: "success",
+      });
+      reset();
+    } catch (error) {
+      setAlert({
+        open: true,
+        message: "Failed to send message!",
+        severity: "error",
+      });
+    }
   };
 
   return (
@@ -139,7 +164,8 @@ const Contact = () => {
               Contact Us
             </Typography>
             <Typography variant="body1" paragraph>
-              We'd love to hear from you! Please fill out the form on the left, and we will get back to you as soon as possible.
+              We'd love to hear from you! Please fill out the form on the left,
+              and we will get back to you as soon as possible.
             </Typography>
             <Box mt={2}>
               <Typography variant="h6" gutterBottom>
@@ -152,7 +178,8 @@ const Contact = () => {
                 Register Number: R/V/B4/39/2024
               </Typography>
               <Typography variant="body1" paragraph>
-                Address: Kalukoorani Village, Vani Bustop, Ramanathapuram, TamilNadu - 623536
+                Address: Kalukoorani Village, Vani Bustop, Ramanathapuram,
+                TamilNadu - 623536
               </Typography>
               <Typography variant="body1" paragraph>
                 Phone: +91 6385224527
@@ -181,6 +208,20 @@ const Contact = () => {
           ></iframe>
         </Box>
       </MapSection>
+      <Snackbar
+        open={alert.open}
+        autoHideDuration={3000}
+        onClose={() => setAlert({ ...alert, open: false })}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }} // Position the snackbar at the top right
+      >
+        <Alert
+          severity={alert.severity}
+          onClose={() => setAlert({ ...alert, open: false })}
+        >
+          {alert.message}
+        </Alert>
+      </Snackbar>
+
       <Footer />
     </>
   );

@@ -1,14 +1,36 @@
 import { useState } from "react";
 import Layout from "../Global/Layouts";
 import {
-    Box, Button, Grid, TextField, Dialog, DialogActions, DialogContent, Typography, IconButton,
-    Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, DialogTitle
+    Box,
+    Button,
+    Grid,
+    TextField,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    Typography,
+    IconButton,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Paper,
+    DialogTitle,
+    Container,
 } from "@mui/material";
-import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
-import DeleteIcon from '@mui/icons-material/Delete';
-import { useAddBannerMutation, useGetAllBannersQuery, useLazyViewBannerQuery, useUpdateBannerMutation } from "../../Slices/AdminApi";
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
+import DeleteIcon from "@mui/icons-material/Delete";
+import {
+    useAddBannerMutation,
+    useGetAllBannersQuery,
+    useLazyViewBannerQuery,
+    useUpdateBannerMutation,
+} from "../../Slices/AdminApi";
 import AddBanner from "../Components/Addbanner";
+import BreadcrumbNav from "../Global/Breadcrumb";
 
 const BannerImages = () => {
     const [open, setOpen] = useState(false);
@@ -22,7 +44,7 @@ const BannerImages = () => {
 
     const [banner, setBanner] = useState({
         title: "",
-        imageUrl: [],
+        imageUrl: [],  
         order: [],
         removedImages: [],
         newImages: [],
@@ -35,10 +57,15 @@ const BannerImages = () => {
             setBanner((prev) => ({
                 ...prev,
                 newImages: [...prev.newImages, ...files],
-                order: [...prev.order, ...files.map((_, i) => prev.order.length + i + 1)],
+                order: [
+                    ...prev.order,
+                    ...files.map((_, i) => prev.order.length + i + 1),
+                ],
             }));
         }
     };
+
+
 
     const handleRemoveNewImage = (index) => {
         setBanner((prev) => {
@@ -75,20 +102,20 @@ const BannerImages = () => {
 
     const [loading, setLoading] = useState(false);
 
+
     const handleViewBanner = async (bannerId) => {
         setLoading(true);
-        setOpenview(true);
         try {
             const response = await fetchBanner(bannerId).unwrap();
-            console.log(response, 'resp')
             setBanner({
-                _id: response.banner._id,
-                title: response.banner.title,
-                imageUrl: response.banner.imageUrl,
-                order: response.banner.order || [],
+                _id: response._id,
+                title: response.title,
+                imageUrl: response.imageUrl,
+                order: response.order || [],
                 removedImages: [],
                 newImages: [],
             });
+            setOpenview(true);
         } catch (error) {
             console.error("Error fetching banner:", error);
         } finally {
@@ -102,15 +129,26 @@ const BannerImages = () => {
         formDataToSend.append("order", JSON.stringify(banner.order));
 
         if (banner.removedImages.length > 0) {
-            formDataToSend.append("removedImages", JSON.stringify(banner.removedImages));
+            formDataToSend.append(
+                "removedImages",
+                JSON.stringify(banner.removedImages)
+            );
         }
 
-        banner.newImages.forEach((file) => formDataToSend.append("banner_image", file));
+        banner.newImages.forEach((file) =>
+            formDataToSend.append("banner_image", file)
+        );
 
-        console.log("FormData being sent:", Object.fromEntries(formDataToSend.entries()));
+        console.log(
+            "FormData being sent:",
+            Object.fromEntries(formDataToSend.entries())
+        );
 
         try {
-            await updateBanner({ bannerId: banner._id, formData: formDataToSend }).unwrap();
+            await updateBanner({
+                bannerId: banner._id,
+                formData: formDataToSend,
+            }).unwrap();
             alert("Banner updated successfully!");
             setIsEditing(false);
         } catch (error) {
@@ -120,8 +158,8 @@ const BannerImages = () => {
     };
 
     const handleClose = () => {
-        setOpen(false)
-    }
+        setOpen(false);
+    };
 
     return (
         <Layout>
@@ -180,46 +218,9 @@ const BannerImages = () => {
                                 </Box>
                             </Grid>
                         ))}
-
-                        {/* Display Newly Added Images */}
-                        {banner?.newImages?.map((file, index) => (
-                            <Grid item xs={6} sm={4} md={3} key={`new-${index}`}>
-                                <Box sx={{ position: "relative" }}>
-                                    <img
-                                        src={URL.createObjectURL(file)}
-                                        style={{ width: "100%", height: "150px", objectFit: "cover", borderRadius: "8px" }}
-                                    />
-                                    <IconButton
-                                        sx={{ position: "absolute", top: 5, right: 5, backgroundColor: "white" }}
-                                        onClick={() => handleRemoveNewImage(index)}
-                                    >
-                                        <DeleteIcon color="error" />
-                                    </IconButton>
-                                </Box>
-                            </Grid>
-                        ))}
                     </Grid>
-
-
-                    {isEditing && (
-                        <Box sx={{ mt: 2 }}>
-                            <Button variant="contained" component="label" startIcon={<CloudUploadIcon />}>
-                                Upload New Images
-                                <input type="file" multiple hidden onChange={handleFileChange} />
-                            </Button>
-                        </Box>
-                    )}
                 </DialogContent>
-                <DialogActions>
-                    {isEditing ? (
-                        <Button variant="contained" color="primary" onClick={handleEditBanner}>Save Changes</Button>
-                    ) : (
-                        <Button onClick={() => setIsEditing(true)} variant="contained">Edit Banner</Button>
-                    )}
-                    <Button onClick={() => setOpenview(false)} variant="contained">Close</Button>
-                </DialogActions>
             </Dialog>
-            {open && <AddBanner open={open} handleClose={handleClose} />}
         </Layout>
     );
 };
