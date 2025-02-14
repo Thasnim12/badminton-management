@@ -1,4 +1,6 @@
 const mongoose = require('mongoose')
+const fs = require("fs");
+const path = require("path");
 const bcrypt = require('bcryptjs')
 const moment = require('moment')
 const multer = require('multer');
@@ -10,8 +12,10 @@ const courtConfig = require('../models/courtConfig')
 const generateAdminToken = require('../authentication/generateAdminToken')
 const Staff = require('../models/staffModel')
 const Addons = require('../models/addonModel')
-const { upload } = require('../helper/multer')
+const { upload, bannerUpload } = require('../helper/multer')
 const Donations = require('../models/donationModel')
+const Banner = require('../models/bannerModel')
+
 
 
 const adminLogin = async (req, res) => {
@@ -616,6 +620,162 @@ const deleteStaff = async (req, res) => {
     }
 };
 
+const addBanner = async (req, res) => {
+    bannerUpload(req, res, async (err) => {
+        if (err) {
+            return res.status(400).json({ message: err.message });
+        }
+
+        try {
+            const { title, order } = req.body;
+            console.log(req.body, 'bodyy')
+
+            let orderArray;
+
+            orderArray = JSON.parse(order);
+
+            if (!Array.isArray(orderArray) || orderArray.some(isNaN)) {
+                return res.status(400).json({ message: "Invalid order format!" });
+            }
+
+
+            const banner_image = req.files ? req.files.map(file => file.filename) : [];
+
+            if (!title || banner_image.length === 0 || orderArray.some(isNaN)) {
+                return res.status(400).json({ message: "Missing required fields or invalid order format!" });
+            }
+
+            const existingOrder = await Banner.findOne({ order: orderArray });
+
+            if (existingOrder) {
+                return res.status(400).json({ message: "Banner with same order exists, try adding with a different order number!" });
+            }
+
+            const existingItem = await Banner.findOne({ title });
+
+            if (existingItem) {
+                return res.status(400).json({ message: "Banner with the same title exists, try adding a different title!" });
+            }
+
+            const newItem = new Banner({
+                title,
+                order: orderArray,
+                imageUrl: banner_image
+            });
+
+            await newItem.save();
+
+            return res.status(200).json({ message: "Item added successfully", item: newItem });
+        } catch (error) {
+            console.error(error.message);
+            return res.status(500).json({ message: "Server error!" });
+        }
+    });
+};
+
+const getAllBanner = async (req, res) => {
+    try {
+        console.log('banner')
+        const banner = await Banner.find({})
+        return res.status(200).json({ banner })
+    }
+    catch (error) {
+        console.log(error.message)
+        return res
+            .status(500)
+            .json({ message: "Server error", error: error.message });
+    }
+}
+
+const viewBanner = async (req, res) => {
+    try {
+
+        const { bannerId } = req.params;
+        console.log(bannerId, 'id')
+        const id = new mongoose.Types.ObjectId(bannerId);
+
+        const banner = await Banner.findById({ _id: id })
+
+        if (!banner) {
+            return res.status(400).json({ message: 'banner not found!' })
+        }
+
+        return res.status(200).json({ banner: banner })
+    }
+    catch (error) {
+        console.log(error.message)
+        return res
+            .status(500)
+            .json({ message: "Server error", error: error.message });
+    }
+
+}
+
+
+const editBanner = async (req, res) => {
+
+    try {
+        console.log("Raw Request Body:", req.body);
+        console.log("Raw Request Files:", req.files);
+
+        const { bannerId } = req.params;
+        const { title, order, removedImages } = req.body;
+        console.log(req.body, 'bodyyy')
+        const newImages = req.files ? req.files.map((file) => file.filename) : [];
+
+        if (!mongoose.Types.ObjectId.isValid(bannerId)) {
+            return res.status(400).json({ message: "Invalid banner ID" });
+        }
+
+        const banner = await Banner.findById(bannerId);
+        if (!banner) {
+            return res.status(404).json({ message: "Banner not found!" });
+        }
+
+        let updatedImages = [...banner.imageUrl];
+        let updatedOrder = [...banner.order];
+
+        if (removedImages && removedImages.length > 0) {
+            const removedImagesArray = JSON.parse(removedImages);
+
+            removedImagesArray.forEach((img) => {
+                const imagePath = path.join(__dirname, "../uploads/", img);
+                if (fs.existsSync(imagePath)) {
+                    fs.unlinkSync(imagePath);
+                }
+            });
+
+            updatedImages = updatedImages.filter((img, index) => {
+                if (removedImagesArray.includes(img)) {
+                    updatedOrder.splice(index, 1);
+                    return false;
+                }
+                return true;
+            });
+
+            updatedOrder = updatedOrder.map((_, i) => i + 1);
+        }
+
+        if (newImages.length > 0) {
+            updatedImages.push(...newImages);
+            updatedOrder.push(...newImages.map((_, i) => updatedImages.length - newImages.length + i + 1));
+        }
+
+        banner.imageUrl = updatedImages;
+        banner.order = updatedOrder;
+        if (title) banner.title = title;
+
+        await banner.save();
+
+        res.status(200).json({ message: "Banner updated successfully!", banner });
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).json({ message: "Server error", error: error.message });
+    }
+};
+
+
+
 module.exports = {
 
     adminLogin,
@@ -635,5 +795,9 @@ module.exports = {
     manageStaffs,
     deleteStaff,
     getAdminDetails,
+    addBanner,
+    getAllBanner,
+    viewBanner,
+    editBanner
 
 }

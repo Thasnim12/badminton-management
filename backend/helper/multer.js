@@ -23,9 +23,18 @@ const upload = multer({
   fileFilter: fileFilter,
 }).single("item_image");
 
+<<<<<<< HEAD
 const profileUpload = multer({
   storage: storage,
   fileFilter: fileFilter,
 }).single("profileImage");
 
 module.exports = { upload, profileUpload};
+=======
+const bannerUpload = multer({ 
+    storage: storage, 
+    fileFilter: fileFilter 
+}).array('banner_image', 5);
+
+module.exports = { upload,bannerUpload };
+>>>>>>> ce02751c7f9f0c4457eec6f227fe96e405f1e440

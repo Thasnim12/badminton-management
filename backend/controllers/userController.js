@@ -97,11 +97,19 @@ const updateUserDetails = async (req, res) => {
           { name, phoneno: mobile, profileImage },
           { new: true, runValidators: true }
         ).select("-password");
+<<<<<<< HEAD
   
+=======
+
+>>>>>>> ce02751c7f9f0c4457eec6f227fe96e405f1e440
         if (!updatedUser) {
           return res.status(404).json({ message: "User not found" });
         }
+<<<<<<< HEAD
   
+=======
+
+>>>>>>> ce02751c7f9f0c4457eec6f227fe96e405f1e440
         return res.status(200).json({
           message: "User details updated successfully",
           user: updatedUser,
