@@ -159,7 +159,7 @@ const AboutUs = () => {
                 helping those in need.
               </Typography>
               <Link to="/register">
-                <Button variant="contained" color="primary">
+                <Button variant="outlined" color="primary">
                   Join now
                 </Button>
               </Link>
@@ -173,7 +173,7 @@ const AboutUs = () => {
                 good cause.
               </Typography>
               <Link to="/donate">
-                <Button variant="contained" color="primary">
+                <Button variant="outlined" color="primary">
                   Sponsor
                 </Button>
               </Link>
@@ -187,7 +187,7 @@ const AboutUs = () => {
                 will go a long way in making a difference in someone’s life.
               </Typography>
               <Link to="/donate">
-                <Button variant="contained" color="primary">
+                <Button variant="outlined" color="primary">
                   Donate Now
                 </Button>
               </Link>
@@ -211,7 +211,7 @@ const AboutUs = () => {
           </Typography>
 
           <Link to="/donate">
-                <Button variant="contained" color="primary">
+                <Button variant="outlined" color="primary">
                   Make a change
                 </Button>
               </Link>

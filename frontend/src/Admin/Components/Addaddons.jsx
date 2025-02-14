@@ -166,7 +166,7 @@ const Addaddons = ({ openForm, handleClose }) => {
                 <label htmlFor="file-upload">
                   <Button
                     component="span"
-                    variant="contained"
+                    variant="outlined"
                     startIcon={<CloudUploadIcon />}
                     sx={{ backgroundColor: "#2c387e", color: "white" }}
                   >

@@ -273,7 +273,7 @@ const HomePage = () => {
                 your desired session, show up, and play!
               </Typography>
               <Button
-                variant="contained"
+                variant="outlined"
                 color="primary"
                 onClick={handleBookingClick}
               >
@@ -298,7 +298,7 @@ const HomePage = () => {
                 helping those in need.
               </Typography>
               <Link to="/register">
-                <Button variant="contained" color="primary">
+                <Button variant="outlined" color="primary">
                   Join now
                 </Button>
               </Link>
@@ -312,7 +312,7 @@ const HomePage = () => {
                 good cause.
               </Typography>
               <Link to="/donate">
-                <Button variant="contained" color="primary">
+                <Button variant="outlined" color="primary">
                   Sponsor
                 </Button>
               </Link>
@@ -326,7 +326,7 @@ const HomePage = () => {
                 will go a long way in making a difference in someone’s life.
               </Typography>
               <Link to="/donate">
-                <Button variant="contained" color="primary">
+                <Button variant="outlined" color="primary">
                   Donate Now
                 </Button>
               </Link>
@@ -353,7 +353,7 @@ const HomePage = () => {
                 generation of leaders, innovators, and change-makers.
               </Typography>
               <Link to="/donate">
-                <Button variant="contained" color="primary">
+                <Button variant="outlined" color="primary">
                   Make a change
                 </Button>
               </Link>
@@ -415,7 +415,7 @@ const HomePage = () => {
                     helperText={errors.message ? errors.message.message : ""}
                   />
                   <Button
-                    variant="contained"
+                    variant="outlined"
                     color="primary"
                     fullWidth
                     type="submit"

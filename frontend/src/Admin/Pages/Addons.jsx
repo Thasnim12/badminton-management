@@ -40,12 +40,12 @@ const Addons = () => {
 
 
     return (
-        <Layout>
+        <Layout  sx={{marginTop: "25px"}}>
             <Container>
                 <Grid item xs={12}>
                     <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
                         <Button
-                            variant="contained"
+                            variant="outlined"
                             sx={{ backgroundColor: "#2c387e", color: "white" }}
                             onClick={handleClickOpen}
                         >
@@ -64,17 +64,17 @@ const Addons = () => {
                         <Table sx={{ minWidth: 650 }} aria-label="addons table">
                             <TableHead>
                                 <TableRow>
-                                    <TableCell>Image</TableCell>
-                                    <TableCell align="right">Item Name</TableCell>
-                                    <TableCell align="right">Quantity</TableCell>
-                                    <TableCell align="right">Price</TableCell>
-                                    <TableCell align="right">Item Type</TableCell>
+                                    <TableCell align="center">Image</TableCell>
+                                    <TableCell align="center">Item Name</TableCell>
+                                    <TableCell align="center">Quantity</TableCell>
+                                    <TableCell align="center">Price</TableCell>
+                                    <TableCell align="center">Item Type</TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
                                 {addons.map((addon) => (
                                     <TableRow key={addon._id}>
-                                        <TableCell>
+                                        <TableCell  align="center">
                                             <img
                                                 src={`http://localhost:5000/uploads/${addon.item_image}`}
                                                 alt={addon.item_name}
@@ -82,10 +82,10 @@ const Addons = () => {
                                                 onClick={() => handleImageClick(`http://localhost:5000/uploads/${addon.item_image}`)}
                                             />
                                         </TableCell>
-                                        <TableCell align="right">{addon.item_name}</TableCell>
-                                        <TableCell align="right">{addon.quantity}</TableCell>
-                                        <TableCell align="right">{addon.price}</TableCell>
-                                        <TableCell align="right">{addon.item_type.join(", ")}</TableCell>
+                                        <TableCell align="center">{addon.item_name}</TableCell>
+                                        <TableCell align="center">{addon.quantity}</TableCell>
+                                        <TableCell  align="center">{addon.price}</TableCell>
+                                        <TableCell  align="center">{addon.item_type.join(", ")}</TableCell>
                                     </TableRow>
                                 ))}
                             </TableBody>

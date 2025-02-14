@@ -8,6 +8,8 @@ import {
   Typography,
   Box,
   Divider,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import {
   Edit as EditIcon,
@@ -16,23 +18,19 @@ import {
   Upload as UploadIcon,
 } from "@mui/icons-material";
 import { styled } from "@mui/material/styles";
-import { useSelector } from "react-redux"; // For accessing Redux store
+import { useSelector } from "react-redux";
 import Header from "../Global/Header";
 import Footer from "../Global/Footer";
 import {
   useGetUserDetailsQuery,
   useUpdateProfileMutation,
 } from "../../Slices/UserApi";
+import { useDispatch } from "react-redux";
+import { setUserCredentials } from "../../Slices/UserSlice";
 
 const Profile = () => {
-
-
-
   const { userInfo } = useSelector((state) => state.userAuth);
-  console.log(userInfo, "Userinfo")
-  const user = userInfo.email; 
-  console.log(user)
-  const {data: getUser} = useGetUserDetailsQuery(user)
+  const user = userInfo.email;
   const [updateProfile] = useUpdateProfileMutation();
 
   const [profileImage, setProfileImage] = useState("/default-profile.jpg");
@@ -45,6 +43,12 @@ const Profile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [showImageOptions, setShowImageOptions] = useState(false);
 
+  const [alert, setAlert] = useState({
+    open: false,
+    message: "",
+    severity: "success", // success, error, info, warning
+  });
+
   useEffect(() => {
     if (user) {
       setFormData({
@@ -53,7 +57,7 @@ const Profile = () => {
         mobile: userInfo.phoneno || "",
         password: "",
       });
-      setProfileImage(user.profileImage || "/default-profile.jpg");
+      setProfileImage(userInfo.profileImage || "/default-profile.jpg");
     }
   }, [user]);
 
@@ -79,27 +83,55 @@ const Profile = () => {
     setFormData({ ...formData, [name]: value });
   };
 
+  const dispatch = useDispatch();
+
   const handleSaveChanges = async () => {
     setIsEditing(false);
     try {
-      // Include profile image data with formData if it's updated
-      const updatedData = await updateProfile({
+      const response = await updateProfile({
         ...formData,
-        profileImage: profileImage !== "/default-profile.jpg" ? profileImage : null,
+        profileImage:
+          profileImage !== "/default-profile.jpg" ? profileImage : null,
       }).unwrap();
 
-      console.log("Profile updated successfully", updatedData);
+      console.log("Profile updated successfully:", response);
 
-      // Clear form data after saving (reset values if needed)
+      const { user } = response;
+
+      if (!user) {
+        console.error("User data is missing in the response");
+        return;
+      }
+      dispatch(
+        setUserCredentials({
+          name: user.name || "",
+          email: user.email || "",
+          phoneno: user.phoneno || "",
+          profileImage: user.profileImage || "/default-profile.jpg",
+        })
+      );
+
       setFormData({
-        name: updatedData.name || "",
-        email: updatedData.email || "",
-        mobile: updatedData.phoneno || "",
-        password: "", // Keep password field empty
+        name: user.name || "",
+        email: user.email || "",
+        mobile: user.phoneno || "",
+        password: "",
       });
-      setProfileImage(updatedData.profileImage || "/default-profile.jpg");
+      setProfileImage(user.profileImage || "/default-profile.jpg");
+
+      setAlert({
+        open: true,
+        message: "Profile updated successfully!",
+        severity: "success",
+      });
     } catch (err) {
       console.error("Error updating profile:", err);
+
+      setAlert({
+        open: true,
+        message: "Error updating profile.",
+        severity: "error",
+      });
     }
   };
 
@@ -108,11 +140,12 @@ const Profile = () => {
     width: "100%",
     textAlign: "center",
     backgroundColor: theme.palette.background.default,
-    flexGrow: 1, // Ensures it takes the available space
+    flexGrow: 1,
   }));
 
-  // const userId = user?.id; 
-  // console.log("User ID from Redux:", userId);
+  const handleCloseAlert = () => {
+    setAlert({ ...alert, open: false });
+  };
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
@@ -132,47 +165,36 @@ const Profile = () => {
               position="relative"
             >
               <Avatar src={profileImage} sx={{ width: 100, height: 100 }} />
-              <IconButton
-                component="label"
-                sx={{
-                  position: "absolute",
-                  bottom: 0,
-                  right: 0,
-                  bgcolor: "primary.main",
-                }}
-                onClick={() => setShowImageOptions(!showImageOptions)}
+            </Grid>
+            {isEditing && (
+              <Grid
+                item
+                xs={12}
+                container
+                justifyContent="center"
+                spacing={2} // This adds spacing between the buttons
               >
-                <EditIcon sx={{ color: "white" }} />
-              </IconButton>
-              {showImageOptions && (
-                <Box
-                  sx={{
-                    position: "absolute",
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    display: "flex",
-                    justifyContent: "space-between",
-                    bgcolor: "white",
-                    padding: "5px",
-                    boxShadow: 2,
-                  }}
-                >
+                <Grid item>
                   <Button
-                    variant="contained"
+                    variant="outlined"
                     component="label"
                     startIcon={<UploadIcon />}
                     size="small"
+                    sx={{ marginBottom: 2 }}
                   >
                     Upload
                     <input
                       type="file"
                       hidden
                       onChange={handleProfileImageChange}
+                      accept="image/*"
                     />
                   </Button>
+                </Grid>
+
+                <Grid item>
                   <Button
-                    variant="contained"
+                    variant="outlined"
                     color="error"
                     startIcon={<DeleteIcon />}
                     size="small"
@@ -180,11 +202,10 @@ const Profile = () => {
                   >
                     Remove
                   </Button>
-                </Box>
-              )}
-            </Grid>
+                </Grid>
+              </Grid>
+            )}
 
-            {/* Name Field */}
             <Grid item xs={12}>
               <TextField
                 fullWidth
@@ -193,11 +214,10 @@ const Profile = () => {
                 value={formData.name}
                 onChange={handleInputChange}
                 variant="outlined"
-                disabled={!isEditing} // Disable when not in editing mode
+                disabled={!isEditing}
               />
             </Grid>
 
-            {/* Email Field (Non-editable) */}
             <Grid item xs={12}>
               <TextField
                 fullWidth
@@ -205,11 +225,10 @@ const Profile = () => {
                 name="email"
                 value={formData.email}
                 variant="outlined"
-                disabled // Always disabled, email can't be edited
+                disabled
               />
             </Grid>
 
-            {/* Mobile Field */}
             <Grid item xs={12}>
               <TextField
                 fullWidth
@@ -218,39 +237,65 @@ const Profile = () => {
                 value={formData.mobile}
                 onChange={handleInputChange}
                 variant="outlined"
-                disabled={!isEditing} // Disable when not in editing mode
+                disabled={!isEditing}
               />
             </Grid>
 
-            {/* Edit/Save Button */}
             <Grid item xs={12} display="flex" justifyContent="flex-end">
               {isEditing ? (
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={handleSaveChanges}
-                  startIcon={<SaveIcon />}
-                >
-                  Save Changes
-                </Button>
+                <>
+                  <Grid container display="flex" justifyContent="flex-end" spacing={2}>
+                    <Grid item>
+                      <Button
+                        variant="outlined"
+                        color="error"
+                        onClick={() => {
+                          setIsEditing(false); // Cancel edit mode
+                          setShowImageOptions(false); // Hide image options
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                    </Grid>
+                    <Grid item>
+                      <Button
+                        variant="outlined"
+                        color="primary"
+                        onClick={handleSaveChanges}
+                      >
+                        Save
+                      </Button>
+                    </Grid>
+                  </Grid>
+                </>
               ) : (
                 <Button
-                  variant="contained"
+                  variant="outlined"
                   color="primary"
                   onClick={() => setIsEditing(true)}
-                  startIcon={<EditIcon />}
                 >
-                  Edit Profile
+                  Edit
                 </Button>
               )}
             </Grid>
           </Grid>
 
-          {/* Divider */}
           <Divider sx={{ marginTop: 3 }} />
         </Box>
       </Section>
       <Footer />
+
+      {/* Snackbar for Alerts */}
+      <Snackbar
+        open={alert.open}
+        autoHideDuration={3000}
+        onClose={handleCloseAlert}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <Alert onClose={handleCloseAlert} severity={alert.severity}>
+          {alert.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

@@ -13,12 +13,6 @@ export const userApi = createApi({
         method: "GET",
       }),
     }),
-    getUserDetails: builder.query({
-      query: () => ({
-        url: "/profile",
-        method: "GET",
-      }),
-    }),
     getSlots: builder.query({
       query: ({ courtId, date }) => ({
         url: `/get-slots/?courtId=${courtId}&date=${date}`,
@@ -94,7 +88,6 @@ export const {
   useGetSlotsQuery,
   useGetAllcourtsQuery,
   useGetAddonsQuery,
-  useGetUserDetailsQuery,
   useUpdateProfileMutation
 } = userApi;
 

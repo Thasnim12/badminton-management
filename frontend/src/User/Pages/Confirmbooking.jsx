@@ -88,7 +88,7 @@ export default function ShoppingCart() {
                   <Typography>Total (Incl. Taxes)</Typography>
                   <Typography>$4818.00</Typography>
                 </Box>
-                <Button fullWidth variant="contained" color="info" sx={{ mt: 2 }}>
+                <Button fullWidth variant="outlined" color="info" sx={{ mt: 2 }}>
                   <Box display="flex" justifyContent="space-between" width="100%">
                     <Typography>$4818.00</Typography>
                     <Typography>Checkout <CreditCard sx={{ ml: 1 }} /></Typography>

@@ -27,6 +27,7 @@ import { adminlogout } from "../../Slices/AdminSlice";
 import { useLogoutadminMutation } from "../../Slices/AdminApi";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom"; // Import Link for declarative routing
 
 const drawerWidth = 290;
 const collapsedDrawerWidth = 80; // Width for collapsed state
@@ -42,15 +43,14 @@ const Sidebar = ({ open, onClose }) => {
   };
 
   const [logout] = useLogoutadminMutation();
-    const dispatch = useDispatch();
-    const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-    const handleLogout = async () => {
-        await logout().unwrap()
-        dispatch(adminlogout());
-        navigate('/admin/login')
-    }
-  
+  const handleLogout = async () => {
+    await logout().unwrap();
+    dispatch(adminlogout());
+    navigate('/admin/login');
+  };
 
   return (
     <Drawer
@@ -99,49 +99,49 @@ const Sidebar = ({ open, onClose }) => {
 
       {/* Navigation List */}
       <List>
-        <ListItemButton component="a" href="/admin">
+        <ListItemButton component={Link} to="/admin">
           <ListItemIcon>
             <DashboardIcon />
           </ListItemIcon>
           {!collapsed && <ListItemText primary="Dashboard" />}
         </ListItemButton>
-        <ListItemButton component="a" href="/admin/users">
+        <ListItemButton component={Link} to="/admin/users">
           <ListItemIcon>
             <UsersIcon />
           </ListItemIcon>
           {!collapsed && <ListItemText primary="Users" />}
         </ListItemButton>
-        <ListItemButton component="a" href="/admin/manage-staffs">
+        <ListItemButton component={Link} to="/admin/manage-staffs">
           <ListItemIcon>
             <UsersIcon />
           </ListItemIcon>
           {!collapsed && <ListItemText primary="Staffs" />}
         </ListItemButton>
-        <ListItemButton component="a" href="/admin/manage-courts">
+        <ListItemButton component={Link} to="/admin/manage-courts">
           <ListItemIcon>
             <SportsTennis />
           </ListItemIcon>
           {!collapsed && <ListItemText primary="Courts" />}
         </ListItemButton>
-        <ListItemButton component="a" href="/admin/manage-donations">
+        <ListItemButton component={Link} to="/admin/manage-donations">
           <ListItemIcon>
             <DonationsIcon />
           </ListItemIcon>
           {!collapsed && <ListItemText primary="Donations" />}
         </ListItemButton>
-        <ListItemButton component="a" href="/admin/manage-bookings">
+        <ListItemButton component={Link} to="/admin/manage-bookings">
           <ListItemIcon>
             <BookingsIcon />
           </ListItemIcon>
           {!collapsed && <ListItemText primary="Bookings" />}
         </ListItemButton>
-        <ListItemButton component="a" href="/admin/manage-payments">
+        <ListItemButton component={Link} to="/admin/manage-payments">
           <ListItemIcon>
             <CurrencyRupeeIcon />
           </ListItemIcon>
           {!collapsed && <ListItemText primary="Payments" />}
         </ListItemButton>
-        <ListItemButton component="a" href="/admin/manage-addons">
+        <ListItemButton component={Link} to="/admin/manage-addons">
           <ListItemIcon>
             <InventoryOutlinedIcon />
           </ListItemIcon>
@@ -153,7 +153,7 @@ const Sidebar = ({ open, onClose }) => {
 
       {/* Settings Section */}
       <List>
-        <ListItemButton component="a" href="/admin/settings">
+        <ListItemButton component={Link} to="/admin/settings">
           <ListItemIcon>
             <SettingsIcon />
           </ListItemIcon>

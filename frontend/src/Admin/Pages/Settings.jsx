@@ -68,10 +68,6 @@ const Settings = () => {
   return (
     <Layout>
       <Box sx={{ maxWidth: 600, margin: "auto", padding: 3 }}>
-        <Typography variant="h5" gutterBottom>
-          Update Profile
-        </Typography>
-
         <Grid container spacing={3} alignItems="center">
           <Grid
             item
@@ -108,7 +104,7 @@ const Settings = () => {
                 }}
               >
                 <Button
-                  variant="contained"
+                  variant="outlined"
                   component="label"
                   startIcon={<UploadIcon />}
                   size="small"
@@ -121,7 +117,7 @@ const Settings = () => {
                   />
                 </Button>
                 <Button
-                  variant="contained"
+                  variant="outlined"
                   color="error"
                   startIcon={<DeleteIcon />}
                   size="small"

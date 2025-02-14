@@ -84,7 +84,7 @@ export default function ViewSlots({ open, handleClose, slot, mode }) {
             </DialogContent>
             <DialogActions>
                 <Button onClick={handleClose}>Close</Button>
-                {mode === "edit" && <Button variant="contained" color="primary" onClick={confirmEdit}>Save</Button>}
+                {mode === "edit" && <Button variant="outlined" color="primary" onClick={confirmEdit}>Save</Button>}
             </DialogActions>
         </Dialog>
     );

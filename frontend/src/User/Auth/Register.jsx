@@ -94,14 +94,12 @@ const Register = () => {
 
     try {
       const response = await verifyOtp({ userId,otp }).unwrap();
-      if (response.status === 'verified') {
+      if (response?.data?.status === 'verified') {
         const { name,email,phoneno } = response.data;
         dispatch(setUserCredentials({ name,email,phoneno }))
         enqueueSnackbar("Registration successful!", { variant: "success" });
         navigate("/login");
-      } else {
-        enqueueSnackbar("Invalid OTP. Please try again.", { variant: "error" });
-      }
+      } 
     } catch (error) {
       console.error("OTP validation failed:", error);
       enqueueSnackbar("Invalid OTP. Please try again.", { variant: "error" });

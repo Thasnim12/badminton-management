@@ -5,6 +5,7 @@ import { Provider } from "react-redux"
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import "./index.css";
 import App from "./App";
+import { SnackbarProvider } from "notistack";
 import store from "./Store";
 
 const appElement = document.getElementById("app") || document.body; 
@@ -17,7 +18,9 @@ if (appElement) {
     <React.StrictMode>
       <GoogleOAuthProvider clientId={clientId}>
         <Provider store={store}>
+        <SnackbarProvider maxSnack={3}>
           <App />
+          </SnackbarProvider>,
         </Provider>
       </GoogleOAuthProvider>
     </React.StrictMode>

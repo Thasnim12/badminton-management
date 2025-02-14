@@ -48,7 +48,7 @@ const AddOnsDrawer = ({ open, onClose, addons, selectedAddOns, onToggle, loading
             ))}
           </List>
         )}
-        <Button fullWidth variant="contained" sx={{ mt: 2 }} onClick={onClose}>
+        <Button fullWidth variant="outlined" sx={{ mt: 2 }} onClick={onClose}>
           Done
         </Button>
       </Box>

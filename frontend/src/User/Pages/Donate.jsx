@@ -11,10 +11,12 @@ import {
   MenuItem,
   Box,
   Dialog,
-  Section,
   DialogActions,
   DialogContent,
   DialogTitle,
+  Paper,
+  Snackbar, // Import Snackbar
+  Alert, // Import Alert
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import {
@@ -40,6 +42,7 @@ const Donate = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [openDialog, setOpenDialog] = useState(false);
   const [donorName, setDonorName] = useState("");
+  const [alert, setAlert] = useState(null); // Alert state for displaying messages
 
   const [donate] = useCreateDonationMutation();
   const [verifyPayment] = useVerifyDonationMutation();
@@ -51,7 +54,10 @@ const Donate = () => {
       script.onload = resolve;
       script.onerror = () => {
         console.error("Failed to load Razorpay script");
-        alert("Failed to load payment system. Please try again later.");
+        setAlert({
+          message: "Failed to load payment system. Please try again later.",
+          severity: "error",
+        });
       };
       document.body.appendChild(script);
     });
@@ -63,17 +69,29 @@ const Donate = () => {
     try {
       setIsLoading(true);
 
-      if (!amount || parseFloat(amount) <= 0) {
-        alert("Please enter a valid donation amount");
+      if (!amount || !paymentMethod) {
+        setAlert({
+          message: "Please enter all fields",
+          severity: "error",
+          variant: "outlined",
+        });
         return;
       }
 
-      // Open the dialog to prompt for donor name
+      if (!amount || parseFloat(amount) <= 0) {
+        setAlert({
+          message: "Please enter a valid donation amount",
+          severity: "error",
+        });
+        return;
+      }
       setOpenDialog(true);
     } catch (error) {
-      alert(
-        "An error occurred while initiating the donation. Please try again later."
-      );
+      setAlert({
+        message:
+          "An error occurred while initiating the donation. Please try again later.",
+        severity: "error",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -81,7 +99,10 @@ const Donate = () => {
 
   const handleDonationSubmit = async () => {
     if (!donorName) {
-      alert("Name is required to proceed with donation");
+      setAlert({
+        message: "Name is required to proceed with donation",
+        severity: "error",
+      });
       return;
     }
 
@@ -117,12 +138,14 @@ const Donate = () => {
               razorpay_signature: response.razorpay_signature,
             }).unwrap();
 
-            alert(verifyRes.message);
+            setAlert({ message: verifyRes.message, severity: "success" });
             navigate("/donation-success");
           } catch (error) {
-            alert(
-              "Payment verification failed. Please contact support if amount was deducted."
-            );
+            setAlert({
+              message:
+                "Payment verification failed. Please contact support if amount was deducted.",
+              severity: "error",
+            });
           }
         },
         prefill: {
@@ -138,9 +161,11 @@ const Donate = () => {
       const rzp = new window.Razorpay(options);
       rzp.open();
     } catch (error) {
-      alert(
-        "An error occurred while initiating the donation. Please try again later."
-      );
+      setAlert({
+        message:
+          "An error occurred while initiating the donation. Please try again later.",
+        severity: "error",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -155,7 +180,6 @@ const Donate = () => {
     height: "400px",
     textAlign: "center",
     width: "100%",
-    // marginTop: "5px",
   }));
 
   const Section = styled(Box)(({ theme }) => ({
@@ -168,117 +192,141 @@ const Donate = () => {
   return (
     <div>
       <Header />
-
       <HeroSection />
-
       <Section>
-        <Container maxWidth="md" sx={{ padding: "40px 0" }}>
-          <Typography
-            variant="h4"
-            sx={{ textAlign: "center", marginBottom: "20px" }}
+        <Container maxWidth="lg" sx={{ padding: "40px 0" }}>
+          <Snackbar
+            open={!!alert} 
+            autoHideDuration={3000} 
+            anchorOrigin={{ vertical: "top", horizontal: "right" }} 
+            onClose={() => setAlert(null)} 
           >
-            How Your Donation Helps
-          </Typography>
-          <Typography
-            variant="body1"
-            sx={{ marginBottom: "20px", textAlign: "center" }}
-          >
-            • Provides medical aid for a child in need. <br />
-            • Helps fund a year of education for an underprivileged student.{" "}
-            <br />• Supports community development projects for a neighborhood.
-          </Typography>
+            <Alert
+              onClose={() => setAlert(null)}
+              severity={alert?.severity}
+              sx={{ width: "100%" }}
+            >
+              {alert?.message}
+            </Alert>
+          </Snackbar>
 
-          {/* Donation Form */}
-          <form onSubmit={(e) => e.preventDefault()}>
-            <Grid container spacing={3}>
-              <Grid item xs={12} sm={4}>
-                <TextField
-                  fullWidth
-                  label="Donation Amount"
-                  type="number"
-                  variant="outlined"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  required
-                  inputProps={{ min: "1" }}
-                />
-              </Grid>
-              <Grid item xs={12} sm={4}>
-                <FormControl fullWidth variant="outlined">
-                  <InputLabel>Currency</InputLabel>
-                  <Select
-                    value={currency}
-                    onChange={(e) => setCurrency(e.target.value)}
-                    label="Currency"
-                    required
-                  >
-                    {CURRENCY_LIST.map((curr) => (
-                      <MenuItem key={curr.code} value={curr.code}>
-                        {curr.name} ({curr.symbol})
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item xs={12} sm={4}>
-                <FormControl fullWidth variant="outlined">
-                  <InputLabel>Payment Method</InputLabel>
-                  <Select
-                    value={paymentMethod}
-                    onChange={(e) => setPaymentMethod(e.target.value)}
-                    label="Payment Method"
-                    required
-                  >
-                    <MenuItem value="Credit Card">Credit Card</MenuItem>
-                    <MenuItem value="Debit Card">Debit Card</MenuItem>
-                    <MenuItem value="UPI">UPI</MenuItem>
-                    <MenuItem value="Net Banking">Net Banking</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
+          <Grid container spacing={4} alignItems="center">
+            {/* Left Side: Donation Information */}
+            <Grid item xs={12} md={6}>
+              <Box sx={{ textAlign: "center" }}>
+                <Typography variant="h4" sx={{ marginBottom: "20px" }}>
+                  How Your Donation Helps
+                </Typography>
+                <Typography
+                  variant="body1"
+                  sx={{ textAlign: "left", display: "inline-block" }}
+                >
+                  • Provides medical aid for a child in need. <br />
+                  • Helps fund a year of education for an underprivileged
+                  student. <br />• Supports community development projects for a
+                  neighborhood.
+                </Typography>
+              </Box>
             </Grid>
 
-            <Box sx={{ textAlign: "center", marginTop: "20px" }}>
-              <Typography variant="body2" sx={{ marginBottom: "10px" }}>
-                Amount: {getCurrencySymbol(currency)} {amount}
-              </Typography>
-              <Button
-                onClick={initiateDonation}
-                variant="contained"
-                color="primary"
-                disabled={isLoading}
-                sx={{ padding: "10px 20px", fontSize: "16px" }}
+            {/* Right Side: Donation Form */}
+            <Grid item xs={12} md={6}>
+              <Paper
+                elevation={3}
+                sx={{ padding: "20px", borderRadius: "10px" }}
               >
-                {isLoading ? "Processing..." : "Donate Now"}
-              </Button>
-            </Box>
-          </form>
-        </Container>
+                <form onSubmit={(e) => e.preventDefault()}>
+                  <Grid container spacing={3}>
+                    <Grid item xs={12}>
+                      <TextField
+                        fullWidth
+                        label="Donation Amount"
+                        type="number"
+                        variant="outlined"
+                         value={amount}
+                        onChange={(e) => setAmount(e.target.value)}
+                        required
+                        inputProps={{ min: "1" }}
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <FormControl fullWidth variant="outlined">
+                        <InputLabel>Currency</InputLabel>
+                        <Select
+                          value={currency}
+                          onChange={(e) => setCurrency(e.target.value)}
+                          label="Currency"
+                          required
+                        >
+                          {CURRENCY_LIST.map((curr) => (
+                            <MenuItem key={curr.code} value={curr.code}>
+                              {curr.name} ({curr.symbol})
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    </Grid>
+                    <Grid item xs={12}>
+                      <FormControl fullWidth variant="outlined">
+                        <InputLabel>Payment Method</InputLabel>
+                        <Select
+                          value={paymentMethod}
+                          onChange={(e) => setPaymentMethod(e.target.value)}
+                          label="Payment Method"
+                          required
+                        >
+                          <MenuItem value="Credit Card">Credit Card</MenuItem>
+                          <MenuItem value="Debit Card">Debit Card</MenuItem>
+                          <MenuItem value="UPI">UPI</MenuItem>
+                          <MenuItem value="Net Banking">Net Banking</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Grid>
+                  </Grid>
 
-        {/* Dialog for Donor Name */}
-        <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
-          <DialogTitle>Enter Your Name</DialogTitle>
-          <DialogContent>
-            <TextField
-              autoFocus
-              fullWidth
-              label="Your Name"
-              variant="outlined"
-              value={donorName}
-              onChange={(e) => setDonorName(e.target.value)}
-              required
-            />
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setOpenDialog(false)} color="secondary">
-              Cancel
-            </Button>
-            <Button onClick={handleDonationSubmit} color="primary">
-              Submit
-            </Button>
-          </DialogActions>
-        </Dialog>
+                  <Box sx={{ textAlign: "center", marginTop: "20px" }}>
+                    <Typography variant="body2" sx={{ marginBottom: "10px" }}>
+                      Amount: {getCurrencySymbol(currency)} {amount}
+                    </Typography>
+                    <Button
+                      onClick={initiateDonation}
+                      variant="outlined"
+                      color="primary"
+                      disabled={isLoading}
+                      sx={{ padding: "10px 20px", fontSize: "16px" }}
+                    >
+                      Donate Now
+                    </Button>
+                  </Box>
+                </form>
+              </Paper>
+            </Grid>
+          </Grid>
+          <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+            <DialogTitle>Enter Your Name</DialogTitle>
+            <DialogContent>
+              <TextField
+                autoFocus
+                fullWidth
+                label="Your Name"
+                variant="outlined"
+                value={donorName}
+                onChange={(e) => setDonorName(e.target.value)}
+                required
+              />
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setOpenDialog(false)} color="secondary">
+                Cancel
+              </Button>
+              <Button onClick={handleDonationSubmit} color="primary">
+                Submit
+              </Button>
+            </DialogActions>
+          </Dialog>
+        </Container>
       </Section>
+
       <Footer />
     </div>
   );

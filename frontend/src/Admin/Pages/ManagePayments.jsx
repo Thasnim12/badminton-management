@@ -5,30 +5,40 @@ import {
   Container,
   Tabs,
   Tab,
-  Card,
-  CardContent,
-  Grid,
   Table,
   TableHead,
   TableBody,
   TableRow,
   TableCell,
   Button,
+  IconButton,
   Dialog,
+  Card,
+  Grid,
+  CardContent,
   DialogTitle,
   DialogContent,
   DialogActions,
+  Pagination, // Import MUI Pagination
 } from "@mui/material";
-import Layout from "../Global/Layouts"; // Adjust the import path based on your directory structure
+import CurrencyRupeeOutlinedIcon from '@mui/icons-material/CurrencyRupeeOutlined';
+import VolunteerActivismIcon from "@mui/icons-material/VolunteerActivism";
+import EventNoteIcon from "@mui/icons-material/EventNote";
+import Layout from "../Global/Layouts";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import { useGetDonationsQuery } from "../../Slices/AdminApi";
+
 const ManagePayments = () => {
   const [selectedDonation, setSelectedDonation] = useState(null);
   const [open, setOpen] = useState(false);
-  const [tabIndex, setTabIndex] = useState(0); // State to manage the active tab
+  const [tabIndex, setTabIndex] = useState(0);
 
-  const handleTabChange = (event, newValue) => {
-    setTabIndex(newValue); // Change the active tab when clicked
-  };
+  const [donationPage, setDonationPage] = useState(1);
+  const [donationRowsPerPage, setDonationRowsPerPage] = useState(5);
+  const [bookingPage, setBookingPage] = useState(1);
+  const [bookingRowsPerPage, setBookingRowsPerPage] = useState(5);
+
+  const handleTabChange = (event, newValue) => setTabIndex(newValue);
   const handleOpenDetails = (donation) => {
     setSelectedDonation(donation);
     setOpen(true);
@@ -38,137 +48,194 @@ const ManagePayments = () => {
     setSelectedDonation(null);
   };
 
-  const { data: donations, error, isLoading } = useGetDonationsQuery();
-  const totalDonations =
-    donations?.reduce((acc, donation) => acc + donation.amount, 0) || 0;
-  const donationHistory = [
-    { id: 1, amount: 100, donor: "John Doe", date: "2025-02-12" },
-    { id: 2, amount: 200, donor: "Jane Smith", date: "2025-01-22" },
-    // Add more donations...
-  ];
+  const handleDonationChangePage = (event, value) => setDonationPage(value);
+  const handleDonationChangeRowsPerPage = (event) => {
+    setDonationRowsPerPage(parseInt(event.target.value, 10));
+    setDonationPage(1);
+  };
+
+  const handleBookingChangePage = (event, value) => setBookingPage(value);
+  const handleBookingChangeRowsPerPage = (event) => {
+    setBookingRowsPerPage(parseInt(event.target.value, 10));
+    setBookingPage(1);
+  };
+
+  const { data: donations } = useGetDonationsQuery();
+  const donationHistory = donations || [];
+
+  const donationProfit =
+    donations
+      ?.filter((donation) => donation.payment_status === "completed")
+      .reduce((total, donation) => total + donation.amount, 0) || 0;
 
   const bookingHistory = [
     { id: 1, amount: 150, customer: "Alice Johnson", date: "2025-02-05" },
     { id: 2, amount: 250, customer: "Bob Lee", date: "2025-01-18" },
-    // Add more bookings...
   ];
 
-  // Calculate profits (replace these with dynamic calculations based on data)
-  const totalProfit =
-    donationHistory.reduce((acc, curr) => acc + curr.amount, 0) +
-    bookingHistory.reduce((acc, curr) => acc + curr.amount, 0);
-  const donationProfit = donationHistory.reduce(
-    (acc, curr) => acc + curr.amount,
-    0
-  );
-  const bookingProfit = bookingHistory.reduce(
-    (acc, curr) => acc + curr.amount,
-    0
-  );
+  const BookingProfit =
+    bookingHistory?.reduce((total, booking) => total + booking.amount, 0) || 0;
+
+  const totalProfit = donationProfit + BookingProfit;
 
   return (
     <Layout>
-      <Container>
+      <Container sx={{ marginTop: "25px" }}>
         <Box sx={{ marginBottom: 3 }}>
-          <Typography variant="h4">Manage Payments</Typography>
-        </Box>
-        {/* Displaying profit cards */}
-        <Grid container spacing={3} sx={{ marginBottom: 3 }}>
-          <Grid item xs={4}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6">Total Profit</Typography>
-                <Typography variant="h4">${totalProfit}</Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid item xs={4}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6">Profit from Donations</Typography>
-                <Typography variant="h4">₹{totalDonations}</Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid item xs={4}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6">Profit from Bookings</Typography>
-                <Typography variant="h4">${bookingProfit}</Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
-        {/* Tabs for Donation and Booking History */}
-        <Tabs
-          value={tabIndex}
-          onChange={handleTabChange}
-          indicatorColor="primary"
-          textColor="primary"
+          
+          {/* Displaying profit cards */}
+          <Grid container spacing={3} sx={{ marginBottom: 3 }}>
+            <Grid item xs={4}>
+            <Card sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      <CardContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <Typography
+          variant="h6"
+          sx={{ display: "flex", alignItems: "center", justifyContent: 'center' }}
         >
+          <CurrencyRupeeOutlinedIcon sx={{ mr: 1 }} />
+          Total Profit
+        </Typography>
+        <Typography variant="h6">₹{totalProfit}</Typography>
+      </CardContent>
+    </Card>
+  </Grid>
+
+  <Grid item xs={4}>
+    <Card sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      <CardContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <Typography
+          variant="h6"
+          sx={{ display: "flex", alignItems: "center", justifyContent: 'center' }}
+        >
+          <VolunteerActivismIcon sx={{ mr: 1 }} />
+          Profit from Donations
+        </Typography>
+        <Typography variant="h6">₹{donationProfit}</Typography>
+      </CardContent>
+    </Card>
+  </Grid>
+
+  <Grid item xs={4}>
+    <Card sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      <CardContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <Typography
+          variant="h6"
+          sx={{ display: "flex", alignItems: "center", justifyContent: 'center' }}
+        >
+          <EventNoteIcon sx={{ mr: 1 }} />
+          Profit from Bookings
+        </Typography>
+        <Typography variant="h6">₹{BookingProfit}</Typography>
+      </CardContent>
+    </Card>
+            </Grid>
+          </Grid>
+        </Box>
+
+        <Tabs value={tabIndex} onChange={handleTabChange}>
           <Tab label="Donations" />
           <Tab label="Bookings" />
         </Tabs>
-        {/* Tab Content */}
+
         {tabIndex === 0 && (
           <Box sx={{ marginTop: 2 }}>
             <Typography variant="h6">Donation History</Typography>
-            {donationHistory.length === 0 ? (
-              <Typography>No donation history available.</Typography>
-            ) : (
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>
-                      <Typography variant="body1">Donor Name</Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="body1">Amount</Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="body1">Currency</Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="body1">Status</Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="body1">Payment Method</Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="body1">Date</Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="body1">Actions</Typography>
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {donations?.map((donation) => (
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell align="center">Donor Name</TableCell>
+                  <TableCell align="center">Amount</TableCell>
+                  <TableCell align="center">Currency</TableCell>
+                  <TableCell align="center">Status</TableCell>
+                  <TableCell align="center">Payment Method</TableCell>
+                  <TableCell align="center">Date</TableCell>
+                  <TableCell align="center">Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {donationHistory
+                  .slice(
+                    (donationPage - 1) * donationRowsPerPage,
+                    donationPage * donationRowsPerPage
+                  )
+                  .map((donation) => (
                     <TableRow key={donation.id}>
-                      <TableCell>{donation.donor_name}</TableCell>
-                      <TableCell>{donation.amount}</TableCell>
-                      <TableCell>{donation.currency}</TableCell>
-                      <TableCell>{donation.payment_status}</TableCell>
-                      <TableCell>{donation.payment_method}</TableCell>
-                      <TableCell>
+                      <TableCell align="center">
+                        {donation.donor_name}
+                      </TableCell>
+                      <TableCell align="center">{donation.amount}</TableCell>
+                      <TableCell align="center">{donation.currency}</TableCell>
+                      <TableCell align="center">
+                        {donation.payment_status}
+                      </TableCell>
+                      <TableCell align="center">
+                        {donation.payment_method}
+                      </TableCell>
+                      <TableCell align="center">
                         {new Date(donation.created_at).toLocaleDateString()}
                       </TableCell>
-                      <TableCell>
-                        <Button
-                          variant="contained"
+                      <TableCell align="center">
+                        <IconButton
                           color="primary"
+                          sx={{ marginRight: 1 }}
                           onClick={() => handleOpenDetails(donation)}
                         >
-                          View
-                        </Button>
+                          <VisibilityIcon />
+                        </IconButton>
                       </TableCell>
                     </TableRow>
                   ))}
-                </TableBody>
-              </Table>
-            )}
+              </TableBody>
+            </Table>
+
+            <Pagination
+              count={Math.ceil(donationHistory.length / donationRowsPerPage)}
+              page={donationPage}
+              onChange={handleDonationChangePage}
+              color="primary"
+              siblingCount={1}
+            />
           </Box>
         )}
+
+        {tabIndex === 1 && (
+          <Box sx={{ marginTop: 2 }}>
+            <Typography variant="h6">Booking History</Typography>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell align="center">Customer</TableCell>
+                  <TableCell align="center">Amount</TableCell>
+                  <TableCell align="center">Date</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {bookingHistory
+                  .slice(
+                    (bookingPage - 1) * bookingRowsPerPage,
+                    bookingPage * bookingRowsPerPage
+                  )
+                  .map((booking) => (
+                    <TableRow key={booking.id}>
+                      <TableCell align="center">{booking.customer}</TableCell>
+                      <TableCell align="center">₹{booking.amount}</TableCell>
+                      <TableCell align="center">{booking.date}</TableCell>
+                    </TableRow>
+                  ))}
+              </TableBody>
+            </Table>
+
+            {/* MUI Pagination for Bookings */}
+            <Pagination
+              count={Math.ceil(bookingHistory.length / bookingRowsPerPage)}
+              page={bookingPage}
+              onChange={handleBookingChangePage}
+              color="primary"
+              siblingCount={1}
+            />
+          </Box>
+        )}
+
         <Dialog open={open} onClose={handleClose}>
           <DialogTitle>Donation Details</DialogTitle>
           <DialogContent>
@@ -203,39 +270,6 @@ const ManagePayments = () => {
             </Button>
           </DialogActions>
         </Dialog>
-        {tabIndex === 1 && (
-          <Box sx={{ marginTop: 2 }}>
-            <Typography variant="h6">Booking History</Typography>
-            {bookingHistory.length === 0 ? (
-              <Typography>No booking history available.</Typography>
-            ) : (
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>
-                      <Typography variant="body1">Customer</Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="body1">Amount</Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="body1">Date</Typography>
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {bookingHistory.map((booking) => (
-                    <TableRow key={booking.id}>
-                      <TableCell>{booking.customer}</TableCell>
-                      <TableCell>${booking.amount}</TableCell>
-                      <TableCell>{booking.date}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
-          </Box>
-        )}
       </Container>
     </Layout>
   );

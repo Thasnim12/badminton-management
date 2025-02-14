@@ -168,7 +168,7 @@ export default function FullScreenDialog({ dialogOpen, handleCloseDialog, court 
                                                         View
                                                     </Button>
                                                     <Button
-                                                        variant="contained"
+                                                        variant="outlined"
                                                         onClick={() => handleEdit(slot)}
                                                         disabled={slot.isBooked}
                                                     >

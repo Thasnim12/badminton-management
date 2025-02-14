@@ -102,7 +102,7 @@ const Bookings = () => {
                 your desired session, show up, and play!
               </Typography>
               <Button
-                variant="contained"
+                variant="outlined"
                 color="primary"
                 size="large"
                 onClick={handleBookingClick}
@@ -131,7 +131,7 @@ const Bookings = () => {
                 hour to a whole day of playing.
               </Typography>
               <Button
-                variant="contained"
+                variant="outlined"
                 color="primary"
                 size="large"
                 onClick={handleBookingClick}
@@ -184,7 +184,7 @@ const Bookings = () => {
                 more effectively and accurately.
               </Typography>
               <Button
-                variant="contained"
+                variant="outlined"
                 color="primary"
                 size="large"
                 onClick={handleBookingClick}
@@ -243,7 +243,7 @@ const Bookings = () => {
 
       <Section>
         <Button
-          variant="contained"
+          variant="outlined"
           color="primary"
           size="large"
           onClick={handleBookingClick}
