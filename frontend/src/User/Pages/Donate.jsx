@@ -42,7 +42,7 @@ const Donate = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [openDialog, setOpenDialog] = useState(false);
   const [donorName, setDonorName] = useState("");
-  const [alert, setAlert] = useState(null); // Alert state for displaying messages
+  const [alert, setAlert] = useState(null); 
 
   const [donate] = useCreateDonationMutation();
   const [verifyPayment] = useVerifyDonationMutation();
@@ -124,7 +124,7 @@ const Donate = () => {
       const { order } = response;
 
       const options = {
-        key: process.env.RAZORPAY_KEY_ID,
+        key: process.env.REACT_RAZORPAY_KEY_ID,
         amount: order.amount,
         currency: order.currency,
         name: "Awinco Donations",

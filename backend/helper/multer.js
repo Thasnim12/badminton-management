@@ -18,19 +18,34 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
+const limits = {
+  fileSize: 5 * 1024 * 1024 // 5MB
+};
+
+
 const upload = multer({
   storage: storage,
+  limits: limits,
   fileFilter: fileFilter,
 }).single("item_image");
 
-const profileUpload = multer({
-  storage: storage,
-  fileFilter: fileFilter,
-}).single("profileImage");
 
 const bannerUpload = multer({ 
     storage: storage, 
-    fileFilter: fileFilter 
+    fileFilter: fileFilter,
+    limits: limits
 }).array('banner_image', 5);
 
-module.exports = { upload,bannerUpload, profileUpload };
+const courtUpload = multer({ 
+  storage: storage, 
+  fileFilter: fileFilter ,
+  limits: limits
+}).array('court_image');
+
+const userUpload = multer({
+  storage: storage, 
+  limits: limits,
+  fileFilter: fileFilter 
+}).array('profileImage');
+
+module.exports = { upload,bannerUpload, courtUpload, userUpload };

@@ -12,11 +12,34 @@ const bookingSchema = mongoose.Schema(
       ref: "Court",
       required: true,
     },
-    slot: {
+    slot: [{
       type: mongoose.Schema.Types.ObjectId,
       ref: "Slot",
       required: true,
-    },
+    }],
+    addons: [{
+      addon: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'Addons'
+      },
+      quantity: {
+          type: Number,
+          required: true
+      },
+      type: {
+          type: String,
+          enum: ['rent', 'buy'],
+          required: true
+      },
+      price: {
+          type: Number,
+          required: true
+      },
+      totalPrice: {
+          type: Number,
+          required: true
+      }
+  }],
     bookingDate: {
       type: Date,
       required: true,
@@ -29,7 +52,7 @@ const bookingSchema = mongoose.Schema(
       currency: { type: String, default: "INR" },
       status: {
         type: String,
-        enum: ["Pending", "Paid", "Failed", "Refunded"],
+        enum: ["Pending", "Completed", "Failed", "Refunded"],
         default: "Pending",
       },
     },

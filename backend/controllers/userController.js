@@ -8,7 +8,6 @@ const sendOTP = require("../helper/otpHelper");
 const Court = require("../models/courtModel");
 const Slot = require("../models/slotModel");
 const Addons = require("../models/addonModel");
-const { profileUpload } = require("../helper/multer");
 
 const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
@@ -81,13 +80,10 @@ const userRegister = async (req, res) => {
 };
 
 const updateUserDetails = async (req, res) => {
-    profileUpload(req, res, async (err) => {
-      if (err) {
-        return res.status(400).json({ message: err.message });
-      }
       try {
         const { email, name, mobile } = req.body;
-        const profileImage = req.file ? req.file.filename : null; 
+        const  profileImage  = req.file ? req.file.filename : null; 
+        console.log(profileImage,'img')
   
         console.log("Request Body: ", req.body); 
         console.log("Uploaded File: ", req.file); 
@@ -110,7 +106,6 @@ const updateUserDetails = async (req, res) => {
         console.log(error.message);
         return res.status(500).json({ message: error.message });
       }
-    });
   };
   
 

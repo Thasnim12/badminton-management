@@ -2,6 +2,7 @@ const Donation = require('../models/donationModel')
 const Razorpay = require('razorpay');
 const mongoose = require('mongoose');
 const crypto = require("crypto");
+const { fetchPaymentDetails } = require('../helper/paymentHelper')
 
 const razorpay = new Razorpay({
     key_id: process.env.RAZORPAY_KEY_ID,
@@ -64,6 +65,8 @@ const verifyPayment = async (req, res) => {
             return res.status(400).json({ error: 'Payment verification failed' });
         }
 
+        const paymentDetails = await fetchPaymentDetails(razorpay_payment_id);
+
         const donation = await Donation.findOne({ razorpay_order_id });
 
         if (!donation) {
@@ -72,6 +75,7 @@ const verifyPayment = async (req, res) => {
 
         donation.razorpay_payment_id = razorpay_payment_id;
         donation.payment_status = 'completed';
+        donation.payment_method = paymentDetails.method,
         donation.completed_at = new Date();
 
         await donation.save();

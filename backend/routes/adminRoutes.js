@@ -24,7 +24,7 @@ const {
     editBanner
   } = require("../controllers/adminController");
 
-  const { bannerUpload } = require('../helper/multer')
+  const { bannerUpload,courtUpload } = require('../helper/multer')
   
 
 
@@ -46,7 +46,7 @@ adminroute.get('/view-banner/:bannerId',authenticateAdmin,viewBanner)
 
 adminroute.post("/login", adminLogin);
 adminroute.post("/logout", authenticateAdmin, adminLogout);
-adminroute.post("/courts", authenticateAdmin, addCourt);
+adminroute.post("/courts", authenticateAdmin,courtUpload,addCourt);
 adminroute.post("/slots", authenticateAdmin, generateSlots);
 adminroute.post("/staffs", authenticateAdmin, addStaff);
 adminroute.put("/users/:userId", authenticateAdmin, manageUsers);

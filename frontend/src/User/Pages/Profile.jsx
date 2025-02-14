@@ -33,7 +33,7 @@ const Profile = () => {
   const user = userInfo.email;
   const [updateProfile] = useUpdateProfileMutation();
 
-  const [profileImage, setProfileImage] = useState("/default-profile.jpg");
+  const [profileImage, setProfileImage] = useState("");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -87,13 +87,16 @@ const Profile = () => {
 
   const handleSaveChanges = async () => {
     setIsEditing(false);
-    try {
-      const response = await updateProfile({
-        ...formData,
-        profileImage:
-          profileImage !== "/default-profile.jpg" ? profileImage : null,
-      }).unwrap();
 
+    try {
+      const formDataToSend = new FormData();
+      formDataToSend.append("name", formData.name);
+      formDataToSend.append("email", formData.email);
+      formDataToSend.append("mobile", formData.mobile);
+      formDataToSend.append("profileImage", formData.profileImage);
+     
+
+      const response = await updateProfile(formDataToSend).unwrap();
       console.log("Profile updated successfully:", response);
 
       const { user } = response;
@@ -102,6 +105,7 @@ const Profile = () => {
         console.error("User data is missing in the response");
         return;
       }
+
       dispatch(
         setUserCredentials({
           name: user.name || "",
@@ -117,6 +121,7 @@ const Profile = () => {
         mobile: user.phoneno || "",
         password: "",
       });
+
       setProfileImage(user.profileImage || "/default-profile.jpg");
 
       setAlert({
@@ -124,6 +129,7 @@ const Profile = () => {
         message: "Profile updated successfully!",
         severity: "success",
       });
+
     } catch (err) {
       console.error("Error updating profile:", err);
 
@@ -134,6 +140,10 @@ const Profile = () => {
       });
     }
   };
+
+
+
+
 
   const Section = styled(Box)(({ theme }) => ({
     padding: "60px 20px",
@@ -164,7 +174,7 @@ const Profile = () => {
               justifyContent="center"
               position="relative"
             >
-              <Avatar src={profileImage} sx={{ width: 100, height: 100 }} />
+              <Avatar src={profileImage || '/default-profile.jpg'} sx={{ width: 100, height: 100 }} />
             </Grid>
             {isEditing && (
               <Grid
@@ -186,7 +196,7 @@ const Profile = () => {
                     <input
                       type="file"
                       hidden
-                      onChange={handleProfileImageChange}
+                      onChange={(event) => setProfileImage(event.target.files[0])}
                       accept="image/*"
                     />
                   </Button>

@@ -153,9 +153,10 @@ const manageUsers = async (req, res) => {
 
 const addCourt = async (req, res) => {
     try {
-        const { court_name, court_image } = req.body;
+        const { court_name, } = req.body;
         console.log(req.body, "body");
         console.log("Headers:", req.headers);
+        const court_image = req.file ? req.file.filename : null;
 
         if (!court_name) {
             return res.status(400).json({ message: "missing required field!" });
@@ -713,14 +714,12 @@ const viewBanner = async (req, res) => {
 
 
 const editBanner = async (req, res) => {
-
     try {
         console.log("Raw Request Body:", req.body);
         console.log("Raw Request Files:", req.files);
 
         const { bannerId } = req.params;
         const { title, order, removedImages } = req.body;
-        console.log(req.body, 'bodyyy')
         const newImages = req.files ? req.files.map((file) => file.filename) : [];
 
         if (!mongoose.Types.ObjectId.isValid(bannerId)) {
@@ -735,9 +734,8 @@ const editBanner = async (req, res) => {
         let updatedImages = [...banner.imageUrl];
         let updatedOrder = [...banner.order];
 
-        if (removedImages && removedImages.length > 0) {
+        if (removedImages) {
             const removedImagesArray = JSON.parse(removedImages);
-
             removedImagesArray.forEach((img) => {
                 const imagePath = path.join(__dirname, "../uploads/", img);
                 if (fs.existsSync(imagePath)) {
@@ -745,16 +743,10 @@ const editBanner = async (req, res) => {
                 }
             });
 
-            updatedImages = updatedImages.filter((img, index) => {
-                if (removedImagesArray.includes(img)) {
-                    updatedOrder.splice(index, 1);
-                    return false;
-                }
-                return true;
-            });
-
-            updatedOrder = updatedOrder.map((_, i) => i + 1);
+            updatedImages = updatedImages.filter((img) => !removedImagesArray.includes(img));
         }
+
+        updatedOrder = updatedImages.map((_, i) => i + 1);
 
         if (newImages.length > 0) {
             updatedImages.push(...newImages);

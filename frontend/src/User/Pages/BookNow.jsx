@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Card,
   Button,
@@ -13,22 +13,37 @@ import {
   DialogContent,
   DialogActions,
   Drawer,
+  Divider
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { skipToken } from "@reduxjs/toolkit/query";
+import { styled } from '@mui/material/styles';
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { useNavigate } from "react-router-dom";
+import IconButton from '@mui/material/IconButton';
+import CloseIcon from '@mui/icons-material/Close';
 import dayjs from "dayjs";
 import Header from "../Global/Header";
 import Footer from "../Global/Footer";
-import { useGetAllcourtsQuery, useGetSlotsQuery, useGetAddonsQuery } from "../../Slices/UserApi";
+import { useGetAllcourtsQuery, useGetSlotsQuery, useGetAddonsQuery, useCreateBookingMutation, useVerifyBookingMutation } from "../../Slices/UserApi";
 import AddOnsDrawer from "../Components/Drawer";
 import DetailsCard from "../Components/DetailsCard";
 
 
+const BootstrapDialog = styled(Dialog)(({ theme }) => ({
+  '& .MuiDialogContent-root': {
+    padding: theme.spacing(2),
+  },
+  '& .MuiDialogActions-root': {
+    padding: theme.spacing(1),
+  },
+}));
+
+
 const CourtBooking = () => {
   const [selectedTime, setSelectedTime] = useState(null);
+  const [selectedSlots, setSelectedSlots] = useState([]);
   const [bookingSummary, setBookingSummary] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
   const [openHistoryModal, setOpenHistoryModal] = useState(false);
@@ -37,9 +52,23 @@ const CourtBooking = () => {
   const [selectedCourt, setSelectedCourt] = useState("");
   const [openDrawer, setOpenDrawer] = useState(false);
   const [selectedAddOns, setSelectedAddOns] = useState([]);
+  const [open, setOpen] = useState(false);
+  const [alert, setAlert] = useState(null);
 
 
-  console.log(selectedCourt, 'court')
+  const [bookingData, setBookingData] = useState({
+    courtId: "",
+    slotId: [],
+    amount: 0,
+    addons: [],
+    courtImage: ""
+  });
+
+  const [createBooking] = useCreateBookingMutation();
+  const [verifyBooking] = useVerifyBookingMutation();
+  const [bookingHistory, setBookingHistory] = useState(null);
+  const [processing, setProcessing] = useState(false);
+
 
 
   const { data, isLoading: courtsLoading } = useGetAllcourtsQuery();
@@ -56,6 +85,54 @@ const CourtBooking = () => {
   const slots = slotsData || [];
   console.log(slots, 'slots')
 
+  const calculateTotalAmount = () => {
+    let total = 0;
+
+    selectedSlots.forEach(slot => {
+      total += slot.price;
+    });
+
+    selectedAddOns.forEach(addOn => {
+      total += addOn.price;
+    });
+
+    return total;
+  };
+
+  console.log(bookingData, 'book-data')
+
+
+  useEffect(() => {
+    setBookingData((prev) => ({
+      ...prev,
+      courtId: selectedCourt,
+      date: selectedDate ? selectedDate.format("YYYY-MM-DD") : null,
+      slotId: selectedSlots.map(slot => slot._id),
+      addons: selectedAddOns.map(addon => addon._id),
+      amount: calculateTotalAmount(),
+    }));
+  }, [selectedCourt, selectedDate, selectedSlots, selectedAddOns]);
+
+
+
+  const getBookingSummary = () => {
+    const selectedCourtDetails = courts.find(court => court._id === selectedCourt);
+    return {
+      court: selectedCourtDetails?.court_name || '',
+      date: selectedDate ? selectedDate.format("YYYY-MM-DD") : '',
+      slots: selectedSlots.map(slot => ({
+        time: `${dayjs(slot.startTime).format("h:mm A")} - ${dayjs(slot.endTime).format("h:mm A")}`,
+        price: slot.price
+      })),
+      addons: selectedAddOns.map(addon => ({
+        name: addon.item_name,
+        price: addon.price
+      })),
+      totalAmount: calculateTotalAmount()
+    };
+  };
+
+
 
 
 
@@ -63,6 +140,122 @@ const CourtBooking = () => {
   const courtImages = {
     "Court 1": "https://www.shutterstock.com/image-photo/badminton-court-without-people-night-600nw-2307374507.jpg",
     "Court 2": "https://content.jdmagicbox.com/comp/def_content/badminton-courts/6-badminton-courts-4-6f9mp.jpg",
+  };
+
+  const loadRazorpayScript = () => {
+    return new Promise((resolve, reject) => {
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.async = true;
+      script.onload = () => {
+        console.log("✅ Razorpay script loaded");
+        resolve(true);
+      };
+      script.onerror = () => {
+        console.error("Razorpay script failed to load");
+        reject(new Error("Failed to load Razorpay SDK"));
+      };
+      document.body.appendChild(script);
+    });
+  };
+
+
+  const handleBooking = async () => {
+    try {
+      setProcessing(true);
+
+      if (!selectedCourt || !selectedDate || selectedSlots.length === 0) {
+        alert('Please select court, date and at least one time slot');
+        return;
+      }
+
+      console.log("Razorpay Key:", process.env.REACT_APP_RAZORPAY_KEY_ID);
+
+      const formattedAddons = selectedAddOns.map(addon => ({
+        addonId: addon._id,
+        quantity: 1,
+        type: 'rent'
+      }));
+
+      if (typeof window.Razorpay === "undefined") {
+        console.log("Razorpay not loaded, attempting to load...");
+        await loadRazorpayScript();
+        if (typeof window.Razorpay === "undefined") {
+          throw new Error("Failed to load Razorpay");
+        }
+      }
+
+
+      const bookingResponse = await createBooking({
+        courtId: selectedCourt,
+        slotId: selectedSlots.map(slot => slot._id),
+        amount: calculateTotalAmount(),
+        addons: formattedAddons
+      }).unwrap();
+
+      const { orderId, bookingId } = bookingResponse;
+
+
+      const options = {
+        key: process.env.REACT_RAZORPAY_KEY_ID,
+        amount: calculateTotalAmount() * 100,
+        currency: 'INR',
+        name: "Awinco Donations",
+        description: "Support our community",
+        order_id: orderId,
+
+        handler: async (response) => {
+          console.log(response, 'resp')
+          try {
+            const verificationResponse = await verifyBooking({
+              bookingId,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_signature: response.razorpay_signature,
+              payment_method: response.method
+            }).unwrap();
+            console.log(verificationResponse,'response')
+            if (verificationResponse.success) {
+              setBookingHistory({
+                court: courts.find(court => court._id === selectedCourt)?.court_name,
+                date: selectedDate.format("YYYY-MM-DD"),
+                slots: selectedSlots.map(slot => ({
+                  startTime: dayjs(slot.startTime).format("h:mm A"),
+                  endTime: dayjs(slot.endTime).format("h:mm A")
+                })),
+                addons: selectedAddOns.map(addon => addon.item_name),
+                totalAmount: calculateTotalAmount(),
+                status: 'Confirmed'
+              });
+              handleClickOpen();
+            }
+          } catch (error) {
+           console.log(error.message)
+          }
+        },
+        prefill: {
+          name: 'User Name',
+          email: 'user@example.com',
+          contact: '9999999999'
+        },
+        theme: {
+          color: '#3f51b5'
+        }
+      };
+
+      const paymentObject = new window.Razorpay(options);
+      paymentObject.on('payment.failed', function (response) {
+        console.log('Payment Failed:', response.error);
+        setProcessing(false);
+      });
+
+      paymentObject.open();
+
+    } catch (error) {
+      console.log('Booking Error:', error);
+    } finally {
+      setProcessing(false);
+    }
   };
 
 
@@ -74,20 +267,25 @@ const CourtBooking = () => {
     });
   };
 
+  const handleSlotToggle = (slot) => {
+    setSelectedSlots((prevSlots) => {
+      const exists = prevSlots.some((s) => s._id === slot._id);
+      return exists ? prevSlots.filter((s) => s._id !== slot._id) : [...prevSlots, slot];
+    });
+  };
+
+
   const handleCourtChange = (e) => {
     setSelectedCourt(e.target.value);
     setOpenDrawer(true);
   };
 
-  const handleConfirmBooking = () => {
-    if (!selectedDate || !selectedTime) {
-      alert("Please select a date and time slot.");
-      return;
-    }
-    const addOnTotal = Object.values(selectedAddOns).reduce((acc, val) => acc + val, 0);
-    setBookingSummary({ selectedCourt, selectedDate, selectedTime, total: 300 + addOnTotal });
-    setOpenDialog(true);
 
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+  const handleClose = () => {
+    setOpen(false);
   };
 
   return (
@@ -97,18 +295,18 @@ const CourtBooking = () => {
           display: "flex",
           flexDirection: "column",
           minHeight: "100vh",
-          backgroundColor:"#dedede",
-          alignItems:"center"
+          backgroundColor: "#dedede",
+          alignItems: "center"
         }}
       >
         <Header />
-        <Grid container spacing={2} sx={{ maxWidth: "80%",marginLeft:"10px",padding:'5px' }}>
+        <Grid container spacing={2} sx={{ maxWidth: "80%", marginLeft: "10px", padding: '5px' }}>
 
-          <Grid item xs={12} md={4} sx={{ height: "100vh" ,marginTop:"3px"}}>
-              <DetailsCard />
+          <Grid item xs={12} md={4} sx={{ height: "100vh", marginTop: "3px" }}>
+            <DetailsCard />
           </Grid>
 
-          <Grid item xs={12} md={8} container spacing={2} sx={{marginTop:"3px",height:"90vh"}}>
+          <Grid item xs={12} md={8} container spacing={2} sx={{ marginTop: "3px", height: "90vh" }}>
             <Grid item xs={12}>
               <Card sx={{ padding: 3, display: "flex", flexDirection: "column", height: "100%" }}>
                 <Typography variant="h6" fontWeight="bold">Select Court & Date</Typography>
@@ -140,13 +338,14 @@ const CourtBooking = () => {
                         <Grid item xs={4} key={slot._id}>
                           <Button
                             fullWidth
-                            variant={selectedTime === slot.startTime ? "contained" : "outlined"}
+                            variant={selectedSlots.some(s => s._id === slot._id) ? "contained" : "outlined"}
                             color={slot.isBooked ? "error" : "primary"}
                             disabled={slot.isBooked}
-                            onClick={() => setSelectedTime(slot.startTime)}
+                            onClick={() => handleSlotToggle(slot)}
                           >
-                            {dayjs(slot.startTime).format("h:mm A")}
+                            {`${dayjs(slot.startTime).format("h:mm A")} - ${dayjs(slot.endTime).format("h:mm A")}`}
                           </Button>
+
                         </Grid>
                       ))
                     )}
@@ -154,9 +353,12 @@ const CourtBooking = () => {
                 </Box>
               </Card>
             </Grid>
-
+            <Grid item xs={12}>
+              <Card sx={{ display: "flex", justifyContent: "flex-end", padding: 2 }}>
+                <Button variant="contained" color="primary" sx={{ display: "flex", justifyContent: "flex-end" }} onClick={handleClickOpen}>Proceed to Booking</Button>
+              </Card>
+            </Grid>
           </Grid>
-
         </Grid>
         <Footer />
       </Box>
@@ -169,35 +371,107 @@ const CourtBooking = () => {
         loading={addonLoading}
       />
 
-      <Dialog open={openHistoryModal} onClose={() => setOpenHistoryModal(false)} maxWidth="md" fullWidth>
-        <DialogTitle>Booking History</DialogTitle>
-        <DialogContent>
-          {bookingSummary ? (
-            <Box>
-              <CardMedia
-                component="img"
-                height="200"
-                image={courtImages[bookingSummary.selectedCourt]}
-                sx={{ borderRadius: 2 }}
-              />
-              <Typography variant="h6" mt={2}>Court: {bookingSummary.selectedCourt}</Typography>
-              <Typography>Date: {dayjs(bookingSummary.selectedDate).format("DD-MM-YYYY")}</Typography>
-              <Typography>Time Slot: {bookingSummary.selectedTime}</Typography>
-              <Typography variant="h6" mt={2}>Add-Ons:</Typography>
-              {Object.entries(selectedAddOns).map(([name, price]) => (
-                price > 0 && <Typography key={name}>{name} - ₹{price}</Typography>
-              ))}
-              <Typography variant="h6" mt={2}>Total Price: ₹{bookingSummary.total}</Typography>
-            </Box>
-          ) : (
-            <Typography>No previous bookings.</Typography>
-          )}
+      <BootstrapDialog
+        onClose={handleClose}
+        aria-labelledby="customized-dialog-title"
+        open={open}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
+          Booking Summary
+        </DialogTitle>
+        <IconButton
+          aria-label="close"
+          onClick={handleClose}
+          sx={{
+            position: 'absolute',
+            right: 8,
+            top: 8,
+            color: theme => theme.palette.grey[500],
+          }}
+        >
+          <CloseIcon />
+        </IconButton>
+        <DialogContent dividers>
+          <Box sx={{ p: 2 }}>
+            {/* Court Image */}
+            <Box
+              component="img"
+              sx={{
+                width: "100%",
+                height: "200px",
+                objectFit: "cover",
+                borderRadius: "8px",
+                mb: 2
+              }}
+              alt="Court"
+              src={courtImages[courts.find(court => court._id === selectedCourt)?.court_name]}
+            />
+
+            {/* Booking Details */}
+            <Typography variant="h6" gutterBottom>
+              Selected Court Details
+            </Typography>
+            <Typography gutterBottom>
+              Court: {courts.find(court => court._id === selectedCourt)?.court_name}
+            </Typography>
+            <Typography gutterBottom>
+              Date: {selectedDate?.format("DD MMMM YYYY")}
+            </Typography>
+
+            <Divider sx={{ my: 2 }} />
+
+            {/* Time Slots */}
+            <Typography variant="h6" gutterBottom>
+              Selected Time Slots
+            </Typography>
+            {selectedSlots.map((slot, index) => (
+              <Typography key={index} gutterBottom>
+                {dayjs(slot.startTime).format("h:mm A")} - {dayjs(slot.endTime).format("h:mm A")}
+                <span style={{ float: 'right' }}>₹{slot.price}</span>
+              </Typography>
+            ))}
+
+            {/* Add-ons if any */}
+            {selectedAddOns.length > 0 && (
+              <>
+                <Divider sx={{ my: 2 }} />
+                <Typography variant="h6" gutterBottom>
+                  Selected Add-ons
+                </Typography>
+                {selectedAddOns.map((addon, index) => (
+                  <Typography key={index} gutterBottom>
+                    {addon.item_name}
+                    <span style={{ float: 'right' }}>₹{addon.price}</span>
+                  </Typography>
+                ))}
+              </>
+            )}
+
+            <Divider sx={{ my: 2 }} />
+
+            {/* Total Amount */}
+            <Typography variant="h6">
+              Total Amount
+              <span style={{ float: 'right' }}>₹{calculateTotalAmount()}</span>
+            </Typography>
+          </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenHistoryModal(false)} color="primary">Close</Button>
+          <Button onClick={handleClose} color="error">
+            Cancel
+          </Button>
+          <Button
+            onClick={handleBooking}
+            variant="contained"
+            color="primary"
+            disabled={processing}
+          >
+            {processing ? 'Processing...' : 'Confirm & Pay'}
+          </Button>
         </DialogActions>
-      </Dialog>
-
+      </BootstrapDialog>
     </>
   );
 };

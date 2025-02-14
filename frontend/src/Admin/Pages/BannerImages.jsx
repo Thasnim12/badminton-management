@@ -15,6 +15,7 @@ const BannerImages = () => {
     const [openView, setOpenview] = useState(false);
     const [addBanner] = useAddBannerMutation();
     const { data } = useGetAllBannersQuery();
+    console.log(data, 'data')
     const [fetchBanner, { data: bannerData }] = useLazyViewBannerQuery();
     const [updateBanner] = useUpdateBannerMutation();
     const [isEditing, setIsEditing] = useState(false);
@@ -43,25 +44,51 @@ const BannerImages = () => {
         setBanner((prev) => {
             const updatedNewImages = [...prev.newImages];
             updatedNewImages.splice(index, 1);
-            return { ...prev, newImages: updatedNewImages };
+
+            const updatedOrder = updatedNewImages.map((_, i) => i + 1);
+
+            return {
+                ...prev,
+                newImages: updatedNewImages,
+                order: updatedOrder
+            };
         });
     };
+
+
+    const handleRemoveExistingImage = (imageUrl, index) => {
+        setBanner((prev) => {
+            const updatedImages = [...prev.imageUrl];
+            updatedImages.splice(index, 1);
+
+            const updatedOrder = updatedImages.map((_, i) => i + 1);
+
+            return {
+                ...prev,
+                imageUrl: updatedImages,
+                removedImages: [...prev.removedImages, imageUrl],
+                order: updatedOrder
+            };
+        });
+    };
+
 
     const [loading, setLoading] = useState(false);
 
     const handleViewBanner = async (bannerId) => {
         setLoading(true);
+        setOpenview(true);
         try {
             const response = await fetchBanner(bannerId).unwrap();
+            console.log(response, 'resp')
             setBanner({
-                _id: response._id,
-                title: response.title,
-                imageUrl: response.imageUrl,
-                order: response.order || [],
+                _id: response.banner._id,
+                title: response.banner.title,
+                imageUrl: response.banner.imageUrl,
+                order: response.banner.order || [],
                 removedImages: [],
                 newImages: [],
             });
-            setOpenview(true);
         } catch (error) {
             console.error("Error fetching banner:", error);
         } finally {
@@ -138,22 +165,41 @@ const BannerImages = () => {
                         {banner?.imageUrl?.map((image, index) => (
                             <Grid item xs={6} sm={4} md={3} key={index}>
                                 <Box sx={{ position: "relative" }}>
-                                    <img src={`http://localhost:5000/uploads/${image}`} style={{ width: "100%", height: "150px", objectFit: "cover", borderRadius: "8px" }} />
+                                    <img
+                                        src={`http://localhost:5000/uploads/${image}`}
+                                        style={{ width: "100%", height: "150px", objectFit: "cover", borderRadius: "8px" }}
+                                    />
+                                    {isEditing && (
+                                        <IconButton
+                                            sx={{ position: "absolute", top: 5, right: 5, backgroundColor: "white" }}
+                                            onClick={() => handleRemoveExistingImage(image, index)}
+                                        >
+                                            <DeleteIcon color="white" />
+                                        </IconButton>
+                                    )}
                                 </Box>
                             </Grid>
                         ))}
 
+                        {/* Display Newly Added Images */}
                         {banner?.newImages?.map((file, index) => (
                             <Grid item xs={6} sm={4} md={3} key={`new-${index}`}>
                                 <Box sx={{ position: "relative" }}>
-                                    <img src={URL.createObjectURL(file)} style={{ width: "100%", height: "150px", objectFit: "cover", borderRadius: "8px" }} />
-                                    <IconButton onClick={() => handleRemoveNewImage(index)}>
-                                        <DeleteIcon />
+                                    <img
+                                        src={URL.createObjectURL(file)}
+                                        style={{ width: "100%", height: "150px", objectFit: "cover", borderRadius: "8px" }}
+                                    />
+                                    <IconButton
+                                        sx={{ position: "absolute", top: 5, right: 5, backgroundColor: "white" }}
+                                        onClick={() => handleRemoveNewImage(index)}
+                                    >
+                                        <DeleteIcon color="error" />
                                     </IconButton>
                                 </Box>
                             </Grid>
                         ))}
                     </Grid>
+
 
                     {isEditing && (
                         <Box sx={{ mt: 2 }}>

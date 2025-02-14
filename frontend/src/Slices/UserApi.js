@@ -25,14 +25,14 @@ export const userApi = createApi({
         method: "GET",
       }),
     }),
-
     updateProfile: builder.mutation({
-      query: (profileData) => ({
+      query: (formData) => ({
         url: "/update-profile",
         method: "PUT",
-        body: profileData,
+        body: formData,
       }),
     }),
+    
     registerUser: builder.mutation({
       query: (data) => ({
         url: "/register",
@@ -75,6 +75,20 @@ export const userApi = createApi({
         body: data,
       }),
     }),
+    createBooking: builder.mutation({
+      query: (data) => ({
+        url: "/booking",
+        method: "POST",
+        body: data,
+      }),
+    }),
+    verifyBooking: builder.mutation({
+      query: (data) => ({
+        url: "/verify-booking",
+        method: "POST",
+        body: data,
+      }),
+    }),
   }),
 });
 
@@ -88,7 +102,9 @@ export const {
   useGetSlotsQuery,
   useGetAllcourtsQuery,
   useGetAddonsQuery,
-  useUpdateProfileMutation
+  useUpdateProfileMutation,
+  useCreateBookingMutation,
+  useVerifyBookingMutation
 } = userApi;
 
 export default userApi;
