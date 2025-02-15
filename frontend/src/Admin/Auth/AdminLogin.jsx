@@ -40,7 +40,7 @@ const AdminLogin = () => {
 
 
   const adminInfo = useSelector((state)=>state.adminAuth)
-
+console.log(adminInfo, "admin")
 
   const [showPassword, setShowPassword] = useState(false);
 

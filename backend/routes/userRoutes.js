@@ -1,8 +1,14 @@
-const express = require('express')
-const { verifyPayment,createDonation } = require('../controllers/donationController')
-const { createBooking,verifyBookingPayment } = require('../controllers/bookingController')
-const authenticateUser = require('../middlewares/userMiddleware')
-const { userUpload } = require('../helper/multer')
+const express = require("express");
+const {
+  verifyPayment,
+  createDonation,
+} = require("../controllers/donationController");
+const {
+  createBooking,
+  verifyBookingPayment,
+} = require("../controllers/bookingController");
+const { authenticateUser } = require("../middlewares/userMiddleware");
+const { userUpload } = require("../helper/multer");
 const {
   userLogin,
   userRegister,
@@ -16,7 +22,6 @@ const {
   sendMessage,
 
 } = require("../controllers/userController");
-
 
 const userroute = express.Router();
 
@@ -36,4 +41,4 @@ userroute.post('/booking',authenticateUser,createBooking)
 userroute.post('/verify-booking',authenticateUser,verifyBookingPayment)
 userroute.put('/update-profile', authenticateUser,updateUserDetails)
 
-module.exports = userroute
+module.exports = userroute;

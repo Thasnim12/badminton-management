@@ -16,7 +16,7 @@ import {
   DialogTitle,
   Container,
   Box,
-  IconButton
+  IconButton,
 } from "@mui/material";
 import Layout from "../Global/Layouts";
 import VisibilityIcon from "@mui/icons-material/Visibility";
@@ -58,7 +58,7 @@ const Enquiries = () => {
             { label: "Enquiries", path: "/admin/enquiry" },
           ]}
         />
-        <TableContainer component={Paper}  sx={{ marginTop: "25px" }}>
+        <TableContainer component={Paper} sx={{ marginTop: "35px" }}>
           <Table>
             <TableHead>
               <TableRow>
@@ -126,7 +126,11 @@ const Enquiries = () => {
             )}
           </DialogContent>
           <DialogActions>
-            <Button onClick={handleCloseDialog} variant="outlined" color="primary">
+            <Button
+              onClick={handleCloseDialog}
+              variant="outlined"
+              color="primary"
+            >
               Close
             </Button>
           </DialogActions>

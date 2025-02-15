@@ -9,7 +9,9 @@ import {
   Modal,
   Box,
   IconButton,
+  InputAdornment,
 } from "@mui/material";
+import { Snackbar, Alert } from "@mui/material";
 import {
   LockOutlined,
   MailOutlined,
@@ -17,6 +19,7 @@ import {
   PhoneOutlined,
   Close as CloseIcon,
 } from "@mui/icons-material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -30,7 +33,6 @@ import Footer from "../Global/Footer";
 import { useSnackbar } from "notistack";
 import { useDispatch, useSelector } from "react-redux";
 import { setUserCredentials } from "../../Slices/UserSlice";
-
 
 const validationSchema = Yup.object({
   name: Yup.string().required("Full Name is required"),
@@ -52,40 +54,65 @@ const validationSchema = Yup.object({
 
 const Register = () => {
   const navigate = useNavigate();
-  const { enqueueSnackbar } = useSnackbar(); // for notifications
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
   const [openOtpModal, setOpenOtpModal] = useState(false);
   const [otp, setOtp] = useState("");
-  const [ userId,setUserId ] = useState("")
+  const [userId, setUserId] = useState("");
   const dispatch = useDispatch();
-  const { control,handleSubmit,formState: { errors },reset } = useForm({resolver: yupResolver(validationSchema)});
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm({ resolver: yupResolver(validationSchema) });
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const [registerUser, { isLoading: isRegistering, error: registerError }] = useRegisterUserMutation();
-  const [verifyOtp, { isLoading: isVerifyingOtp, error: otpError }] = useVerifyOtpMutation();
+  const [registerUser, { isLoading: isRegistering, error: registerError }] =
+    useRegisterUserMutation();
+  const [verifyOtp, { isLoading: isVerifyingOtp, error: otpError }] =
+    useVerifyOtpMutation();
 
+  const handleSnackbarClose = () => {
+    setOpenSnackbar(false);
+  };
+
+  const showSnackbar = (message, severity) => {
+    setSnackbarMessage(message);
+    setSnackbarSeverity(severity);
+    setOpenSnackbar(true);
+  };
+
+  const handleTogglePasswordVisibility = () => {
+    setShowPassword((prev) => !prev);
+  };
+
+  const handleToggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword((prev) => !prev);
+  };
 
   const handleRegistration = async (data) => {
     try {
-
       const response = await registerUser({
         name: data.name,
         mobile: data.mobile,
         email: data.email,
         password: data.password,
         phoneno: data.phoneno,
-        confirmPassword: data.confirmPassword
+        confirmPassword: data.confirmPassword,
       }).unwrap();
-       if(response){
-        const user = response.user
-        console.log(user,'user')
-        setUserId(user._id)
-       }
-      console.log("Registration successful:", response);
+      if (response) {
+        const user = response.user;
+        setUserId(user._id);
+      }
+
+      showSnackbar("Registration successful!", "success");
       setOpenOtpModal(true);
     } catch (error) {
       console.error("Registration failed:", error);
-      enqueueSnackbar("Registration failed. Please try again.", {
-        variant: "error",
-      });
+      showSnackbar(error?.data?.message, "error");
     }
   };
 
@@ -93,16 +120,21 @@ const Register = () => {
     event.preventDefault();
 
     try {
-      const response = await verifyOtp({ userId,otp }).unwrap();
-      if (response?.data?.status === 'verified') {
-        const { name,email,phoneno } = response.data;
-        dispatch(setUserCredentials({ name,email,phoneno }))
-        enqueueSnackbar("Registration successful!", { variant: "success" });
-        navigate("/login");
-      } 
+      const response = await verifyOtp({ userId, otp }).unwrap();
+      if (response?.data?.status === "verified") {
+        const { name, email, phoneno } = response.data;
+        dispatch(setUserCredentials({ name, email, phoneno }));
+        showSnackbar("Registration successful!", "success");
+        setOpenOtpModal(false);
+        
+        // Force navigation after a small delay
+        setTimeout(() => {
+          navigate("/login", { replace: true });
+        }, 100);
+      }
     } catch (error) {
       console.error("OTP validation failed:", error);
-      enqueueSnackbar("Invalid OTP. Please try again.", { variant: "error" });
+      showSnackbar(error?.data?.message, "error");
     }
   };
 
@@ -154,7 +186,6 @@ const Register = () => {
                   />
                 )}
               />
-
               <Controller
                 name="phoneno"
                 control={control}
@@ -176,7 +207,6 @@ const Register = () => {
                   />
                 )}
               />
-
               <Controller
                 name="email"
                 control={control}
@@ -198,7 +228,6 @@ const Register = () => {
                   />
                 )}
               />
-
               <Controller
                 name="password"
                 control={control}
@@ -206,7 +235,7 @@ const Register = () => {
                   <TextField
                     {...field}
                     label="Password"
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     fullWidth
                     margin="normal"
                     variant="outlined"
@@ -216,11 +245,20 @@ const Register = () => {
                       startAdornment: (
                         <LockOutlined style={{ marginRight: 8 }} />
                       ),
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton
+                            onClick={handleTogglePasswordVisibility}
+                            edge="end"
+                          >
+                            {showPassword ? <Visibility /> : <VisibilityOff />}
+                          </IconButton>
+                        </InputAdornment>
+                      ),
                     }}
                   />
                 )}
               />
-
               <Controller
                 name="confirmPassword"
                 control={control}
@@ -228,7 +266,7 @@ const Register = () => {
                   <TextField
                     {...field}
                     label="Confirm Password"
-                    type="password"
+                    type={showConfirmPassword ? "text" : "password"}
                     fullWidth
                     margin="normal"
                     variant="outlined"
@@ -238,11 +276,24 @@ const Register = () => {
                       startAdornment: (
                         <LockOutlined style={{ marginRight: 8 }} />
                       ),
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton
+                            onClick={handleToggleConfirmPasswordVisibility}
+                            edge="end"
+                          >
+                            {showConfirmPassword ? (
+                              <Visibility />
+                            ) : (
+                              <VisibilityOff />
+                            )}
+                          </IconButton>
+                        </InputAdornment>
+                      ),
                     }}
                   />
                 )}
               />
-
               <Button
                 type="submit"
                 variant="contained"
@@ -253,7 +304,6 @@ const Register = () => {
               >
                 {isRegistering ? "Registering..." : "Sign Up"}
               </Button>
-
               <div style={{ marginTop: "20px", textAlign: "center" }}>
                 <Typography variant="body2">
                   Already have an account?{" "}
@@ -329,6 +379,19 @@ const Register = () => {
           </form>
         </Box>
       </Modal>
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={3000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <Alert
+          onClose={handleSnackbarClose}
+          severity={snackbarSeverity}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
 
       <Footer />
     </div>

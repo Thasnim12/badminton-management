@@ -51,7 +51,7 @@ const Addons = () => {
           ]}
         />
         <Grid item xs={12}>
-          <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
+          <Box sx={{ display: "flex", justifyContent: "flex-start", mb: 2 }}>
             <Button
               variant="outlined"
               sx={{ backgroundColor: "#2c387e", color: "white" }}
@@ -68,7 +68,7 @@ const Addons = () => {
         ) : error ? (
           <p>Error fetching add-ons</p>
         ) : (
-          <TableContainer component={Paper}>
+          <TableContainer sx={{ marginTop: "25px" }} component={Paper}>
             <Table sx={{ minWidth: 650 }} aria-label="addons table">
               <TableHead>
                 <TableRow>

@@ -13,33 +13,37 @@ import {
   DialogContent,
   DialogActions,
   Drawer,
-  Divider
+  Divider,
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { skipToken } from "@reduxjs/toolkit/query";
-import { styled } from '@mui/material/styles';
+import { styled } from "@mui/material/styles";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { useNavigate } from "react-router-dom";
-import IconButton from '@mui/material/IconButton';
-import CloseIcon from '@mui/icons-material/Close';
+import IconButton from "@mui/material/IconButton";
+import CloseIcon from "@mui/icons-material/Close";
 import dayjs from "dayjs";
 import Header from "../Global/Header";
 import Footer from "../Global/Footer";
-import { useGetAllcourtsQuery, useGetSlotsQuery, useGetAddonsQuery, useCreateBookingMutation, useVerifyBookingMutation } from "../../Slices/UserApi";
+import {
+  useGetAllcourtsQuery,
+  useGetSlotsQuery,
+  useGetAddonsQuery,
+  useCreateBookingMutation,
+  useVerifyBookingMutation,
+} from "../../Slices/UserApi";
 import AddOnsDrawer from "../Components/Drawer";
 import DetailsCard from "../Components/DetailsCard";
 
-
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
-  '& .MuiDialogContent-root': {
+  "& .MuiDialogContent-root": {
     padding: theme.spacing(2),
   },
-  '& .MuiDialogActions-root': {
+  "& .MuiDialogActions-root": {
     padding: theme.spacing(1),
   },
 }));
-
 
 const CourtBooking = () => {
   const [selectedTime, setSelectedTime] = useState(null);
@@ -55,21 +59,18 @@ const CourtBooking = () => {
   const [open, setOpen] = useState(false);
   const [alert, setAlert] = useState(null);
 
-
   const [bookingData, setBookingData] = useState({
     courtId: "",
     slotId: [],
     amount: 0,
     addons: [],
-    courtImage: ""
+    courtImage: "",
   });
 
   const [createBooking] = useCreateBookingMutation();
   const [verifyBooking] = useVerifyBookingMutation();
   const [bookingHistory, setBookingHistory] = useState(null);
   const [processing, setProcessing] = useState(false);
-
-
 
   const { data, isLoading: courtsLoading } = useGetAllcourtsQuery();
   const courts = data?.court || [];
@@ -87,59 +88,53 @@ const CourtBooking = () => {
   console.log(addons, "ad");
 
   const slots = slotsData || [];
-  console.log(slots, 'slots')
+  console.log(slots, "slots");
 
   const calculateTotalAmount = () => {
     let total = 0;
 
-    selectedSlots.forEach(slot => {
+    selectedSlots.forEach((slot) => {
       total += slot.price;
     });
 
-    selectedAddOns.forEach(addOn => {
+    selectedAddOns.forEach((addOn) => {
       total += addOn.price;
     });
 
     return total;
   };
 
-  console.log(bookingData, 'book-data')
-
+  console.log(bookingData, "book-data");
 
   useEffect(() => {
     setBookingData((prev) => ({
       ...prev,
       courtId: selectedCourt,
       date: selectedDate ? selectedDate.format("YYYY-MM-DD") : null,
-      slotId: selectedSlots.map(slot => slot._id),
-      addons: selectedAddOns.map(addon => addon._id),
+      slotId: selectedSlots.map((slot) => slot._id),
+      addons: selectedAddOns.map((addon) => addon._id),
       amount: calculateTotalAmount(),
     }));
   }, [selectedCourt, selectedDate, selectedSlots, selectedAddOns]);
 
-
-
   const getBookingSummary = () => {
-    const selectedCourtDetails = courts.find(court => court._id === selectedCourt);
+    const selectedCourtDetails = courts.find(
+      (court) => court._id === selectedCourt
+    );
     return {
-      court: selectedCourtDetails?.court_name || '',
-      date: selectedDate ? selectedDate.format("YYYY-MM-DD") : '',
-      slots: selectedSlots.map(slot => ({
+      court: selectedCourtDetails?.court_name || "",
+      date: selectedDate ? selectedDate.format("YYYY-MM-DD") : "",
+      slots: selectedSlots.map((slot) => ({
         time: `${dayjs(slot.startTime).format("h:mm A")} - ${dayjs(slot.endTime).format("h:mm A")}`,
-        price: slot.price
+        price: slot.price,
       })),
-      addons: selectedAddOns.map(addon => ({
+      addons: selectedAddOns.map((addon) => ({
         name: addon.item_name,
-        price: addon.price
+        price: addon.price,
       })),
-      totalAmount: calculateTotalAmount()
+      totalAmount: calculateTotalAmount(),
     };
   };
-
-
-
-
-
 
   const courtImages = {
     "Court 1":
@@ -165,22 +160,21 @@ const CourtBooking = () => {
     });
   };
 
-
   const handleBooking = async () => {
     try {
       setProcessing(true);
 
       if (!selectedCourt || !selectedDate || selectedSlots.length === 0) {
-        alert('Please select court, date and at least one time slot');
+        alert("Please select court, date and at least one time slot");
         return;
       }
 
       console.log("Razorpay Key:", process.env.REACT_APP_RAZORPAY_KEY_ID);
 
-      const formattedAddons = selectedAddOns.map(addon => ({
+      const formattedAddons = selectedAddOns.map((addon) => ({
         addonId: addon._id,
         quantity: 1,
-        type: 'rent'
+        type: "rent",
       }));
 
       if (typeof window.Razorpay === "undefined") {
@@ -191,80 +185,76 @@ const CourtBooking = () => {
         }
       }
 
-
       const bookingResponse = await createBooking({
         courtId: selectedCourt,
-        slotId: selectedSlots.map(slot => slot._id),
+        slotId: selectedSlots.map((slot) => slot._id),
         amount: calculateTotalAmount(),
-        addons: formattedAddons
+        addons: formattedAddons,
       }).unwrap();
 
       const { orderId, bookingId } = bookingResponse;
 
-
       const options = {
         key: process.env.REACT_RAZORPAY_KEY_ID,
         amount: calculateTotalAmount() * 100,
-        currency: 'INR',
+        currency: "INR",
         name: "Awinco Donations",
         description: "Support our community",
         order_id: orderId,
 
         handler: async (response) => {
-          console.log(response, 'resp')
+          console.log(response, "resp");
           try {
             const verificationResponse = await verifyBooking({
               bookingId,
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_order_id: response.razorpay_order_id,
               razorpay_signature: response.razorpay_signature,
-              payment_method: response.method
+              payment_method: response.method,
             }).unwrap();
-            console.log(verificationResponse,'response')
+            console.log(verificationResponse, "response");
             if (verificationResponse.success) {
               setBookingHistory({
-                court: courts.find(court => court._id === selectedCourt)?.court_name,
+                court: courts.find((court) => court._id === selectedCourt)
+                  ?.court_name,
                 date: selectedDate.format("YYYY-MM-DD"),
-                slots: selectedSlots.map(slot => ({
+                slots: selectedSlots.map((slot) => ({
                   startTime: dayjs(slot.startTime).format("h:mm A"),
-                  endTime: dayjs(slot.endTime).format("h:mm A")
+                  endTime: dayjs(slot.endTime).format("h:mm A"),
                 })),
-                addons: selectedAddOns.map(addon => addon.item_name),
+                addons: selectedAddOns.map((addon) => addon.item_name),
                 totalAmount: calculateTotalAmount(),
-                status: 'Confirmed'
+                status: "Confirmed",
               });
               handleClickOpen();
             }
           } catch (error) {
-           console.log(error.message)
+            console.log(error.message);
           }
         },
         prefill: {
-          name: 'User Name',
-          email: 'user@example.com',
-          contact: '9999999999'
+          name: "User Name",
+          email: "user@example.com",
+          contact: "9999999999",
         },
         theme: {
-          color: '#3f51b5'
-        }
+          color: "#3f51b5",
+        },
       };
 
       const paymentObject = new window.Razorpay(options);
-      paymentObject.on('payment.failed', function (response) {
-        console.log('Payment Failed:', response.error);
+      paymentObject.on("payment.failed", function (response) {
+        console.log("Payment Failed:", response.error);
         setProcessing(false);
       });
 
       paymentObject.open();
-
     } catch (error) {
-      console.log('Booking Error:', error);
+      console.log("Booking Error:", error);
     } finally {
       setProcessing(false);
     }
   };
-
-
 
   const handleAddOnToggle = (addOn) => {
     setSelectedAddOns((prev) => {
@@ -278,16 +268,16 @@ const CourtBooking = () => {
   const handleSlotToggle = (slot) => {
     setSelectedSlots((prevSlots) => {
       const exists = prevSlots.some((s) => s._id === slot._id);
-      return exists ? prevSlots.filter((s) => s._id !== slot._id) : [...prevSlots, slot];
+      return exists
+        ? prevSlots.filter((s) => s._id !== slot._id)
+        : [...prevSlots, slot];
     });
   };
-
 
   const handleCourtChange = (e) => {
     setSelectedCourt(e.target.value);
     setOpenDrawer(true);
   };
-
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -304,17 +294,27 @@ const CourtBooking = () => {
           flexDirection: "column",
           minHeight: "100vh",
           backgroundColor: "#dedede",
-          alignItems: "center"
+          alignItems: "center",
         }}
       >
         <Header />
-        <Grid container spacing={2} sx={{ maxWidth: "80%", marginLeft: "10px", padding: '5px' }}>
-
+        <Grid
+          container
+          spacing={2}
+          sx={{ maxWidth: "80%", marginLeft: "10px", padding: "5px" }}
+        >
           <Grid item xs={12} md={4} sx={{ height: "100vh", marginTop: "3px" }}>
             <DetailsCard />
           </Grid>
 
-          <Grid item xs={12} md={8} container spacing={2} sx={{ marginTop: "3px", height: "90vh" }}>
+          <Grid
+            item
+            xs={12}
+            md={8}
+            container
+            spacing={2}
+            sx={{ marginTop: "3px", height: "90vh" }}
+          >
             <Grid item xs={12}>
               <Card
                 sx={{
@@ -378,14 +378,17 @@ const CourtBooking = () => {
                         <Grid item xs={4} key={slot._id}>
                           <Button
                             fullWidth
-                            variant={selectedSlots.some(s => s._id === slot._id) ? "contained" : "outlined"}
+                            variant={
+                              selectedSlots.some((s) => s._id === slot._id)
+                                ? "contained"
+                                : "outlined"
+                            }
                             color={slot.isBooked ? "error" : "primary"}
                             disabled={slot.isBooked}
                             onClick={() => handleSlotToggle(slot)}
                           >
                             {`${dayjs(slot.startTime).format("h:mm A")} - ${dayjs(slot.endTime).format("h:mm A")}`}
                           </Button>
-
                         </Grid>
                       ))
                     )}
@@ -394,13 +397,21 @@ const CourtBooking = () => {
               </Card>
             </Grid>
             <Grid item xs={12}>
-              <Card sx={{ display: "flex", justifyContent: "flex-end", padding: 2 }}>
-                <Button variant="contained" color="primary" sx={{ display: "flex", justifyContent: "flex-end" }} onClick={handleClickOpen}>Proceed to Booking</Button>
+              <Card
+                sx={{ display: "flex", justifyContent: "flex-end", padding: 2 }}
+              >
+                <Button
+                  variant="contained"
+                  color="primary"
+                  sx={{ display: "flex", justifyContent: "flex-end" }}
+                  onClick={handleClickOpen}
+                >
+                  Proceed to Booking
+                </Button>
               </Card>
             </Grid>
           </Grid>
         </Grid>
-        <Footer />
       </Box>
       <AddOnsDrawer
         open={openDrawer}
@@ -425,10 +436,10 @@ const CourtBooking = () => {
           aria-label="close"
           onClick={handleClose}
           sx={{
-            position: 'absolute',
+            position: "absolute",
             right: 8,
             top: 8,
-            color: theme => theme.palette.grey[500],
+            color: (theme) => theme.palette.grey[500],
           }}
         >
           <CloseIcon />
@@ -443,10 +454,15 @@ const CourtBooking = () => {
                 height: "200px",
                 objectFit: "cover",
                 borderRadius: "8px",
-                mb: 2
+                mb: 2,
               }}
               alt="Court"
-              src={courtImages[courts.find(court => court._id === selectedCourt)?.court_name]}
+              src={
+                courtImages[
+                  courts.find((court) => court._id === selectedCourt)
+                    ?.court_name
+                ]
+              }
             />
 
             {/* Booking Details */}
@@ -454,7 +470,8 @@ const CourtBooking = () => {
               Selected Court Details
             </Typography>
             <Typography gutterBottom>
-              Court: {courts.find(court => court._id === selectedCourt)?.court_name}
+              Court:{" "}
+              {courts.find((court) => court._id === selectedCourt)?.court_name}
             </Typography>
             <Typography gutterBottom>
               Date: {selectedDate?.format("DD MMMM YYYY")}
@@ -468,8 +485,9 @@ const CourtBooking = () => {
             </Typography>
             {selectedSlots.map((slot, index) => (
               <Typography key={index} gutterBottom>
-                {dayjs(slot.startTime).format("h:mm A")} - {dayjs(slot.endTime).format("h:mm A")}
-                <span style={{ float: 'right' }}>₹{slot.price}</span>
+                {dayjs(slot.startTime).format("h:mm A")} -{" "}
+                {dayjs(slot.endTime).format("h:mm A")}
+                <span style={{ float: "right" }}>₹{slot.price}</span>
               </Typography>
             ))}
 
@@ -483,7 +501,7 @@ const CourtBooking = () => {
                 {selectedAddOns.map((addon, index) => (
                   <Typography key={index} gutterBottom>
                     {addon.item_name}
-                    <span style={{ float: 'right' }}>₹{addon.price}</span>
+                    <span style={{ float: "right" }}>₹{addon.price}</span>
                   </Typography>
                 ))}
               </>
@@ -494,7 +512,7 @@ const CourtBooking = () => {
             {/* Total Amount */}
             <Typography variant="h6">
               Total Amount
-              <span style={{ float: 'right' }}>₹{calculateTotalAmount()}</span>
+              <span style={{ float: "right" }}>₹{calculateTotalAmount()}</span>
             </Typography>
           </Box>
         </DialogContent>
@@ -508,10 +526,11 @@ const CourtBooking = () => {
             color="primary"
             disabled={processing}
           >
-            {processing ? 'Processing...' : 'Confirm & Pay'}
+            {processing ? "Processing..." : "Confirm & Pay"}
           </Button>
         </DialogActions>
       </BootstrapDialog>
+      <Footer />
     </>
   );
 };

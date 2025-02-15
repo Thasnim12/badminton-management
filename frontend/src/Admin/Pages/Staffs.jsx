@@ -20,6 +20,7 @@ import {
   DialogContentText,
   DialogTitle,
   Pagination,
+  Card,
 } from "@mui/material";
 import {
   useGetStaffsQuery,
@@ -31,8 +32,9 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import Layout from "../Global/Layouts";
 import BreadcrumbNav from "../Global/Breadcrumb";
+import ManageStaffs from "./ManageStaffs";
 
-const ManageStaffs = () => {
+const Staffs = () => {
   const { data, error, isLoading, refetch } = useGetStaffsQuery();
   const [updateStaff, { isLoading: isUpdating }] = useUpdateStaffMutation();
   const [deleteStaff, { isLoading: isDeleting }] = useDeleteStaffMutation();
@@ -43,6 +45,7 @@ const ManageStaffs = () => {
   const [mode, setMode] = useState("view");
   const [page, setPage] = useState(1);
   const rowsPerPage = 5;
+  const [openForm, setOpenform] = useState(false);
 
   if (isLoading) return <Typography>Loading...</Typography>;
   if (error) return <Typography>Error fetching staff data</Typography>;
@@ -51,6 +54,14 @@ const ManageStaffs = () => {
     (page - 1) * rowsPerPage,
     page * rowsPerPage
   );
+
+  const handleClickOpen = () => {
+    setOpenform(true);
+  };
+
+  const handleClose = () => {
+    setOpenform(false);
+  };
 
   const handlePageChange = (event, value) => setPage(value);
 
@@ -106,15 +117,32 @@ const ManageStaffs = () => {
   return (
     <Layout>
       <Container sx={{ marginTop: "25px" }} maxWidth="lg">
-      <BreadcrumbNav
+        <BreadcrumbNav
           links={[
             { label: "Dashboard", path: "/admin" },
             { label: "Staffs", path: "/admin/manage-staffs" },
           ]}
         />
+
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginTop: "25px",
+          }}
+        >
+          <Button
+            variant="contained"
+            sx={{ backgroundColor: "#2c387e", color: "white"}}
+            onClick={handleClickOpen}
+          >
+           Add Staff
+          </Button>
+        </Box>
         <TableContainer
           component={Paper}
-          sx={{ boxShadow: 3, borderRadius: 2 }}
+          sx={{ boxShadow: 3, borderRadius: 2 ,  marginTop: "25px",}}
         >
           <Table sx={{ minWidth: 650 }} aria-label="staff table">
             <TableHead>
@@ -296,8 +324,15 @@ const ManageStaffs = () => {
           </DialogActions>
         </Dialog>
       </Container>
+      {openForm && (
+        <ManageStaffs
+          openForm={openForm}
+          handleClickOpen={handleClickOpen}
+          handleClose={handleClose}
+        />
+      )}
     </Layout>
   );
 };
 
-export default ManageStaffs;
+export default Staffs;
