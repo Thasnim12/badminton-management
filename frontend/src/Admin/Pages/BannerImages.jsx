@@ -28,6 +28,7 @@ import {
     useGetAllBannersQuery,
     useLazyViewBannerQuery,
     useUpdateBannerMutation,
+    useDeleteBannerMutation
 } from "../../Slices/AdminApi";
 import AddBanner from "../Components/Addbanner";
 import BreadcrumbNav from "../Global/Breadcrumb";
@@ -38,7 +39,8 @@ const BannerImages = () => {
     const [addBanner] = useAddBannerMutation();
     const { data } = useGetAllBannersQuery();
     console.log(data, 'data')
-    const [fetchBanner, { data: bannerData }] = useLazyViewBannerQuery();
+    const [fetchBanner, { data: bannerData },refetch] = useLazyViewBannerQuery();
+    const [deleteBanner] = useDeleteBannerMutation();
     const [updateBanner] = useUpdateBannerMutation();
     const [isEditing, setIsEditing] = useState(false);
 
@@ -160,6 +162,17 @@ const BannerImages = () => {
     const handleClose = () => {
         setOpen(false);
     };
+
+    const handleDelete = async(bannerId) =>{
+        try{
+         const response = await deleteBanner(bannerId)
+         console.log(response)
+         refetch();
+        }
+        catch(error){
+            console.log(error.message)
+        }
+    }
 
     return (
         <Layout>

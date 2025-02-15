@@ -46,7 +46,7 @@ const Profile = () => {
   const [alert, setAlert] = useState({
     open: false,
     message: "",
-    severity: "success", // success, error, info, warning
+    severity: "success",
   });
 
   useEffect(() => {
@@ -93,7 +93,11 @@ const Profile = () => {
       formDataToSend.append("name", formData.name);
       formDataToSend.append("email", formData.email);
       formDataToSend.append("mobile", formData.mobile);
-      formDataToSend.append("profileImage", formData.profileImage);
+
+      if (profileImage) {
+        formDataToSend.append("profileImage", profileImage); 
+        
+      }
      
 
       const response = await updateProfile(formDataToSend).unwrap();
@@ -120,6 +124,7 @@ const Profile = () => {
         email: user.email || "",
         mobile: user.phoneno || "",
         password: "",
+        profileImage: user.profileImage || "/default-profile.jpg",
       });
 
       setProfileImage(user.profileImage || "/default-profile.jpg");

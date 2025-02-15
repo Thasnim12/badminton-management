@@ -74,14 +74,11 @@ export const adminApi = createApi({
     }),
     addcourts: builder.mutation({
       query: (data) => ({
-        url: `/courts`,
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: data
+        url: "/courts",
+        method: "POST",
+        body: data,  
       }),
-    }),
+    }),    
     updatecourts: builder.mutation({
       query: ({ slotId,...data }) => ({
         url: `/edit-slots/${slotId}`,
@@ -150,7 +147,36 @@ export const adminApi = createApi({
         body: userData,
       }),
     }),
-    
+    getBookings: builder.query({
+      query: () => '/bookings',
+      method: 'GET',
+    }),
+    manageCsv: builder.mutation({
+      query: () => ({
+        url: "/download-booking",
+        method: "GET",
+        responseHandler: async (response) => response.blob(),
+      }),
+    }),
+    managedownloadCsv: builder.mutation({
+      query: () => ({
+        url: "/download-donation",
+        method: "GET",
+        responseHandler: async (response) => response.blob(),
+      }),
+    }),
+    deleteBanner: builder.mutation({
+      query: (bannerId) => ({
+        url: `/delete-banner/${bannerId}`,
+        method: "DELETE",
+      }),
+    }),
+    deleteAddon: builder.mutation({
+      query: (addonsId) => ({
+        url: `/delete-addons/${addonsId}`,
+        method: "DELETE",
+      }),
+    }),
   }),
 });   
 
@@ -178,6 +204,11 @@ export const {
   useUpdateBannerMutation,
   useGetMessagesQuery,
   useAddUserMutation,
+  useGetBookingsQuery,
+  useManageCsvMutation,
+  useManagedownloadCsvMutation,
+  useDeleteBannerMutation,
+  useDeleteAddonMutation
  }
   = adminApi;
 

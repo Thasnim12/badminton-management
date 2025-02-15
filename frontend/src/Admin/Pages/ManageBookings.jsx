@@ -5,6 +5,7 @@ import ScrollableTabsButtonVisible from "../Components/Tabs";
 import BreadcrumbNav from "../Global/Breadcrumb";
 
 const ManageBookings = () => {
+
   return (
     <Layout>
       <Container sx={{ marginTop: "25px" }}>

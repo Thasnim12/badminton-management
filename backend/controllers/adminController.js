@@ -12,7 +12,7 @@ const courtConfig = require("../models/courtConfig");
 const generateAdminToken = require("../authentication/generateAdminToken");
 const Staff = require("../models/staffModel");
 const Addons = require("../models/addonModel");
-const { upload, bannerUpload } = require("../helper/multer");
+const { upload, bannerUpload, courtUpload } = require("../helper/multer");
 const Donations = require("../models/donationModel");
 const Banner = require("../models/bannerModel");
 const Enquiry = require("../models/enquiryModel");
@@ -140,9 +140,8 @@ const manageUsers = async (req, res) => {
     );
 
     return res.status(200).json({
-      message: `User ${
-        updatedUser.is_blocked ? "blocked" : "unblocked"
-      } successfully`,
+      message: `User ${updatedUser.is_blocked ? "blocked" : "unblocked"
+        } successfully`,
       user: updatedUser,
     });
   } catch (error) {
@@ -152,47 +151,60 @@ const manageUsers = async (req, res) => {
 };
 
 const addCourt = async (req, res) => {
+
+  courtUpload(req, res, async (err) => {
+
+    if (err) {
+      return res.status(400).json({ message: err.message });
+    }
+
     try {
-        const { court_name, } = req.body;
-        console.log(req.body, "body");
-        console.log("Headers:", req.headers);
-        const court_image = req.file ? req.file.filename : null;
+      const { court_name, } = req.body;
+      console.log(req.body, "body");
+      console.log("Headers:", req.headers);
 
-    if (!court_name) {
-      return res.status(400).json({ message: "missing required field!" });
+      const court_image = req.file ? req.file.filename : null;
+
+      console.log(court_image, 'file')
+
+      if (!court_name) {
+        return res.status(400).json({ message: "missing required field!" });
+      }
+
+      const court = await Court.findOne({ court_name: court_name });
+
+      if (court) {
+        return res.status(400).json({ message: "court with same name exists" });
+      }
+
+      const newCourt = new Court({
+        court_name: court_name,
+        court_image: court_image,
+      });
+
+      await newCourt.save();
+
+      const newCourtConfig = new courtConfig({
+        court: newCourt._id,
+        defaultStartHour: 6,
+        defaultEndHour: 22,
+        closedDays: [0],
+      });
+      console.log(newCourtConfig, "config");
+
+      await newCourtConfig.save();
+
+      return res
+        .status(200)
+        .json({ message: "Court added successfully. Admin must set the price." });
+    } catch (error) {
+      console.log(error.message);
+      return res.status(500).json({ message: error.message });
     }
-
-    const court = await Court.findOne({ court_name: court_name });
-
-    if (court) {
-      return res.status(400).json({ message: "court with same name exists" });
-    }
-
-    const newCourt = new Court({
-      court_name: court_name,
-      court_image: court_image,
-    });
-
-    await newCourt.save();
-
-    const newCourtConfig = new courtConfig({
-      court: newCourt._id,
-      defaultStartHour: 6,
-      defaultEndHour: 22,
-      closedDays: [0],
-    });
-    console.log(newCourtConfig, "config");
-
-    await newCourtConfig.save();
-
-    return res
-      .status(200)
-      .json({ message: "Court added successfully. Admin must set the price." });
-  } catch (error) {
-    console.log(error.message);
-    return res.status(500).json({ message: error.message });
-  }
+  })
 };
+
+
 
 const getAllcourts = async (req, res) => {
   try {
@@ -555,6 +567,8 @@ const getAlladdons = async (req, res) => {
     console.log(error.message);
   }
 };
+
+
 const manageStaffs = async (req, res) => {
   try {
     const { name, email, designation, employee_id, joining_date, phoneno } =
@@ -598,7 +612,7 @@ const manageStaffs = async (req, res) => {
 
 const deleteStaff = async (req, res) => {
   try {
-    const { id } = req.params; // Use 'id' instead of '_id'
+    const { id } = req.params;
     console.log(id, "id received for deletion");
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -620,6 +634,8 @@ const deleteStaff = async (req, res) => {
       .json({ message: "Server error", error: error.message });
   }
 };
+
+
 
 const addBanner = async (req, res) => {
   bannerUpload(req, res, async (err) => {
@@ -691,18 +707,20 @@ const addBanner = async (req, res) => {
   });
 };
 
+
+
 const getAllBanner = async (req, res) => {
-    try {
-        console.log('banner')
-        const banner = await Banner.find({})
-        return res.status(200).json({ banner })
-    }
-    catch (error) {
-        console.log(error.message)
-        return res
-            .status(500)
-            .json({ message: "Server error", error: error.message });
-    }
+  try {
+    console.log('banner')
+    const banner = await Banner.find({})
+    return res.status(200).json({ banner })
+  }
+  catch (error) {
+    console.log(error.message)
+    return res
+      .status(500)
+      .json({ message: "Server error", error: error.message });
+  }
 }
 
 
@@ -792,6 +810,8 @@ const editBanner = async (req, res) => {
   }
 };
 
+
+
 const getMessages = async (req, res) => {
   try {
     const enquiries = await Enquiry.find().sort({ createdAt: -1 });
@@ -845,6 +865,100 @@ const addUser = async (req, res) => {
   }
 };
 
+
+const deleteCourt = async (req, res) => {
+  try {
+    const { courtId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(courtId)) {
+      return res.status(400).json({ message: "Invalid court ID format" });
+    }
+
+    const court = await Court.findById(courtId);
+    if (!court) {
+      return res.status(404).json({ message: "Court doesn't exist!" });
+    }
+
+    await Court.deleteOne({ _id: courtId });
+
+    return res.status(200).json({ success: true, message: "Court deleted successfully!" });
+  } catch (error) {
+    console.error("Error deleting court:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+
+
+const deleteBanner = async (req, res) => {
+  try {
+    const { bannerId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(bannerId)) {
+      return res.status(400).json({ message: "Invalid court ID format" });
+    }
+
+    const banner = await Banner.findById(bannerId);
+    if (!banner) {
+      return res.status(404).json({ message: "Court doesn't exist!" });
+    }
+
+    await Banner.deleteOne({ _id: bannerId });
+
+  }
+  catch (error) {
+    console.log(error.message)
+  }
+}
+
+const editStatus = async (req, res) => {
+  try {
+    const { courtId } = req.params;
+    const id = new mongoose.Types.ObjectId(courtId);
+    const court = await Court.findById({ _id: id });
+
+    if (!court) {
+      return res.status(400).json({ message: "user not found" });
+    }
+
+    const updatedCourt = await Court.findByIdAndUpdate(
+      id,
+      { isActive: !court.isActive },
+      { new: true }
+    );
+
+    return res.status(200).json({
+      message: `User ${updatedCourt.isActive ? "active" : "inactive"
+        } successfully`,
+      user: updatedUser,
+    });
+  }
+  catch (error) {
+    console.log(error.message)
+  }
+}
+
+const deleteAddons = async (req, res) => {
+  try {
+    const { addonsId } = req.params;
+    const id = new mongoose.Types.ObjectId(addonsId);
+    const addons = await Addons.findById({ _id: id });
+
+    if (!addons) {
+      return res.status(404).json({ message: "Addons not found!" })
+    }
+
+    await Addons.deleteOne({ _id: id })
+
+  }
+  catch (error) {
+    console.log(error.message)
+  }
+}
+
+
+
+
 module.exports = {
   adminLogin,
   adminLogout,
@@ -869,4 +983,8 @@ module.exports = {
   editBanner,
   getMessages,
   addUser,
+  deleteCourt,
+  deleteBanner,
+  editStatus,
+  deleteAddons
 };

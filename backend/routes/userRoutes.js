@@ -14,6 +14,7 @@ const {
   getSlots,
   getAddons,
   sendMessage,
+
 } = require("../controllers/userController");
 
 
@@ -33,6 +34,6 @@ userroute.get("/get-slots", authenticateUser, getSlots);
 userroute.get("/get-addons", authenticateUser, getAddons);
 userroute.post('/booking',authenticateUser,createBooking)
 userroute.post('/verify-booking',authenticateUser,verifyBookingPayment)
-userroute.put('/update-profile', authenticateUser,userUpload,updateUserDetails)
+userroute.put('/update-profile', authenticateUser,updateUserDetails)
 
 module.exports = userroute

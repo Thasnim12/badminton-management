@@ -8,7 +8,7 @@ const sendOTP = require("../helper/otpHelper");
 const Court = require("../models/courtModel");
 const Slot = require("../models/slotModel");
 const Addons = require("../models/addonModel");
-const { profileUpload } = require("../helper/multer");
+const { userUpload } = require("../helper/multer");
 const nodemailer = require("nodemailer");
 require("dotenv").config();
 
@@ -83,6 +83,13 @@ const userRegister = async (req, res) => {
 };
 
 const updateUserDetails = async (req, res) => {
+
+  userUpload(req, res, async (err) => {
+     
+    if (err) {
+      return res.status(400).json({ message: err.message });
+    }
+
       try {
         const { email, name, mobile } = req.body;
         const  profileImage  = req.file ? req.file.filename : null; 
@@ -109,6 +116,7 @@ const updateUserDetails = async (req, res) => {
         console.log(error.message);
         return res.status(500).json({ message: error.message });
       }
+    })
   };
   
 

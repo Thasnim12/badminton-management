@@ -52,7 +52,7 @@ const bookingSchema = mongoose.Schema(
       currency: { type: String, default: "INR" },
       status: {
         type: String,
-        enum: ["Pending", "Completed", "Failed", "Refunded"],
+        enum: ["Pending", "Completed", "Failed"],
         default: "Pending",
       },
     },

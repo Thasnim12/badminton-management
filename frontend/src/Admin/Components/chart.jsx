@@ -25,29 +25,27 @@ const data = [
     createData("24:00", undefined)
 ];
 
-export default function Chart() {
+export default function Chart({ bookingsData }) {
+
+    const formattedData = bookingsData.map((booking) => ({
+        time: new Date(booking.createdAt).toLocaleDateString(), // Format date
+        amount: booking.amount || 0, // Assuming `amount` is the booking fee
+    }));
+
     return (
         <React.Fragment>
-            <Title>Today</Title>
-                <ResponsiveContainer width="100%" height="100%">
-                    <LineChart
-                        data={data}
-                        margin={{
-                            top: 16,
-                            right: 16,
-                            bottom: 16,
-                            left: 24
-                        }}
-                    >
-                        <XAxis dataKey="time" />
-                        <YAxis>
-                            <Label angle={270} position="left" style={{ textAnchor: "middle" }}>
-                                Sales ($)
-                            </Label>
-                        </YAxis>
-                        <Line type="monotone" dataKey="amount" stroke="#556CD6" dot={false} />
-                    </LineChart>
-                </ResponsiveContainer>
+            <Title>Bookings Report</Title>
+            <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={formattedData} margin={{ top: 16, right: 16, bottom: 16, left: 24 }}>
+                    <XAxis dataKey="time" />
+                    <YAxis>
+                        <Label angle={270} position="left" style={{ textAnchor: "middle" }}>
+                            Booking Amount (₹)
+                        </Label>
+                    </YAxis>
+                    <Line type="monotone" dataKey="amount" stroke="#556CD6" dot={false} />
+                </LineChart>
+            </ResponsiveContainer>
         </React.Fragment>
     );
 }

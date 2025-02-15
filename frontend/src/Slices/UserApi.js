@@ -26,10 +26,10 @@ export const userApi = createApi({
       }),
     }),
     updateProfile: builder.mutation({
-      query: (formData) => ({
+      query: (data) => ({
         url: "/update-profile",
         method: "PUT",
-        body: formData,
+        body: data,
       }),
     }),
     

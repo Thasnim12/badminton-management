@@ -12,10 +12,14 @@ import Layout from "../Global/Layouts";
 import Cards from '../Components/Cards'
 import Piechart from "../Components/Piecharts";
 import ManageStaffs from "./ManageStaffs";
+import { useGetBookingsQuery } from "../../Slices/AdminApi";
 
 export default function Dashboard() {
   const [open, setOpen] = useState(false);
-  const [ openForm,setOpenform ] = useState(false)
+  const [openForm, setOpenform] = useState(false)
+
+  const { data, isLoading: isLoadingBookings } = useGetBookingsQuery();
+  const bookingsData = data?.bookings || [];
 
   const handleClickOpen = () => {
     setOpenform(true);
@@ -34,38 +38,36 @@ export default function Dashboard() {
             <Grid item xs={12}>
               <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <Cards />
-                <Button variant="outlined" sx={{ whiteSpace: "nowrap", }}  onClick={handleClickOpen}>
+                <Button variant="outlined" sx={{ whiteSpace: "nowrap", }} onClick={handleClickOpen}>
                   Manage Staff
                 </Button>
               </Box>
             </Grid>
 
 
-            {/* Charts (Pie + Graph) */}
             <Grid container item xs={12} spacing={3}>
               <Grid item xs={12} sm={6}>
                 <Paper sx={{ padding: 4, height: 350, width: "100%", marginRight: 10 }}>
-                  <Piechart />
+                  <Piechart bookingsData={bookingsData} />
                 </Paper>
               </Grid>
 
               <Grid item xs={12} sm={6}>
                 <Paper sx={{ padding: 4, height: 350, width: "100%" }}>
-                  <Chart />
+                  <Chart bookingsData={bookingsData} />
                 </Paper>
               </Grid>
             </Grid>
 
-            {/* Orders (Full Width) */}
             <Grid item xs={12}>
               <Paper sx={{ padding: 2, width: "100%" }}>
-                <Orders />
+                <Orders bookingsData={bookingsData} />
               </Paper>
             </Grid>
           </Grid>
         </Box>
       </Box>
-      {openForm && <ManageStaffs openForm={openForm} handleClickOpen={handleClickOpen} handleClose={handleClose}/>}
+      {openForm && <ManageStaffs openForm={openForm} handleClickOpen={handleClickOpen} handleClose={handleClose} />}
     </Layout>
   );
 

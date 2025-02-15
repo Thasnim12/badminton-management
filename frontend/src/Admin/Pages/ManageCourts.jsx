@@ -79,26 +79,29 @@ const SlotManagement = () => {
   });
 
   const handleAddcourt = async () => {
-    if (!courtName) {
+    if (!courtName || !courtImage) {
       setErrorMessage("Please enter a court name and select an image.");
       return;
     }
+
     setErrorMessage("");
 
-    const courtData = {
-      court_name: courtName,
-      court_image: courtImage,
-    };
+    const formData = new FormData();
+    formData.append("court_name", courtName);
+    formData.append("court_image", courtImage);
 
     try {
-      const response = await addcourt(courtData).unwrap();
+      const response = await addcourt(formData).unwrap();
+      console.log("Court added:", response);
       setCourtImage("");
       setCourtName("");
       handleClose();
     } catch (error) {
+      console.error("Failed to add court:", error);
       setErrorMessage("Failed to add court. Please try again.");
     }
   };
+
 
   const activeCourts =
     courts?.courts?.filter((court) => court.isActive).length || 0;
@@ -201,15 +204,20 @@ const SlotManagement = () => {
                 Upload files
                 <VisuallyHiddenInput
                   type="file"
-                  onChange={(event) => setCourtImage(event.target.files[0])}
+                  onChange={(event) => {
+                    const file = event.target.files[0];
+                    console.log("Selected file:", file);
+                    setCourtImage(file);
+                  }}
                   accept="image/*"
                 />
+
               </Button>
             </Stack>
           </DialogContent>
           <DialogActions>
-            <Button  variant="outlined" onClick={handleClose}>Cancel</Button>
-            <Button  variant="outlined" onClick={handleAddcourt}>Add</Button>
+            <Button variant="outlined" onClick={handleClose}>Cancel</Button>
+            <Button variant="outlined" onClick={handleAddcourt}>Add</Button>
           </DialogActions>
         </Dialog>
 

@@ -157,7 +157,6 @@ const HomePage = () => {
   return (
     <>
       <Header />
-      {/* Hero Section */}
       <CarouselWrapper>
         <StyledCarousel
           showArrows={true}

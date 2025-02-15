@@ -21,14 +21,17 @@ import {
   Card,
   CardContent,
 } from "@mui/material";
+
 import BreadcrumbNav from "../Global/Breadcrumb";
 import VolunteerActivismIcon from "@mui/icons-material/VolunteerActivism";
+import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
 import ErrorIcon from "@mui/icons-material/Error";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import { useGetDonationsQuery } from "../../Slices/AdminApi";
+import { useGetDonationsQuery, useManagedownloadCsvMutation } from "../../Slices/AdminApi";
 import Layout from "../Global/Layouts";
+
 
 const ManageDonations = () => {
   const [selectedDonation, setSelectedDonation] = useState(null);
@@ -39,6 +42,8 @@ const ManageDonations = () => {
   const rowsPerPage = 7;
 
   const { data, error, isLoading } = useGetDonationsQuery();
+  const [manageCsv] = useManagedownloadCsvMutation();
+
 
   useEffect(() => {
     console.log("API Response:", data);
@@ -87,17 +92,40 @@ const ManageDonations = () => {
     (donation) => donation.payment_status === "failed"
   ).length;
 
+  const handleDownload = async () => {
+    try {
+      const response = await manageCsv().unwrap();
+
+      if (!response || !(response instanceof Blob)) {
+        throw new Error("Invalid CSV response");
+      }
+
+      const blob = new Blob([response], { type: "text/csv" });
+      const url = window.URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "donations.csv";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Download error:", error);
+    }
+  };
+
   return (
     <Layout>
       <Container sx={{ marginTop: "25px" }}>
-      <BreadcrumbNav
+        <BreadcrumbNav
           links={[
             { label: "Dashboard", path: "/admin" },
             { label: "Donations", path: "/admin/manage-donations" },
           ]}
         />
 
-        {/* Cards for Total Donations, Completed, Pending, and Failed Transactions */}
         <Box
           sx={{
             display: "flex",
@@ -238,6 +266,16 @@ const ManageDonations = () => {
           </Grid>
         </Box>
 
+        <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
+          <Button
+            startIcon={<FileDownloadIcon />}
+            onClick={handleDownload}
+            sx={{ ml: 1, backgroundColor: "#2c387e", color: "white" }}
+          >
+            Download CSV
+          </Button>
+        </Box>
+
         <TableContainer component={Paper}>
           <Table>
             <TableHead>
@@ -295,11 +333,11 @@ const ManageDonations = () => {
           </Table>
         </TableContainer>
 
-        <Box  sx={{
-            display: 'flex',
-            justifyContent: 'center', 
-            marginTop: '20px', 
-          }}>
+        <Box sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          marginTop: '20px',
+        }}>
           <Pagination
             count={Math.ceil(donations.length / rowsPerPage)}
             page={page}
@@ -338,7 +376,7 @@ const ManageDonations = () => {
             )}
           </DialogContent>
           <DialogActions>
-            <Button onClick={handleClose}  variant="outlined" color="primary">
+            <Button onClick={handleClose} variant="outlined" color="primary">
               Close
             </Button>
           </DialogActions>

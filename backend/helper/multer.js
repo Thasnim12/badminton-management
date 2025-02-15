@@ -40,12 +40,12 @@ const courtUpload = multer({
   storage: storage, 
   fileFilter: fileFilter ,
   limits: limits
-}).array('court_image');
+}).single('court_image');
 
 const userUpload = multer({
   storage: storage, 
   limits: limits,
   fileFilter: fileFilter 
-}).array('profileImage');
+}).single('profileImage');
 
 module.exports = { upload,bannerUpload, courtUpload, userUpload };

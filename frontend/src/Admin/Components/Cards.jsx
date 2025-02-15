@@ -13,6 +13,7 @@ import {
   useGetDonationsQuery,
   useGetAllUsersQuery,
   useGetStaffsQuery,
+  useGetBookingsQuery
 } from "../../Slices/AdminApi";
 
 const SelectActionCard = () => {
@@ -20,6 +21,10 @@ const SelectActionCard = () => {
 
   const { data: donationData, isLoading: isLoadingDonations } =
     useGetDonationsQuery();
+
+  const { data, isLoading: isLoadingBookings } = useGetBookingsQuery();
+  const totalBookings = data?.bookings?.length || 0;
+
   const totalDonations =
     donationData?.reduce((acc, donation) => acc + donation.amount, 0) || 0;
   const { data: usersData, isLoading: isLoadingUsers } = useGetAllUsersQuery();
@@ -31,7 +36,7 @@ const SelectActionCard = () => {
     {
       id: 1,
       title: "Bookings",
-      description: "Manage court bookings.",
+      description: isLoadingBookings ? "Loading..." : `Total Bookings: ${totalBookings}`,
       icon: <EventIcon fontSize="medium" sx={{ color: "black" }} />,
     },
     {
@@ -51,9 +56,7 @@ const SelectActionCard = () => {
     {
       id: 4,
       title: "Staffs",
-      description: isLoadingUsers
-        ? "Loading..."
-        : `Total Staffs: ${totalStaffs}`,
+      description: isLoadingStaffs ? "Loading..." : `Total Staffs: ${totalStaffs}`,
       icon: <GroupAddIcon fontSize="medium" sx={{ color: "black" }} />,
     },
   ];

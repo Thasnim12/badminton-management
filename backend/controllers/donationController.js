@@ -2,7 +2,10 @@ const Donation = require('../models/donationModel')
 const Razorpay = require('razorpay');
 const mongoose = require('mongoose');
 const crypto = require("crypto");
+const fastCsv = require("fast-csv");
 const { fetchPaymentDetails } = require('../helper/paymentHelper')
+const { Readable } = require("stream");
+
 
 const razorpay = new Razorpay({
     key_id: process.env.RAZORPAY_KEY_ID,
@@ -88,8 +91,52 @@ const verifyPayment = async (req, res) => {
     }
 };
 
+const downloadDonations = async(req,res) =>{
+        try {
+            const donations = await Donation.find().populate("donor_id", "name email");
+    
+            if (!donations.length) {
+                return res.status(404).json({ message: "No donations found" });
+            }
+    
+            const csvStream = fastCsv.format({ headers: true });
+    
+            const readableStream = new Readable({
+                read() {},
+            });
+    
+            res.setHeader("Content-Disposition", "attachment; filename=donations.csv");
+            res.setHeader("Content-Type", "text/csv");
+    
+            csvStream.pipe(res);
+    
+            donations.forEach((donation) => {
+                csvStream.write({
+                    "Donation ID": donation._id,
+                    "Donor Name": donation.donor_name || "Anonymous",
+                    "Donor Email": donation.donor_id?.email || "N/A",
+                    "Amount": donation.amount,
+                    "Currency": donation.currency,
+                    "Payment Status": donation.payment_status,
+                    "Payment Method": donation.payment_method || "N/A",
+                    "Razorpay Order ID": donation.razorpay_order_id || "N/A",
+                    "Razorpay Payment ID": donation.razorpay_payment_id || "N/A",
+                    "Created At": donation.created_at.toISOString().split("T")[0],
+                    "Completed At": donation.completed_at ? donation.completed_at.toISOString().split("T")[0] : "N/A",
+                    "Transfer Status": donation.transfer_status,
+                });
+            });
+    
+            csvStream.end();
+        } catch (error) {
+            console.error("Error generating CSV:", error);
+            res.status(500).json({ message: "Internal server error" });
+        }
+    };
+
 
 module.exports = {
     createDonation,
-    verifyPayment
+    verifyPayment,
+    downloadDonations
 }
