@@ -2,10 +2,11 @@ import React from "react";
 import { Breadcrumbs, Link, Typography } from "@mui/material";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import { useNavigate } from "react-router-dom";
+import { useTheme } from "@mui/material/styles";
 
 const BreadcrumbNav = ({ links }) => {
   const navigate = useNavigate();
-
+  const theme = useTheme();
   return (
     <Breadcrumbs
       color="primary"
@@ -34,7 +35,7 @@ const BreadcrumbNav = ({ links }) => {
                 bottom: -2,
                 width: "100%",
                 height: "2px",
-                backgroundColor: "gray",
+                backgroundColor: theme.palette.primary.main,
                 transform: "scaleX(0)",
                 transformOrigin: "left",
                 transition: "transform 0.3s ease-in-out",

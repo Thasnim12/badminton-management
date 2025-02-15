@@ -208,8 +208,12 @@ const SlotManagement = () => {
             </Stack>
           </DialogContent>
           <DialogActions>
-            <Button  variant="outlined" onClick={handleClose}>Cancel</Button>
-            <Button  variant="outlined" onClick={handleAddcourt}>Add</Button>
+            <Button variant="outlined" onClick={handleClose}>
+              Cancel
+            </Button>
+            <Button variant="outlined" onClick={handleAddcourt}>
+              Add
+            </Button>
           </DialogActions>
         </Dialog>
 

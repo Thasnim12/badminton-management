@@ -32,7 +32,7 @@ export const userApi = createApi({
         body: formData,
       }),
     }),
-    
+
     registerUser: builder.mutation({
       query: (data) => ({
         url: "/register",
@@ -51,7 +51,7 @@ export const userApi = createApi({
       query: ({ code }) => ({
         url: "/google-login",
         method: "POST",
-        body:  { code },
+        body: { code },
       }),
     }),
     verifyOtp: builder.mutation({
@@ -99,19 +99,20 @@ export const userApi = createApi({
   }),
 });
 
-export const { 
-  useRegisterUserMutation, 
-  useLoginUserMutation, 
-  useVerifyOtpMutation, 
-  useCreateDonationMutation, 
-  useVerifyDonationMutation, 
+export const {
+  useRegisterUserMutation,
+  useLoginUserMutation,
+  useVerifyOtpMutation,
+  useCreateDonationMutation,
+  useVerifyDonationMutation,
   useGoogleLoginMutation,
   useGetSlotsQuery,
   useGetAllcourtsQuery,
   useGetAddonsQuery,
   useUpdateProfileMutation,
   useCreateBookingMutation,
-  useVerifyBookingMutation
+  useVerifyBookingMutation,
+  useSendMessageMutation,
 } = userApi;
 
 export default userApi;

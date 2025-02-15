@@ -4,12 +4,24 @@ import {
   Button,
   Grid,
   Avatar,
+  Tabs,
+  Tab,
   IconButton,
   Typography,
   Box,
   Divider,
   Snackbar,
   Alert,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TablePagination,
+  Stack,
+  Pagination,
+  Paper,
 } from "@mui/material";
 import {
   Edit as EditIcon,
@@ -42,12 +54,16 @@ const Profile = () => {
   });
   const [isEditing, setIsEditing] = useState(false);
   const [showImageOptions, setShowImageOptions] = useState(false);
-
+  const [tabIndex, setTabIndex] = useState(0);
   const [alert, setAlert] = useState({
     open: false,
     message: "",
     severity: "success", // success, error, info, warning
   });
+
+  const handleTabChange = (event, newValue) => {
+    setTabIndex(newValue);
+  };
 
   useEffect(() => {
     if (user) {
@@ -73,6 +89,25 @@ const Profile = () => {
     }
   };
 
+  const bookings = Array.from({ length: 20 }, (_, i) => ({
+    id: i + 1,
+    date: `2024-02-${10 + i}`,
+    time: "10:00 AM - 11:00 AM",
+    court: `Court ${i % 3 === 0 ? "A" : i % 3 === 1 ? "B" : "C"}`,
+    price: `$${20 + (i % 5) * 5}`,
+    status: i % 2 === 0 ? "Confirmed" : "Pending",
+  }));
+
+  const [page, setPage] = useState(1); // Current page (starts from 1)
+  const rowsPerPage = 7; // Limit of 7 per page
+
+  const handleChangePage = (event, value) => {
+    setPage(value);
+  };
+
+  // Calculate total pages
+  const totalPages = Math.ceil(bookings.length / rowsPerPage);
+
   const handleRemoveImage = () => {
     setProfileImage("/default-profile.jpg");
     setShowImageOptions(false);
@@ -94,7 +129,6 @@ const Profile = () => {
       formDataToSend.append("email", formData.email);
       formDataToSend.append("mobile", formData.mobile);
       formDataToSend.append("profileImage", formData.profileImage);
-     
 
       const response = await updateProfile(formDataToSend).unwrap();
       console.log("Profile updated successfully:", response);
@@ -129,7 +163,6 @@ const Profile = () => {
         message: "Profile updated successfully!",
         severity: "success",
       });
-
     } catch (err) {
       console.error("Error updating profile:", err);
 
@@ -140,10 +173,6 @@ const Profile = () => {
       });
     }
   };
-
-
-
-
 
   const Section = styled(Box)(({ theme }) => ({
     padding: "60px 20px",
@@ -158,155 +187,247 @@ const Profile = () => {
   };
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+    <>
       <Header />
       <Section>
-        <Box sx={{ maxWidth: 600, margin: "auto", padding: 3 }}>
-          <Typography variant="h5" gutterBottom>
-            Update Profile
-          </Typography>
+        <Box
+          sx={{ display: "flex", flexDirection: "column", marginTop: "25px" }}
+        >
+          <Tabs
+            value={tabIndex}
+            onChange={handleTabChange}
+            centered
+            sx={{ mb: 1 }}
+          >
+            <Tab label="Profile" />
+            <Tab label="Booking History" />
+          </Tabs>
 
-          <Grid container spacing={3} alignItems="center">
-            <Grid
-              item
-              xs={12}
-              display="flex"
-              justifyContent="center"
-              position="relative"
-            >
-              <Avatar src={profileImage || '/default-profile.jpg'} sx={{ width: 100, height: 100 }} />
-            </Grid>
-            {isEditing && (
-              <Grid
-                item
-                xs={12}
-                container
-                justifyContent="center"
-                spacing={2} // This adds spacing between the buttons
-              >
-                <Grid item>
-                  <Button
-                    variant="outlined"
-                    component="label"
-                    startIcon={<UploadIcon />}
-                    size="small"
-                    sx={{ marginBottom: 2 }}
-                  >
-                    Upload
-                    <input
-                      type="file"
-                      hidden
-                      onChange={(event) => setProfileImage(event.target.files[0])}
-                      accept="image/*"
+          {tabIndex === 0 && (
+            <Box sx={{ padding: 3 }}>
+              <Grid sx={{ padding: 3, margin: "auto", maxWidth: 600 }}>
+                <Typography variant="h5" gutterBottom>
+                  Update Profile
+                </Typography>
+
+                <Grid container spacing={3} alignItems="center">
+                  <Grid item xs={12} display="flex" justifyContent="center">
+                    <Avatar
+                      src={profileImage || "/default-profile.jpg"}
+                      sx={{ width: 100, height: 100 }}
                     />
-                  </Button>
-                </Grid>
+                  </Grid>
 
-                <Grid item>
-                  <Button
-                    variant="outlined"
-                    color="error"
-                    startIcon={<DeleteIcon />}
-                    size="small"
-                    onClick={handleRemoveImage}
-                  >
-                    Remove
-                  </Button>
-                </Grid>
-              </Grid>
-            )}
+                  {isEditing && (
+                    <Grid
+                      item
+                      xs={12}
+                      container
+                      justifyContent="center"
+                      spacing={2}
+                    >
+                      <Grid item>
+                        <Button
+                          variant="outlined"
+                          component="label"
+                          startIcon={<UploadIcon />}
+                          size="small"
+                        >
+                          Upload
+                          <input
+                            type="file"
+                            hidden
+                            onChange={(e) =>
+                              setProfileImage(
+                                URL.createObjectURL(e.target.files[0])
+                              )
+                            }
+                            accept="image/*"
+                          />
+                        </Button>
+                      </Grid>
 
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Name"
-                name="name"
-                value={formData.name}
-                onChange={handleInputChange}
-                variant="outlined"
-                disabled={!isEditing}
-              />
-            </Grid>
-
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Email"
-                name="email"
-                value={formData.email}
-                variant="outlined"
-                disabled
-              />
-            </Grid>
-
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Mobile"
-                name="mobile"
-                value={formData.mobile}
-                onChange={handleInputChange}
-                variant="outlined"
-                disabled={!isEditing}
-              />
-            </Grid>
-
-            <Grid item xs={12} display="flex" justifyContent="flex-end">
-              {isEditing ? (
-                <>
-                  <Grid container display="flex" justifyContent="flex-end" spacing={2}>
-                    <Grid item>
-                      <Button
-                        variant="outlined"
-                        color="error"
-                        onClick={() => {
-                          setIsEditing(false); // Cancel edit mode
-                          setShowImageOptions(false); // Hide image options
-                        }}
-                      >
-                        Cancel
-                      </Button>
+                      <Grid item>
+                        <Button
+                          variant="outlined"
+                          color="error"
+                          startIcon={<DeleteIcon />}
+                          size="small"
+                          onClick={() => setProfileImage(null)}
+                        >
+                          Remove
+                        </Button>
+                      </Grid>
                     </Grid>
-                    <Grid item>
+                  )}
+
+                  <Grid item xs={12}>
+                    <TextField
+                      fullWidth
+                      label="Name"
+                      name="name"
+                      value={formData.name}
+                      onChange={(e) =>
+                        setFormData({ ...formData, name: e.target.value })
+                      }
+                      variant="outlined"
+                      disabled={!isEditing}
+                    />
+                  </Grid>
+
+                  <Grid item xs={12}>
+                    <TextField
+                      fullWidth
+                      label="Email"
+                      name="email"
+                      value={formData.email}
+                      variant="outlined"
+                      disabled
+                    />
+                  </Grid>
+
+                  <Grid item xs={12}>
+                    <TextField
+                      fullWidth
+                      label="Mobile"
+                      name="mobile"
+                      value={formData.mobile}
+                      onChange={(e) =>
+                        setFormData({ ...formData, mobile: e.target.value })
+                      }
+                      variant="outlined"
+                      disabled={!isEditing}
+                    />
+                  </Grid>
+
+                  <Grid item xs={12} display="flex" justifyContent="flex-end">
+                    {isEditing ? (
+                      <>
+                        <Button
+                          variant="outlined"
+                          color="error"
+                          onClick={() => setIsEditing(false)}
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          variant="outlined"
+                          color="primary"
+                          onClick={handleSaveChanges}
+                          sx={{ ml: 2 }}
+                        >
+                          Save
+                        </Button>
+                      </>
+                    ) : (
                       <Button
                         variant="outlined"
                         color="primary"
-                        onClick={handleSaveChanges}
+                        onClick={() => setIsEditing(true)}
                       >
-                        Save
+                        Edit
                       </Button>
-                    </Grid>
+                    )}
                   </Grid>
-                </>
-              ) : (
-                <Button
-                  variant="outlined"
-                  color="primary"
-                  onClick={() => setIsEditing(true)}
-                >
-                  Edit
-                </Button>
-              )}
-            </Grid>
-          </Grid>
+                </Grid>
 
-          <Divider sx={{ marginTop: 3 }} />
+                <Divider sx={{ marginTop: 3 }} />
+              </Grid>
+            </Box>
+          )}
+
+          {tabIndex === 1 && (
+            <Box sx={{ padding: 3 }}>
+              <Grid sx={{ padding: 3, margin: "auto", maxWidth: 800 }}>
+                <Typography variant="h5" gutterBottom>
+                  Booking History
+                </Typography>
+
+                {bookings.length > 0 ? (
+                  <>
+                    <TableContainer component={Paper}>
+                      <Table>
+                        <TableHead>
+                          <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
+                            <TableCell>
+                              <strong>Date</strong>
+                            </TableCell>
+                            <TableCell>
+                              <strong>Time</strong>
+                            </TableCell>
+                            <TableCell>
+                              <strong>Court</strong>
+                            </TableCell>
+                            <TableCell>
+                              <strong>Price</strong>
+                            </TableCell>
+                            <TableCell>
+                              <strong>Status</strong>
+                            </TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {bookings
+                            .slice((page - 1) * rowsPerPage, page * rowsPerPage)
+                            .map((booking) => (
+                              <TableRow key={booking.id}>
+                                <TableCell>{booking.date}</TableCell>
+                                <TableCell>{booking.time}</TableCell>
+                                <TableCell>{booking.court}</TableCell>
+                                <TableCell>{booking.price}</TableCell>
+                                <TableCell>
+                                  <Typography
+                                    sx={{
+                                      color:
+                                        booking.status === "Confirmed"
+                                          ? "green"
+                                          : "orange",
+                                      fontWeight: "bold",
+                                    }}
+                                  >
+                                    {booking.status}
+                                  </Typography>
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+
+                    {/* Centered Pagination */}
+                    <Stack
+                      spacing={2}
+                      alignItems="center"
+                      sx={{ marginTop: 2 }}
+                    >
+                      <Pagination
+                        count={totalPages}
+                        page={page}
+                        onChange={handleChangePage}
+                        color="primary"
+                      />
+                    </Stack>
+                  </>
+                ) : (
+                  <Typography variant="body1">No bookings found.</Typography>
+                )}
+              </Grid>
+            </Box>
+          )}
+          <Snackbar
+            open={alert.open}
+            autoHideDuration={3000}
+            onClose={handleCloseAlert}
+            anchorOrigin={{ vertical: "top", horizontal: "right" }}
+          >
+            <Alert onClose={handleCloseAlert} severity={alert.severity}>
+              {alert.message}
+            </Alert>
+          </Snackbar>
         </Box>
       </Section>
       <Footer />
-
-      {/* Snackbar for Alerts */}
-      <Snackbar
-        open={alert.open}
-        autoHideDuration={3000}
-        onClose={handleCloseAlert}
-        anchorOrigin={{ vertical: "top", horizontal: "right" }}
-      >
-        <Alert onClose={handleCloseAlert} severity={alert.severity}>
-          {alert.message}
-        </Alert>
-      </Snackbar>
-    </Box>
+    </>
   );
 };
 

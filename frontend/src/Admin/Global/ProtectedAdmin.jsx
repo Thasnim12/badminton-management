@@ -9,7 +9,7 @@ const ProtectedAdmin = ({ element }) => {
     return <Navigate to="/admin/login" />;
   }
 
-  return element; // If admin is logged in, render the requested element
+  return element; 
 };
 
 export default ProtectedAdmin;

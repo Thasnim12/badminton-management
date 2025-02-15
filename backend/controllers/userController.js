@@ -8,6 +8,7 @@ const sendOTP = require("../helper/otpHelper");
 const Court = require("../models/courtModel");
 const Slot = require("../models/slotModel");
 const Addons = require("../models/addonModel");
+const Enquiry = require("../models/enquiryModel");
 const { profileUpload } = require("../helper/multer");
 const nodemailer = require("nodemailer");
 require("dotenv").config();
@@ -83,34 +84,33 @@ const userRegister = async (req, res) => {
 };
 
 const updateUserDetails = async (req, res) => {
-      try {
-        const { email, name, mobile } = req.body;
-        const  profileImage  = req.file ? req.file.filename : null; 
-        console.log(profileImage,'img')
-  
-        console.log("Request Body: ", req.body); 
-        console.log("Uploaded File: ", req.file); 
-  
-        const updatedUser = await User.findOneAndUpdate(
-          { email },
-          { name, phoneno: mobile, profileImage },
-          { new: true, runValidators: true }
-        ).select("-password");
-  
-        if (!updatedUser) {
-          return res.status(404).json({ message: "User not found" });
-        }
-  
-        return res.status(200).json({
-          message: "User details updated successfully",
-          user: updatedUser,
-        });
-      } catch (error) {
-        console.log(error.message);
-        return res.status(500).json({ message: error.message });
-      }
-  };
-  
+  try {
+    const { email, name, mobile } = req.body;
+    const profileImage = req.file ? req.file.filename : null;
+    console.log(profileImage, "img");
+
+    console.log("Request Body: ", req.body);
+    console.log("Uploaded File: ", req.file);
+
+    const updatedUser = await User.findOneAndUpdate(
+      { email },
+      { name, phoneno: mobile, profileImage },
+      { new: true, runValidators: true }
+    ).select("-password");
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    return res.status(200).json({
+      message: "User details updated successfully",
+      user: updatedUser,
+    });
+  } catch (error) {
+    console.log(error.message);
+    return res.status(500).json({ message: error.message });
+  }
+};
 
 const sendOTPVerificationEmail = async ({ id, email }, res) => {
   try {
@@ -413,8 +413,6 @@ const sendMessage = async (req, res) => {
     res.status(500).json({ error: "Failed to send message" });
   }
 };
-
-
 
 module.exports = {
   userRegister,

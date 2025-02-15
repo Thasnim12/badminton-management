@@ -2,7 +2,8 @@ import React from "react";
 import { Box, Grid, Typography, Button, Paper, Container } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import Header from "../Global/Header";
 import Footer from "../Global/Footer";
 
@@ -44,6 +45,17 @@ const PaperCard = styled(Paper)({
 });
 
 const AboutUs = () => {
+  const navigate = useNavigate();
+  const { userInfo } = useSelector((state) => state.userAuth);
+  const handleJoinClick = (e) => {
+    e.preventDefault(); 
+    console.log("Button clicked, userInfo:", userInfo); 
+    if (userInfo) {
+      navigate("/bookings");
+    } else {
+      navigate("/register");
+    }
+  };
   return (
     <>
       <Header />
@@ -158,11 +170,13 @@ const AboutUs = () => {
                 Join our tournaments and show your skills on the court while
                 helping those in need.
               </Typography>
-              <Link to="/register">
-                <Button variant="outlined" color="primary">
-                  Join now
-                </Button>
-              </Link>
+              <Button
+                variant="outlined"
+                color="primary"
+                onClick={handleJoinClick}
+              >
+                {userInfo ? "Book Now" : "Join now"}
+              </Button>
             </PaperCard>
           </Grid>
           <Grid item xs={12} md={4}>
@@ -211,10 +225,10 @@ const AboutUs = () => {
           </Typography>
 
           <Link to="/donate">
-                <Button variant="outlined" color="primary">
-                  Make a change
-                </Button>
-              </Link>
+            <Button variant="outlined" color="primary">
+              Make a change
+            </Button>
+          </Link>
         </Container>
       </Section>
 

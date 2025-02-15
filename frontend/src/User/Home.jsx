@@ -13,6 +13,7 @@ import {
 import { styled } from "@mui/system";
 import Header from "./Global/Header";
 import Footer from "./Global/Footer";
+import { useSelector } from "react-redux";
 import Bookings from "./Pages/Bookings";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -100,6 +101,16 @@ const validationSchema = yup.object().shape({
 });
 
 const HomePage = () => {
+  const { userInfo } = useSelector((state) => state.userAuth);
+  const handleJoinClick = (e) => {
+    e.preventDefault();
+    console.log("Button clicked, userInfo:", userInfo);
+    if (userInfo) {
+      navigate("/bookings");
+    } else {
+      navigate("/register");
+    }
+  };
   const {
     register,
     handleSubmit,
@@ -130,12 +141,12 @@ const HomePage = () => {
     }
   };
 
-    const [sendMessage, { isLoading }] = useSendMessageMutation();
-    const [alert, setAlert] = useState({
-      open: false,
-      message: "",
-      severity: "",
-    });
+  const [sendMessage, { isLoading }] = useSendMessageMutation();
+  const [alert, setAlert] = useState({
+    open: false,
+    message: "",
+    severity: "",
+  });
 
   const onSubmit = async (data) => {
     try {
@@ -321,11 +332,13 @@ const HomePage = () => {
                 Join our tournaments and show your skills on the court while
                 helping those in need.
               </Typography>
-              <Link to="/register">
-                <Button variant="outlined" color="primary">
-                  Join now
-                </Button>
-              </Link>
+              <Button
+                variant="outlined"
+                color="primary"
+                onClick={handleJoinClick}
+              >
+                {userInfo ? "Book Now" : "Join now"}
+              </Button>
             </PaperCard>
           </Grid>
           <Grid item xs={12} md={4}>
@@ -470,10 +483,7 @@ const HomePage = () => {
                   <Typography variant="body1" paragraph>
                     Register Number: R/V/B4/39/2024
                   </Typography>
-                  <Typography variant="body1" paragraph>
-                    Address: Kalukoorani Village, Vani Bustop, Ramanathapuram,
-                    TamilNadu - 623536
-                  </Typography>
+
                   <Typography variant="body1" paragraph>
                     Phone: +91 6385224527
                   </Typography>
@@ -486,19 +496,19 @@ const HomePage = () => {
           </Grid>
         </Container>
       </ContactSection>
-       <Snackbar
-              open={alert.open}
-              autoHideDuration={3000}
-              onClose={() => setAlert({ ...alert, open: false })}
-              anchorOrigin={{ vertical: "top", horizontal: "right" }} // Position the snackbar at the top right
-            >
-              <Alert
-                severity={alert.severity}
-                onClose={() => setAlert({ ...alert, open: false })}
-              >
-                {alert.message}
-              </Alert>
-            </Snackbar>
+      <Snackbar
+        open={alert.open}
+        autoHideDuration={3000}
+        onClose={() => setAlert({ ...alert, open: false })}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }} // Position the snackbar at the top right
+      >
+        <Alert
+          severity={alert.severity}
+          onClose={() => setAlert({ ...alert, open: false })}
+        >
+          {alert.message}
+        </Alert>
+      </Snackbar>
       <Footer />
     </>
   );

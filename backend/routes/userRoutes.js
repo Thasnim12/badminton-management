@@ -1,10 +1,6 @@
 const express = require('express')
-const { userLogin,userRegister,verifyOtp,userLogout,googleLogin,updateUserDetails,getCourts,getSlots,getAddons } = require('../controllers/userController')
-const { verifyPayment,createDonation } = require('../controllers/donationController')
 const { createBooking,verifyBookingPayment } = require('../controllers/bookingController')
-const authenticateUser = require('../middlewares/userMiddleware')
 const { userUpload } = require('../helper/multer')
-const express = require("express");
 const {
   userLogin,
   userRegister,
