@@ -7,8 +7,6 @@ const {
   createBooking,
   verifyBookingPayment,
 } = require("../controllers/bookingController");
-const { authenticateUser } = require("../middlewares/userMiddleware");
-const { userUpload } = require("../helper/multer");
 const {
   userLogin,
   userRegister,
@@ -22,6 +20,8 @@ const {
   sendMessage,
 
 } = require("../controllers/userController");
+
+const authenticateUser = require('../middlewares/userMiddleware')
 
 const userroute = express.Router();
 
