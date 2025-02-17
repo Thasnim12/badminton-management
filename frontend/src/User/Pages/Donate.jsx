@@ -470,12 +470,12 @@ const Donate = () => {
       const response = await donate({
         donor_id: donorId,
         donor_name: donorName,
+        donor_phone: donorPhone,
+        donor_city: donorCity,
+        donation_type: donationType,
         amount,
         currency,
         paymentMethod,
-        donationType,
-        donorCity,
-        donor_Phone: donorPhone,
       }).unwrap();
 
       const { order } = response;
@@ -686,10 +686,10 @@ const Donate = () => {
                 onChange={(e) => setDonationType(e.target.value)}
                 required
               >
-                <MenuItem value="Education">Sponsor for Education</MenuItem>
-                <MenuItem value="Welfare">Sponsor for Welfare</MenuItem>
-                <MenuItem value="Food">Food</MenuItem>
-                <MenuItem value="Shelters">Shelters</MenuItem>
+                <MenuItem value="education">Sponsor for Education</MenuItem>
+                <MenuItem value="welfare">Sponsor for Welfare</MenuItem>
+                <MenuItem value="food">Food</MenuItem>
+                <MenuItem value="shelters">Shelters</MenuItem>
               </Select>
             </FormControl>
             <br />

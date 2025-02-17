@@ -65,21 +65,32 @@ const Users = () => {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [userToBlock, setUserToBlock] = useState(null);
 
   const handlePageChange = (event, value) => {
     setPage(value);
   };
 
-  const handleStatusChange = async (userId) => {
+  const handleStatusChange = async (user) => {
+    setUserToBlock(user);
+    setConfirmOpen(true);
+  };
+
+  const handleConfirmBlockUnblock = async () => {
     try {
-      const response = await manageUsers(userId).unwrap();
+      const response = await manageUsers(userToBlock._id).unwrap();
       setSnackbarMessage(response.message);
       setSnackbarSeverity("success");
       setSnackbarOpen(true);
+      setConfirmOpen(false);
       refetch();
     } catch (error) {
       console.error("Error updating user status:", error);
-      alert("Failed to update user status");
+      setSnackbarMessage("Failed to update user status");
+      setSnackbarSeverity("error");
+      setSnackbarOpen(true);
+      setConfirmOpen(false);
     }
   };
 
@@ -104,46 +115,49 @@ const Users = () => {
     if (!formData.name || !formData.email || !formData.phoneno) {
       setSnackbar({
         open: true,
-        message: 'Please fill in all the fields.',
-        type: 'error',
+        message: "Please fill in all the fields.",
+        type: "error",
       });
       return;
     }
-  
+
     if (!validateEmail(formData.email)) {
       setSnackbar({
         open: true,
-        message: 'Please enter a valid email address.',
-        type: 'error',
+        message: "Please enter a valid email address.",
+        type: "error",
       });
       return;
     }
-  
+
     try {
       const response = await addUsers(formData);
-      if (response?.message) {
+
+      if (response.error) {
         setSnackbar({
           open: true,
-          message: response.message || 'User added successfully!',
-          type: response.message === 'User added successfully!' ? 'success' : 'error',
+          message: response.error.data.message || "Error occurred",
+          type: "error",
         });
-      } else {
-        setSnackbar({
-          open: true,
-          message: 'Email or Phone number already exists!',
-          type: 'error',
-        });
+        return;
       }
-      setOpen(false); 
+
+      setSnackbar({
+        open: true,
+        message: response.message || "User added successfully!",
+        type: "success",
+      });
+      setOpen(false);
+      refetch();
     } catch (error) {
       setSnackbar({
         open: true,
-        message: error?.response?.data?.message || 'Error adding user.',
-        type: 'error',
+        message: "Error connecting to server",
+        type: "error",
       });
     }
   };
-  
+
   const validateEmail = (email) => {
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     return emailRegex.test(email);
@@ -308,7 +322,7 @@ const Users = () => {
                         <Button
                           variant="outlined"
                           color={user.is_blocked ? "error" : "success"}
-                          onClick={() => handleStatusChange(user._id)}
+                          onClick={() => handleStatusChange(user)}
                         >
                           {user.is_blocked ? "Unblock" : "Block"}
                         </Button>
@@ -318,6 +332,39 @@ const Users = () => {
                 </TableBody>
               </Table>
             </TableContainer>
+
+            <Dialog
+              open={confirmOpen}
+              onClose={() => setConfirmOpen(false)}
+              fullWidth
+              maxWidth="sm"
+            >
+              <DialogTitle>
+                {userToBlock?.is_blocked ? "Unblock User" : "Block User"}
+              </DialogTitle>
+              <DialogContent>
+                <Typography>
+                  Are you sure you want to{" "}
+                  {userToBlock?.is_blocked ? "unblock" : "block"} this user?
+                </Typography>
+              </DialogContent>
+              <DialogActions>
+                <Button
+                  onClick={() => setConfirmOpen(false)}
+                  variant="outlined"
+                  color="primary"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleConfirmBlockUnblock} // Use the confirm handler
+                  color="primary"
+                  variant="outlined"
+                >
+                  Confirm
+                </Button>
+              </DialogActions>
+            </Dialog>
 
             {/* Pagination */}
             <Box
@@ -342,12 +389,12 @@ const Users = () => {
         open={snackbar.open}
         autoHideDuration={3000}
         onClose={() => setSnackbar({ ...snackbar, open: false })}
-        anchorOrigin={{ vertical: 'top', horizontal: 'right' }} 
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
       >
         <Alert
           onClose={() => setSnackbar({ ...snackbar, open: false })}
           severity={snackbar.type}
-          sx={{ width: '100%' }}
+          sx={{ width: "100%" }}
         >
           {snackbar.message}
         </Alert>

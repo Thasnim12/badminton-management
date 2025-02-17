@@ -1,129 +1,131 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 export const adminApi = createApi({
-  reducerPath: 'adminApi',
-  baseQuery: fetchBaseQuery({ baseUrl: 'http://localhost:5000/api/admin', credentials: 'include' }),
+  reducerPath: "adminApi",
+  baseQuery: fetchBaseQuery({
+    baseUrl: "http://localhost:5000/api/admin",
+    credentials: "include",
+  }),
   endpoints: (builder) => ({
-
     getAdminDetails: builder.query({
-      query: () => '/admin-profile',
+      query: () => "/admin-profile",
     }),
     getAllUsers: builder.query({
       query: () => ({
-        url: '/users', 
-        method: 'GET',
+        url: "/users",
+        method: "GET",
       }),
     }),
     getAllcourts: builder.query({
       query: () => ({
         url: `/courts`,
-        method: 'GET',
+        method: "GET",
       }),
     }),
     getAllslost: builder.query({
       query: (courtId) => ({
         url: `/slots/${courtId}`,
-        method: 'GET',
+        method: "GET",
       }),
     }),
     getAlladdons: builder.query({
       query: () => ({
         url: `/addons`,
-        method: 'GET',
+        method: "GET",
       }),
     }),
     GetStaffs: builder.query({
-      query: () => '/get-staffs', 
-      method: 'GET',
+      query: () => "/get-staffs",
+      method: "GET",
     }),
     GetDonations: builder.query({
-      query: () => '/get-donations',
-      method: 'GET',
+      query: () => "/get-donations",
+      method: "GET",
     }),
     viewBanner: builder.query({
       query: (bannerId) => ({
-        url: `/view-banner/${bannerId}`, 
-        method: 'GET',
+        url: `/view-banner/${bannerId}`,
+        method: "GET",
       }),
     }),
     loginadmin: builder.mutation({
-        query: (data) => ({
-          url: '/login', 
-          method: 'POST',
-          body: data,
-        }),
+      query: (data) => ({
+        url: "/login",
+        method: "POST",
+        body: data,
+      }),
     }),
     logoutadmin: builder.mutation({
       query: () => ({
-        url: '/logout',
-        method: 'POST',
+        url: "/logout",
+        method: "POST",
       }),
     }),
     manageusers: builder.mutation({
       query: (userId) => ({
         url: `/users/${userId}`,
-        method: 'PUT',
+        method: "PUT",
       }),
     }),
     manageslots: builder.mutation({
       query: (data) => ({
         url: `/slots`,
-        method: 'POST',
-        body: data
+        method: "POST",
+        body: data,
       }),
     }),
     addcourts: builder.mutation({
       query: (data) => ({
         url: "/courts",
         method: "POST",
-        body: data,  
+        body: data,
       }),
-    }),    
+    }),
     updatecourts: builder.mutation({
-      query: ({ slotId,...data }) => ({
+      query: ({ slotId, ...data }) => ({
         url: `/edit-slots/${slotId}`,
-        method: 'PUT',
-        body: data
+        method: "PUT",
+        body: data,
       }),
     }),
     addstaffs: builder.mutation({
       query: (data) => ({
         url: `/staffs`,
-        method: 'POST',
-        body: data
+        method: "POST",
+        body: data,
       }),
     }),
     addaddons: builder.mutation({
       query: (data) => ({
         url: `/addons`,
-        method: 'POST',
-        body: data
+        method: "POST",
+        body: data,
       }),
     }),
     UpdateStaff: builder.mutation({
       query: (updatedStaff) => ({
-        url: `/staffs/${updatedStaff.employee_id}`, 
-        method: 'PUT',
+        url: `/staffs/${updatedStaff.employee_id}`,
+        method: "PUT",
         body: updatedStaff,
       }),
     }),
     DeleteStaff: builder.mutation({
       query: (_id) => ({
         url: `/staffs/${_id}`,
-        method: 'DELETE',
+        method: "DELETE",
       }),
-      invalidatesTags: ['Staff'],
+      invalidatesTags: ["Staff"],
     }),
-    addBanner:builder.mutation({
-      query:(data) => ({
-        url:'/banner',
-        method:"POST",
-        body: data
-      })
+    addBanner: builder.mutation({
+      query: (data) => ({
+        url: "/banner",
+        method: "POST",
+        body: data,
+      }),
     }),
     getAllBanners: builder.query({
       query: () => ({
-        url: '/banner', 
+        url: "/banner",
       }),
     }),
     updateBanner: builder.mutation({
@@ -136,8 +138,8 @@ export const adminApi = createApi({
     }),
     getMessages: builder.query({
       query: () => ({
-        url: '/get-message', 
-        method: 'GET',
+        url: "/get-message",
+        method: "GET",
       }),
     }),
     addUser: builder.mutation({
@@ -148,8 +150,8 @@ export const adminApi = createApi({
       }),
     }),
     getBookings: builder.query({
-      query: () => '/bookings',
-      method: 'GET',
+      query: () => "/bookings",
+      method: "GET",
     }),
     manageCsv: builder.mutation({
       query: () => ({
@@ -177,8 +179,22 @@ export const adminApi = createApi({
         method: "DELETE",
       }),
     }),
+    editCourtStatus: builder.mutation({
+      query: (courtId) => ({
+        url: "/status",
+        method: "PUT",
+        body: courtId,
+      }),
+    }),
+    deleteCourt: builder.mutation({
+      query: (courtId) => ({
+        url: "/delete-court",
+        method: "DELETE",
+        body: courtId,
+      }),
+    }),
   }),
-});   
+});
 
 export const {
   useGetAllUsersQuery,
@@ -208,8 +224,9 @@ export const {
   useManageCsvMutation,
   useManagedownloadCsvMutation,
   useDeleteBannerMutation,
-  useDeleteAddonMutation
- }
-  = adminApi;
+  useDeleteAddonMutation,
+  useEditCourtStatusMutation,
+  useDeleteCourtMutation
+} = adminApi;
 
-export default adminApi
+export default adminApi;

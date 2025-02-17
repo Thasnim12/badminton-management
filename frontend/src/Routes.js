@@ -14,6 +14,7 @@ import BookingSummary from "./User/Pages/Confirmbooking";
 import Addons from "./Admin/Pages/Addons";
 import Profile from "./User/Pages/Profile";
 import BannerImages from "./Admin/Pages/BannerImages";
+import MembersPage from "./User/Pages/MembersPage";
 
 import Dashboard from "./Admin/Pages/Dashboard";
 import Users from "./Admin/Pages/Users";
@@ -43,6 +44,7 @@ const AppRoutes = () => {
         {/* User Routes */}
         <Route path="/" element={<Home />} />
         <Route path="/donate" element={<Donate />} />
+        <Route path="/members" element={<MembersPage />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/about" element={<AboutUs />} />
         <Route path="/login" element={<Login />} />

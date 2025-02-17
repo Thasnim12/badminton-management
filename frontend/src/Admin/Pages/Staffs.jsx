@@ -315,10 +315,10 @@ const Staffs = () => {
             </DialogContentText>
           </DialogContent>
           <DialogActions>
-            <Button onClick={() => setOpenConfirmDialog(false)} color="primary">
+            <Button onClick={() => setOpenConfirmDialog(false)} variant="outlined" color="primary">
               Cancel
             </Button>
-            <Button onClick={confirmDelete} color="error" disabled={isDeleting}>
+            <Button onClick={confirmDelete} color="error" variant="outlined"  disabled={isDeleting}>
               {isDeleting ? "Deleting..." : "Delete"}
             </Button>
           </DialogActions>

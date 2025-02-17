@@ -29,9 +29,11 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
 import ErrorIcon from "@mui/icons-material/Error";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import { useGetDonationsQuery, useManagedownloadCsvMutation } from "../../Slices/AdminApi";
+import {
+  useGetDonationsQuery,
+  useManagedownloadCsvMutation,
+} from "../../Slices/AdminApi";
 import Layout from "../Global/Layouts";
-
 
 const ManageDonations = () => {
   const [selectedDonation, setSelectedDonation] = useState(null);
@@ -43,7 +45,6 @@ const ManageDonations = () => {
 
   const { data, error, isLoading } = useGetDonationsQuery();
   const [manageCsv] = useManagedownloadCsvMutation();
-
 
   useEffect(() => {
     console.log("API Response:", data);
@@ -313,7 +314,7 @@ const ManageDonations = () => {
                     {donation.payment_status}
                   </TableCell>
                   <TableCell align="center">
-                    {donation.payment_method}
+                    {donation.payment_method || " N/A"}
                   </TableCell>
                   <TableCell align="center">
                     {new Date(donation.created_at).toLocaleDateString()}
@@ -333,11 +334,13 @@ const ManageDonations = () => {
           </Table>
         </TableContainer>
 
-        <Box sx={{
-          display: 'flex',
-          justifyContent: 'center',
-          marginTop: '20px',
-        }}>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            marginTop: "20px",
+          }}
+        >
           <Pagination
             count={Math.ceil(donations.length / rowsPerPage)}
             page={page}

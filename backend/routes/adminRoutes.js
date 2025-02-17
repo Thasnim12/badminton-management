@@ -41,10 +41,11 @@ const { bannerUpload, courtUpload } = require('../helper/multer')
 
 const adminroute = express.Router();
 
-adminroute.get('/users', authenticateAdmin, getAllusers)
-adminroute.get('/courts', authenticateAdmin, getAllcourts)
-adminroute.get('/slots/:courtId', authenticateAdmin, getAllSlots)
-adminroute.get('/addons', authenticateAdmin, getAlladdons)
+//Get route
+adminroute.get('/users',authenticateAdmin,getAllusers)
+adminroute.get('/courts',authenticateAdmin,getAllcourts)
+adminroute.get('/slots/:courtId',authenticateAdmin,getAllSlots)
+adminroute.get('/addons',authenticateAdmin,getAlladdons)
 adminroute.get("/admin-profile", getAdminDetails);
 adminroute.get("/users", authenticateAdmin, getAllusers);
 adminroute.get("/courts", authenticateAdmin, getAllcourts);
@@ -59,23 +60,27 @@ adminroute.get('/download-donation', authenticateAdmin, downloadDonations)
 adminroute.get('/download-booking', authenticateAdmin, downloadBookings)
 
 
-
+//Post route
 adminroute.post("/login", adminLogin);
 adminroute.post("/logout", authenticateAdmin, adminLogout);
 adminroute.post("/courts", authenticateAdmin, addCourt);
 adminroute.post("/slots", authenticateAdmin, generateSlots);
 adminroute.post("/staffs", authenticateAdmin, addStaff);
+adminroute.post('/addons',authenticateAdmin,manageAddons)
+adminroute.post('/banner',authenticateAdmin,addBanner)
+adminroute.post('/add-user', authenticateAdmin, addUser)
+
+//Edit route
 adminroute.put("/users/:userId", authenticateAdmin, manageUsers);
 adminroute.put("/edit-slots/:slotId", authenticateAdmin, updateSlot);
 adminroute.put("/staffs/:employee_id", authenticateAdmin, manageStaffs);
+adminroute.put('/banner/:bannerId',authenticateAdmin,bannerUpload,editBanner)
+adminroute.put('/status',authenticateAdmin,editStatus)
+
+// Delete route
 adminroute.delete("/staffs/:id", authenticateAdmin, deleteStaff);
-adminroute.post('/addons', authenticateAdmin, manageAddons)
-adminroute.post('/banner', authenticateAdmin, addBanner)
-adminroute.post('/add-user', authenticateAdmin, addUser)
-adminroute.put('/banner/:bannerId', authenticateAdmin, bannerUpload, editBanner)
-adminroute.put('/status', authenticateAdmin, editStatus)
-adminroute.delete('/delete-court', authenticateAdmin, deleteCourt)
-adminroute.delete('/delete-banner/:bannerId', authenticateAdmin, deleteBanner)
-adminroute.delete('/delete-addons/:addonsId', authenticateAdmin, deleteAddons)
+adminroute.delete('/delete-court',authenticateAdmin,deleteCourt)
+adminroute.delete('/delete-banner/:bannerId',authenticateAdmin,deleteBanner)
+adminroute.delete('/delete-addons/:addonsId',authenticateAdmin,deleteAddons)
 
 module.exports = adminroute;

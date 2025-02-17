@@ -8,6 +8,7 @@ const sendOTP = require("../helper/otpHelper");
 const Court = require("../models/courtModel");
 const Slot = require("../models/slotModel");
 const Addons = require("../models/addonModel");
+const Booking = require("../models/bookingModel");
 const { userUpload } = require("../helper/multer");
 const nodemailer = require("nodemailer");
 const Bookings = require('../models/bookingModel')
@@ -85,9 +86,7 @@ const userRegister = async (req, res) => {
 };
 
 const updateUserDetails = async (req, res) => {
-
   userUpload(req, res, async (err) => {
-
     if (err) {
       return res.status(400).json({ message: err.message });
     }
@@ -118,9 +117,8 @@ const updateUserDetails = async (req, res) => {
       console.log(error.message);
       return res.status(500).json({ message: error.message });
     }
-  })
+  });
 };
-
 
 const sendOTPVerificationEmail = async ({ id, email }, res) => {
   try {
@@ -432,6 +430,32 @@ const sendMessage = async (req, res) => {
   }
 };
 
+const getBookingHistory = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const bookings = await Booking.find({ user: userId })
+      .populate("user", "name")
+      .populate("court", "court_name")
+      .populate("slot")
+      .sort({ bookingDate: -1 });
+
+    if (!bookings.length) {
+      return res.status(404).json({
+        success: false,
+        message: "No bookings found for this user",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: bookings,
+    });
+  } catch (error) {
+    console.error("Error fetching booking history:", error);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+};
+
 module.exports = {
   userRegister,
   userLogin,
@@ -443,4 +467,5 @@ module.exports = {
   getAddons,
   updateUserDetails,
   sendMessage,
+  getBookingHistory,
 };

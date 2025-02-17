@@ -96,6 +96,12 @@ export const userApi = createApi({
         body: data,
       }),
     }),
+    userBooking: builder.query({
+      query: () => ({
+        url: "/user-history",
+        method: "Get",
+      }),
+    }),
   }),
 });
 
@@ -113,6 +119,7 @@ export const {
   useCreateBookingMutation,
   useVerifyBookingMutation,
   useSendMessageMutation,
+  useUserBookingQuery,
 } = userApi;
 
 export default userApi;

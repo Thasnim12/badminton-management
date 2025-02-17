@@ -14,6 +14,8 @@ import {
   DialogActions,
   Drawer,
   Divider,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { skipToken } from "@reduxjs/toolkit/query";
@@ -21,6 +23,7 @@ import { styled } from "@mui/material/styles";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { useNavigate } from "react-router-dom";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 import dayjs from "dayjs";
@@ -163,6 +166,10 @@ const CourtBooking = () => {
     });
   };
 
+  const handleOpenDrawer = () => {
+    setOpenDrawer(true);
+  };
+
   const handleBooking = async () => {
     try {
       setProcessing(true);
@@ -286,10 +293,18 @@ const CourtBooking = () => {
 
 
   const handleClickOpen = () => {
-    setOpen(true);
+    if (selectedSlots.length === 0) {
+      setOpenSnackbar(true);
+    } else {
+      setOpen(true);
+    }
   };
   const handleClose = () => {
     setOpen(false);
+  };
+
+  const handleCloseSnackbar = () => {
+    setOpenSnackbar(false);
   };
 
   return (
@@ -328,14 +343,34 @@ const CourtBooking = () => {
                   display: "flex",
                   flexDirection: "column",
                   height: "100%",
+                  position: "relative", // For positioning the button
                 }}
               >
                 <Typography variant="h6" fontWeight="bold">
                   Select Court & Date
                 </Typography>
+
+                {/* Add button on the top right */}
+                <Button
+                  variant="outlined"
+                  startIcon={<AddCircleOutlineIcon />}
+                  sx={{
+                    position: "absolute",
+                    top: 10,
+                    right: 10,
+                    padding: "6px 16px", // Adjust padding for better fit
+                  }}
+                  onClick={handleOpenDrawer}
+                >
+                  Add Ons
+                </Button>
+
+                {/* Date Picker */}
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <DatePicker value={selectedDate} onChange={setSelectedDate} />
                 </LocalizationProvider>
+
+                {/* Court Select */}
                 <Select
                   fullWidth
                   value={courts.find((court) => court._id === selectedCourt) || ''}
@@ -376,7 +411,9 @@ const CourtBooking = () => {
                 <Typography variant="h6" fontWeight="bold">
                   Select Time Slot
                 </Typography>
-                <Box sx={{ overflowY: "auto", maxHeight: 300, mt: 2 }}>
+                <Box
+                  sx={{ overflowY: "auto", maxHeight: 300, mt: 2, flexGrow: 1 }}
+                >
                   <Grid container spacing={1}>
                     {isLoading ? (
                       <Typography>Loading slots...</Typography>
@@ -399,16 +436,11 @@ const CourtBooking = () => {
                     )}
                   </Grid>
                 </Box>
-              </Card>
-            </Grid>
-            <Grid item xs={12}>
-              <Card
-                sx={{ display: "flex", justifyContent: "flex-end", padding: 2 }}
-              >
+
                 <Button
-                  variant="contained"
-                  color="primary"
-                  sx={{ display: "flex", justifyContent: "flex-end" }}
+                  variant="outlined"
+                  color="success"
+                  sx={{ marginTop: 2, alignSelf: "flex-end" }}
                   onClick={handleClickOpen}
                 >
                   Proceed to Booking
@@ -418,6 +450,21 @@ const CourtBooking = () => {
           </Grid>
         </Grid>
       </Box>
+
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={3000}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+        onClose={handleCloseSnackbar}
+      >
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity="error"
+          sx={{ width: "100%" }}
+        >
+          Please Select all the fields
+        </Alert>
+      </Snackbar>
       <AddOnsDrawer
         open={openDrawer}
         onClose={() => setOpenDrawer(false)}
@@ -522,12 +569,12 @@ const CourtBooking = () => {
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose} color="error">
+          <Button onClick={handleClose} variant="outlined" color="error">
             Cancel
           </Button>
           <Button
             onClick={handleBooking}
-            variant="contained"
+            variant="outlined"
             color="primary"
             disabled={processing}
           >

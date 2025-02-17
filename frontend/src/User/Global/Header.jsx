@@ -59,6 +59,7 @@ const Header = () => {
     { text: "Contact", to: "/contact" },
     { text: "Donate", to: "/donate" },
     { text: "Book Now", to: "/bookings" },
+    { text: "Members", to: "/members" },
   ];
 
   return (
@@ -74,13 +75,13 @@ const Header = () => {
           }}
         >
           <img
-            src="/Logo.png" 
+            src="/Logo.png"
             alt="Logo"
             style={{
-              width: '40px', 
-              height: '40px',
-              borderRadius: '50%',
-              marginRight: '8px' 
+              width: "40px",
+              height: "40px",
+              borderRadius: "50%",
+              marginRight: "8px",
             }}
           />
           {/* Add your logo or title here */}
