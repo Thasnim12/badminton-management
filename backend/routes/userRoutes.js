@@ -18,13 +18,14 @@ const {
   getSlots,
   getAddons,
   sendMessage,
-
+  getBookingHistory,
 } = require("../controllers/userController");
 
-const authenticateUser = require('../middlewares/userMiddleware')
+const authenticateUser = require("../middlewares/userMiddleware");
 
 const userroute = express.Router();
 
+// Post route
 userroute.post("/register", userRegister);
 userroute.post("/login", userLogin);
 userroute.post("/verify-otp", verifyOtp);
@@ -33,12 +34,16 @@ userroute.post("/donation", createDonation);
 userroute.post("/verify-donation", verifyPayment);
 userroute.post("/google-login", googleLogin);
 userroute.post("/send-message", sendMessage);
+userroute.post("/booking", authenticateUser, createBooking);
+userroute.post("/verify-booking", authenticateUser, verifyBookingPayment);
 
+// Get route
 userroute.get("/get-courts", authenticateUser, getCourts);
 userroute.get("/get-slots", authenticateUser, getSlots);
 userroute.get("/get-addons", authenticateUser, getAddons);
-userroute.post('/booking',authenticateUser,createBooking)
-userroute.post('/verify-booking',authenticateUser,verifyBookingPayment)
-userroute.put('/update-profile', authenticateUser,updateUserDetails)
+userroute.get("/user-history", authenticateUser, getBookingHistory);
+
+// Update route
+userroute.put("/update-profile", authenticateUser, updateUserDetails);
 
 module.exports = userroute;

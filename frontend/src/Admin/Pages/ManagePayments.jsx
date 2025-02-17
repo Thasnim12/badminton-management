@@ -27,7 +27,10 @@ import VolunteerActivismIcon from "@mui/icons-material/VolunteerActivism";
 import EventNoteIcon from "@mui/icons-material/EventNote";
 import Layout from "../Global/Layouts";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import { useGetDonationsQuery } from "../../Slices/AdminApi";
+import {
+  useGetDonationsQuery,
+  useGetBookingsQuery,
+} from "../../Slices/AdminApi";
 
 const ManagePayments = () => {
   const [selectedDonation, setSelectedDonation] = useState(null);
@@ -64,25 +67,27 @@ const ManagePayments = () => {
   const { data: donations } = useGetDonationsQuery();
   const donationHistory = donations || [];
 
+  const { data: bookings } = useGetBookingsQuery(); // Fetch bookings
+  const bookingHistory = bookings?.bookings || []; // Assuming response contains 'bookings'
+
+  const totalBookings = bookingHistory.length;
+
   const donationProfit =
     donations
       ?.filter((donation) => donation.payment_status === "completed")
       .reduce((total, donation) => total + donation.amount, 0) || 0;
 
-  const bookingHistory = [
-    { id: 1, amount: 150, customer: "Alice Johnson", date: "2025-02-05" },
-    { id: 2, amount: 250, customer: "Bob Lee", date: "2025-01-18" },
-  ];
-
   const BookingProfit =
-    bookingHistory?.reduce((total, booking) => total + booking.amount, 0) || 0;
+    bookingHistory
+      ?.filter((booking) => booking?.payment?.status === "Completed")
+      .reduce((total, booking) => total + booking?.payment?.amount, 0) || 0;
 
   const totalProfit = donationProfit + BookingProfit;
 
   return (
     <Layout>
       <Container sx={{ marginTop: "25px" }}>
-      <BreadcrumbNav
+        <BreadcrumbNav
           links={[
             { label: "Dashboard", path: "/admin" },
             { label: "Payments", path: "/admin/manage-payments" },
@@ -203,7 +208,7 @@ const ManagePayments = () => {
                   <TableCell align="center">Status</TableCell>
                   <TableCell align="center">Payment Method</TableCell>
                   <TableCell align="center">Date</TableCell>
-                  <TableCell align="center">Actions</TableCell>
+                  {/* <TableCell align="center">Actions</TableCell> */}
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -223,12 +228,12 @@ const ManagePayments = () => {
                         {donation.payment_status}
                       </TableCell>
                       <TableCell align="center">
-                        {donation.payment_method}
+                        {donation.payment_method || "N/A"}
                       </TableCell>
                       <TableCell align="center">
                         {new Date(donation.created_at).toLocaleDateString()}
                       </TableCell>
-                      <TableCell align="center">
+                      {/* <TableCell align="center">
                         <IconButton
                           color="primary"
                           sx={{ marginRight: 1 }}
@@ -236,7 +241,7 @@ const ManagePayments = () => {
                         >
                           <VisibilityIcon />
                         </IconButton>
-                      </TableCell>
+                      </TableCell> */}
                     </TableRow>
                   ))}
               </TableBody>
@@ -265,46 +270,74 @@ const ManagePayments = () => {
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell align="center">Customer</TableCell>
-                  <TableCell align="center">Amount</TableCell>
-                  <TableCell align="center">Date</TableCell>
+                  <TableCell align="center">Booking ID</TableCell>
+                  <TableCell align="center">Customer Name</TableCell>
+                  <TableCell align="center">Court</TableCell>
+                  <TableCell align="center">Slot Time</TableCell>
+                  <TableCell align="center">Booking Date</TableCell>
+                  <TableCell align="center">Payment Status</TableCell>
+                  <TableCell align="center">Payment Method</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {bookingHistory
-                  .slice(
-                    (bookingPage - 1) * bookingRowsPerPage,
-                    bookingPage * bookingRowsPerPage
-                  )
-                  .map((booking) => (
-                    <TableRow key={booking.id}>
-                      <TableCell align="center">{booking.customer}</TableCell>
-                      <TableCell align="center">₹{booking.amount}</TableCell>
-                      <TableCell align="center">{booking.date}</TableCell>
-                    </TableRow>
-                  ))}
+                {bookingHistory.length > 0 ? (
+                  bookingHistory
+                    .slice(
+                      (bookingPage - 1) * bookingRowsPerPage,
+                      bookingPage * bookingRowsPerPage
+                    )
+                    .map((booking) => (
+                      <TableRow key={booking._id}>
+                        <TableCell align="center">
+                          {booking.payment?.razorpayOrderId}
+                        </TableCell>
+                        <TableCell align="center">
+                          {booking.user?.name || "N/A"}
+                        </TableCell>
+                        <TableCell align="center">
+                          {booking.court?.court_name || "N/A"}
+                        </TableCell>
+                        <TableCell align="center">
+                          {booking.slot
+                            ?.map(
+                              (s) =>
+                                `${new Date(s.startTime).toLocaleTimeString()} - ${new Date(s.endTime).toLocaleTimeString()}`
+                            )
+                            .join(", ") || "N/A"}
+                        </TableCell>
+                        <TableCell align="center">
+                          {new Date(booking.bookingDate).toLocaleDateString()}
+                        </TableCell>
+                        <TableCell align="center">
+                          {booking.payment?.status || "N/A"}
+                        </TableCell>
+                        <TableCell align="center">
+                          {booking.payment?.method || "N/A"}
+                        </TableCell>
+                      </TableRow>
+                    ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={6} align="center">
+                      No Bookings Available
+                    </TableCell>
+                  </TableRow>
+                )}
               </TableBody>
             </Table>
-
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                marginTop: "20px",
-              }}
-            >
-              <Pagination
-                count={Math.ceil(bookingHistory.length / bookingRowsPerPage)}
-                page={bookingPage}
-                onChange={handleBookingChangePage}
-                color="primary"
-                siblingCount={1}
-              />
-            </Box>
+            <Pagination
+              count={Math.ceil(totalBookings / bookingRowsPerPage)}
+              page={bookingPage}
+              onChange={handleBookingChangePage}
+              rowsPerPage={bookingRowsPerPage}
+              color="primary"
+              onRowsPerPageChange={handleBookingChangeRowsPerPage}
+              sx={{ mt: 2, display: "flex", justifyContent: "center" }}
+            />{" "}
           </Box>
         )}
 
-        <Dialog open={open} onClose={handleClose}  maxWidth="md" fullWidth>
+        <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
           <DialogTitle>Donation Details</DialogTitle>
           <DialogContent>
             {selectedDonation && (
@@ -333,7 +366,7 @@ const ManagePayments = () => {
             )}
           </DialogContent>
           <DialogActions>
-            <Button onClick={handleClose}  variant="outlined" color="primary">
+            <Button onClick={handleClose} variant="outlined" color="primary">
               Close
             </Button>
           </DialogActions>

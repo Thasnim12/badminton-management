@@ -13,7 +13,7 @@ import {
   useGetDonationsQuery,
   useGetAllUsersQuery,
   useGetStaffsQuery,
-  useGetBookingsQuery
+  useGetBookingsQuery,
 } from "../../Slices/AdminApi";
 
 const SelectActionCard = () => {
@@ -23,12 +23,19 @@ const SelectActionCard = () => {
     useGetDonationsQuery();
 
   const { data, isLoading: isLoadingBookings } = useGetBookingsQuery();
-  const totalBookings = data?.bookings?.length || 0;
+  const totalBookings =
+    data?.bookings?.filter(
+      (booking) => booking?.payment?.status === "Completed"
+    ).length || 0;
 
   const totalDonations =
-    donationData?.reduce((acc, donation) => acc + donation.amount, 0) || 0;
+    donationData
+      ?.filter((donation) => donation.payment_status === "completed")
+      .reduce((acc, donation) => acc + donation.amount, 0) || 0;
+
   const { data: usersData, isLoading: isLoadingUsers } = useGetAllUsersQuery();
-  const totalUsers = usersData?.users?.length || 0;
+  const totalUsers =
+    usersData?.users?.filter((user) => user.is_blocked === false).length || 0;
   const { data: staffData, isLoading: isLoadingStaffs } = useGetStaffsQuery();
   const totalStaffs = staffData?.staffs?.length || 0;
 
@@ -36,7 +43,9 @@ const SelectActionCard = () => {
     {
       id: 1,
       title: "Bookings",
-      description: isLoadingBookings ? "Loading..." : `Total Bookings: ${totalBookings}`,
+      description: isLoadingBookings
+        ? "Loading..."
+        : `Total Bookings: ${totalBookings}`,
       icon: <EventIcon fontSize="medium" sx={{ color: "black" }} />,
     },
     {
@@ -56,7 +65,9 @@ const SelectActionCard = () => {
     {
       id: 4,
       title: "Staffs",
-      description: isLoadingStaffs ? "Loading..." : `Total Staffs: ${totalStaffs}`,
+      description: isLoadingStaffs
+        ? "Loading..."
+        : `Total Staffs: ${totalStaffs}`,
       icon: <GroupAddIcon fontSize="medium" sx={{ color: "black" }} />,
     },
   ];

@@ -112,6 +112,7 @@ const Addaddons = ({ openForm, handleClose }) => {
               <TextField
                 name="quantity"
                 label="Quantity"
+                type="number"
                 variant="outlined"
                 fullWidth
                 value={formData.quantity}

@@ -142,26 +142,6 @@ const Settings = () => {
                 disabled={!isEditing} // Disable when not in editing mode
               />
             </Grid>
-
-            {/* Passkey Field */}
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Passkey"
-                name="passkey"
-                value={formData.passkey}
-                variant="outlined"
-                type={showPasskey ? "text" : "password"} // Toggle visibility of passkey
-                disabled
-                InputProps={{
-                  endAdornment: (
-                    <IconButton onClick={handleTogglePasskeyVisibility}>
-                      {showPasskey ? <Visibility /> : <VisibilityOff />}
-                    </IconButton>
-                  ),
-                }}
-              />
-            </Grid>
           </Grid>
           {/* Divider */}
           <Divider sx={{ marginTop: 3 }} />

@@ -27,7 +27,7 @@ import IconButton from "@mui/material/IconButton";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import CancelIcon from "@mui/icons-material/Cancel";
+import DeleteIcon from "@mui/icons-material/Delete";
 import GroupIcon from "@mui/icons-material/Group";
 import BlockIcon from "@mui/icons-material/Block";
 import { styled } from "@mui/material/styles";
@@ -36,6 +36,8 @@ import FullScreenDialog from "../Components/ViewCourt";
 import {
   useAddcourtsMutation,
   useGetAllcourtsQuery,
+  useEditCourtStatusMutation,
+  useDeleteCourtMutation,
 } from "../../Slices/AdminApi";
 
 const SlotManagement = () => {
@@ -45,9 +47,34 @@ const SlotManagement = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedcourt, SetSelectedCourt] = useState("");
+  const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false); // for the status change confirmation
+  const [deleteConfirmation, setDeleteConfirmation] = useState(false);
 
   const [addcourt] = useAddcourtsMutation();
   const { data: courts, refetch } = useGetAllcourtsQuery();
+  const [editCourtStatus] = useEditCourtStatusMutation(); // Mutation for updating the court status
+  const [deleteCourt] = useDeleteCourtMutation();
+
+  const handleDeleteCourt = async (court) => {
+    SetSelectedCourt(court);
+    setDeleteConfirmation(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (selectedcourt) {
+      try {
+        await deleteCourt({ courtId: selectedcourt._id }).unwrap();
+        refetch();
+        setDeleteConfirmation(false);
+      } catch (error) {
+        console.error("Failed to delete court:", error);
+      }
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setDeleteConfirmation(false);
+  };
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -64,6 +91,27 @@ const SlotManagement = () => {
 
   const handleCloseDialog = () => {
     setDialogOpen(false);
+  };
+
+  const handleConfirmationDialogClose = () => {
+    setConfirmationDialogOpen(false);
+  };
+
+  const handleStatusChange = async (court) => {
+    SetSelectedCourt(court);
+    setConfirmationDialogOpen(true);
+  };
+
+  const handleConfirmStatusChange = async () => {
+    if (selectedcourt) {
+      try {
+        await editCourtStatus({ courtId: selectedcourt._id }).unwrap();
+        refetch();
+        setConfirmationDialogOpen(false);
+      } catch (error) {
+        console.error("Failed to update court status:", error);
+      }
+    }
   };
 
   const VisuallyHiddenInput = styled("input")({
@@ -96,12 +144,12 @@ const SlotManagement = () => {
       setCourtImage("");
       setCourtName("");
       handleClose();
+      refetch();
     } catch (error) {
       console.error("Failed to add court:", error);
       setErrorMessage("Failed to add court. Please try again.");
     }
   };
-
 
   const activeCourts =
     courts?.courts?.filter((court) => court.isActive).length || 0;
@@ -211,13 +259,16 @@ const SlotManagement = () => {
                   }}
                   accept="image/*"
                 />
-
               </Button>
             </Stack>
           </DialogContent>
           <DialogActions>
-            <Button variant="outlined" onClick={handleClose}>Cancel</Button>
-            <Button variant="outlined" onClick={handleAddcourt}>Add</Button>
+            <Button variant="outlined" onClick={handleClose}>
+              Cancel
+            </Button>
+            <Button variant="outlined" onClick={handleAddcourt}>
+              Add
+            </Button>
           </DialogActions>
         </Dialog>
 
@@ -254,6 +305,7 @@ const SlotManagement = () => {
                       <Button
                         variant="outlined"
                         color={court.isActive ? "success" : "error"}
+                        onClick={() => handleStatusChange(court)} // Open the status change confirmation dialog
                       >
                         {court.isActive ? "Active" : "Inactive"}
                       </Button>
@@ -266,6 +318,12 @@ const SlotManagement = () => {
                       >
                         <VisibilityIcon />
                       </IconButton>
+                      <IconButton
+                        color="error"
+                        onClick={() => handleDeleteCourt(court)}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -273,6 +331,53 @@ const SlotManagement = () => {
             </Table>
           </TableContainer>
         </Box>
+
+        {/* Confirmation Dialog for status change */}
+        <Dialog
+          open={confirmationDialogOpen}
+          onClose={handleConfirmationDialogClose}
+        >
+          <DialogTitle>Change Court Status</DialogTitle>
+          <DialogContent>
+            <Typography>
+              Are you sure you want to{" "}
+              {selectedcourt?.isActive ? "deactivate" : "activate"} this court?
+            </Typography>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleConfirmationDialogClose} variant="outlined">
+              Cancel
+            </Button>
+            <Button onClick={handleConfirmStatusChange} variant="outlined">
+              Confirm
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Confirmation Dialog for Delete */}
+        <Dialog open={deleteConfirmation} onClose={handleCancelDelete}>
+          <DialogTitle>Delete Court</DialogTitle>
+          <DialogContent>
+            Are you sure you want to delete this court? This action cannot be
+            undone.
+          </DialogContent>
+          <DialogActions>
+            <Button
+              onClick={handleCancelDelete}
+              variant="outlined"
+              color="primary"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleConfirmDelete}
+              variant="outlined"
+              color="error"
+            >
+              Confirm
+            </Button>
+          </DialogActions>
+        </Dialog>
 
         {selectedcourt && (
           <FullScreenDialog

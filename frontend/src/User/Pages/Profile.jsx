@@ -39,11 +39,40 @@ import {
 } from "../../Slices/UserApi";
 import { useDispatch } from "react-redux";
 import { setUserCredentials } from "../../Slices/UserSlice";
+import { useUserBookingQuery } from "../../Slices/UserApi";
+import BookingHistory from "../Components/BookingHistory";
 
 const Profile = () => {
   const { userInfo } = useSelector((state) => state.userAuth);
   const user = userInfo.email;
   const [updateProfile] = useUpdateProfileMutation();
+
+  // const { data: bookingHistory } = useUserBookingQuery();
+  // const loginBooking = bookingHistory?.bookings ?? [];
+
+  // const userBookings = loginBooking.map(
+  //   ({ _id, user, court, slot, payment, bookingDate, isCancelled }) => ({
+  //     bookingId: _id,
+  //     userId: user?._id,
+  //     userName: user?.name,
+  //     courtId: court?._id,
+  //     courtName: court?.court_name,
+  //     slots: slot.map(({ _id, startTime, endTime }) => ({
+  //       slotId: _id,
+  //       startTime,
+  //       endTime,
+  //     })),
+  //     paymentStatus: payment?.status,
+  //     amount: payment?.amount,
+  //     currency: payment?.currency,
+  //     bookingDate,
+  //     isCancelled,
+  //   })
+  // );
+
+  // console.log(userBookings, "BOOKINGS OF MINE");
+
+  // console.log(loginBooking, "User BOoking");
 
   const [profileImage, setProfileImage] = useState("");
   const [formData, setFormData] = useState({
@@ -98,8 +127,8 @@ const Profile = () => {
     status: i % 2 === 0 ? "Confirmed" : "Pending",
   }));
 
-  const [page, setPage] = useState(1); // Current page (starts from 1)
-  const rowsPerPage = 7; // Limit of 7 per page
+  const [page, setPage] = useState(1);
+  const rowsPerPage = 7;
 
   const handleChangePage = (event, value) => {
     setPage(value);
@@ -130,10 +159,8 @@ const Profile = () => {
       formDataToSend.append("mobile", formData.mobile);
 
       if (profileImage) {
-        formDataToSend.append("profileImage", profileImage); 
-        
+        formDataToSend.append("profileImage", profileImage);
       }
-     
 
       const response = await updateProfile(formDataToSend).unwrap();
       console.log("Profile updated successfully:", response);
@@ -343,82 +370,7 @@ const Profile = () => {
           )}
 
           {tabIndex === 1 && (
-            <Box sx={{ padding: 3 }}>
-              <Grid sx={{ padding: 3, margin: "auto", maxWidth: 800 }}>
-                <Typography variant="h5" gutterBottom>
-                  Booking History
-                </Typography>
-
-                {bookings.length > 0 ? (
-                  <>
-                    <TableContainer component={Paper}>
-                      <Table>
-                        <TableHead>
-                          <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
-                            <TableCell>
-                              <strong>Date</strong>
-                            </TableCell>
-                            <TableCell>
-                              <strong>Time</strong>
-                            </TableCell>
-                            <TableCell>
-                              <strong>Court</strong>
-                            </TableCell>
-                            <TableCell>
-                              <strong>Price</strong>
-                            </TableCell>
-                            <TableCell>
-                              <strong>Status</strong>
-                            </TableCell>
-                          </TableRow>
-                        </TableHead>
-                        <TableBody>
-                          {bookings
-                            .slice((page - 1) * rowsPerPage, page * rowsPerPage)
-                            .map((booking) => (
-                              <TableRow key={booking.id}>
-                                <TableCell>{booking.date}</TableCell>
-                                <TableCell>{booking.time}</TableCell>
-                                <TableCell>{booking.court}</TableCell>
-                                <TableCell>{booking.price}</TableCell>
-                                <TableCell>
-                                  <Typography
-                                    sx={{
-                                      color:
-                                        booking.status === "Confirmed"
-                                          ? "green"
-                                          : "orange",
-                                      fontWeight: "bold",
-                                    }}
-                                  >
-                                    {booking.status}
-                                  </Typography>
-                                </TableCell>
-                              </TableRow>
-                            ))}
-                        </TableBody>
-                      </Table>
-                    </TableContainer>
-
-                    {/* Centered Pagination */}
-                    <Stack
-                      spacing={2}
-                      alignItems="center"
-                      sx={{ marginTop: 2 }}
-                    >
-                      <Pagination
-                        count={totalPages}
-                        page={page}
-                        onChange={handleChangePage}
-                        color="primary"
-                      />
-                    </Stack>
-                  </>
-                ) : (
-                  <Typography variant="body1">No bookings found.</Typography>
-                )}
-              </Grid>
-            </Box>
+        <BookingHistory />
           )}
           <Snackbar
             open={alert.open}
