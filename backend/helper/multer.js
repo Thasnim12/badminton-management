@@ -48,4 +48,5 @@ const userUpload = multer({
   fileFilter: fileFilter 
 }).single('profileImage');
 
+
 module.exports = { upload,bannerUpload, courtUpload, userUpload };

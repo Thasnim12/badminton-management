@@ -226,35 +226,40 @@ const generateSlots = async (req, res) => {
     const today = moment().startOf("day");
     const endDate = moment(today).add(6, "days").endOf("day");
 
+    await Slot.deleteMany({
+      court: courtId,
+      isBooked: false,
+      startTime: {
+        $gte: today.toDate(),
+        $lt: moment(today).add(7, "days").toDate(),
+      },
+    });
+
     const existingSlots = await Slot.find({
       court: courtId,
       startTime: { $gte: today.toDate(), $lte: endDate.toDate() },
     });
 
-    if (existingSlots.length > 0) {
-      return res.status(200).json({
-        success: true,
-        message: "Slots already exist",
-        count: existingSlots.length,
-        data: existingSlots,
-      });
-    }
-
     const slots = [];
     const slotMap = new Map();
+
+    const existingSlotMap = new Map(
+      existingSlots.map(slot => [
+        `${courtId}-${moment(slot.startTime).format("YYYY-MM-DD-HH")}`,
+        slot
+      ])
+    );
 
     for (let day = 0; day < 7; day++) {
       const currentDate = moment(today).add(day, "days");
 
-      for (let hour = 6; hour < 21; hour++) {
-        const startTime = moment(currentDate)
-          .set("hour", hour)
-          .set("minute", 0);
-        const endTime = moment(startTime).add(1, "hour");
+      for (let hour = 6; hour < 22; hour++) {
+        const startTime = moment(currentDate).set("hour", hour).set("minute", 0).utc();
+        const endTime = moment(startTime).add(1, "hour").utc();
 
         const slotKey = `${courtId}-${startTime.format("YYYY-MM-DD-HH")}`;
 
-        if (!slotMap.has(slotKey)) {
+        if (!existingSlotMap.has(slotKey) && !slotMap.has(slotKey)) {
           const slot = new Slot({
             court: courtId,
             startTime: startTime.toDate(),
@@ -269,24 +274,20 @@ const generateSlots = async (req, res) => {
       }
     }
 
-    await Slot.deleteMany({
-      court: courtId,
-      isBooked: false,
-      startTime: {
-        $gte: today.toDate(),
-        $lt: moment(today).add(7, "days").toDate(),
-      },
-    });
-
     if (slots.length > 0) {
       await Slot.insertMany(slots);
     }
 
+    const allSlots = await Slot.find({
+      court: courtId,
+      startTime: { $gte: today.toDate(), $lte: endDate.toDate() },
+    }).sort({ startTime: 1 });
+
     res.status(201).json({
       success: true,
       message: "Slots generated successfully",
-      count: slots.length,
-      data: slots,
+      count: allSlots.length,
+      data: allSlots,
     });
   } catch (error) {
     console.error("Error in generateSlots:", error);

@@ -51,24 +51,24 @@ export default function FullScreenDialog({ dialogOpen, handleCloseDialog, court 
 
     useEffect(() => {
         if (courtId && dialogOpen) {
-            let isMounted = true; 
+            let isMounted = true;
             const generateSlots = async () => {
                 try {
                     await addSlot({ courtId: courtId }).unwrap();
-                    if (isMounted) refetch(); 
+                    if (isMounted) refetch();
                 } catch (error) {
                     console.error("Error generating slots:", error);
                 }
             };
-    
+
             generateSlots();
-    
+
             return () => {
                 isMounted = false;
             };
         }
-    }, []); 
-    
+    }, []);
+
 
     const handlePageChange = (event, value) => {
         setPage(value);
@@ -79,6 +79,7 @@ export default function FullScreenDialog({ dialogOpen, handleCloseDialog, court 
     const indexOfLastSlot = page * slotsPerPage;
     const indexOfFirstSlot = indexOfLastSlot - slotsPerPage;
     const currentSlots = slots.slice(indexOfFirstSlot, indexOfLastSlot);
+    console.log(currentSlots, 'slots')
 
     const handleView = (slot) => {
         setSelectedSlot(slot);
@@ -147,8 +148,8 @@ export default function FullScreenDialog({ dialogOpen, handleCloseDialog, court 
                                                     {moment(slot.date).format('DD MMM YYYY')}
                                                 </TableCell>
                                                 <TableCell align="center">
-                                                    {moment(slot.startTime, "HH:mm").format('hh:mm A')} -
-                                                    {moment(slot.endTime, "HH:mm").format('hh:mm A')}
+                                                    {moment(slot.startTime, "hh:mm A").format('hh:mm A')} -
+                                                    {moment(slot.endTime, "hh:mm A").format('hh:mm A')}
                                                 </TableCell>
                                                 <TableCell align="center">
                                                     ₹{slot.price || 0}

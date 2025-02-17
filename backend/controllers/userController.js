@@ -10,6 +10,8 @@ const Slot = require("../models/slotModel");
 const Addons = require("../models/addonModel");
 const { userUpload } = require("../helper/multer");
 const nodemailer = require("nodemailer");
+const Bookings = require('../models/bookingModel')
+const moment = require('moment')
 require("dotenv").config();
 
 const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
@@ -85,40 +87,40 @@ const userRegister = async (req, res) => {
 const updateUserDetails = async (req, res) => {
 
   userUpload(req, res, async (err) => {
-     
+
     if (err) {
       return res.status(400).json({ message: err.message });
     }
 
-      try {
-        const { email, name, mobile } = req.body;
-        const  profileImage  = req.file ? req.file.filename : null; 
-        console.log(profileImage,'img')
-  
-        console.log("Request Body: ", req.body); 
-        console.log("Uploaded File: ", req.file); 
-  
-        const updatedUser = await User.findOneAndUpdate(
-          { email },
-          { name, phoneno: mobile, profileImage },
-          { new: true, runValidators: true }
-        ).select("-password");
-  
-        if (!updatedUser) {
-          return res.status(404).json({ message: "User not found" });
-        }
-  
-        return res.status(200).json({
-          message: "User details updated successfully",
-          user: updatedUser,
-        });
-      } catch (error) {
-        console.log(error.message);
-        return res.status(500).json({ message: error.message });
+    try {
+      const { email, name, mobile } = req.body;
+      const profileImage = req.file ? req.file.filename : null;
+      console.log(profileImage, 'img')
+
+      console.log("Request Body: ", req.body);
+      console.log("Uploaded File: ", req.file);
+
+      const updatedUser = await User.findOneAndUpdate(
+        { email },
+        { name, phoneno: mobile, profileImage },
+        { new: true, runValidators: true }
+      ).select("-password");
+
+      if (!updatedUser) {
+        return res.status(404).json({ message: "User not found" });
       }
-    })
-  };
-  
+
+      return res.status(200).json({
+        message: "User details updated successfully",
+        user: updatedUser,
+      });
+    } catch (error) {
+      console.log(error.message);
+      return res.status(500).json({ message: error.message });
+    }
+  })
+};
+
 
 const sendOTPVerificationEmail = async ({ id, email }, res) => {
   try {
@@ -340,6 +342,8 @@ const getCourts = async (req, res) => {
   }
 };
 
+
+
 const getSlots = async (req, res) => {
   try {
     const { courtId, date } = req.query;
@@ -350,22 +354,28 @@ const getSlots = async (req, res) => {
         .json({ message: "Court ID and Date are required" });
     }
 
-    const startOfDay = new Date(date);
-    startOfDay.setHours(0, 0, 0, 0);
-    const endOfDay = new Date(date);
-    endOfDay.setHours(23, 59, 59, 999);
+    const startOfDay = moment(date).set({ hour: 6, minute: 0, second: 0, millisecond: 0 });
+    const endOfDay = moment(date).set({ hour: 22, minute: 0, second: 0, millisecond: 0 });
 
     const slots = await Slot.find({
       court: courtId,
-      startTime: { $gte: startOfDay, $lte: endOfDay },
-      isBooked: false,
-    });
+      startTime: { $gte: startOfDay.toDate(), $lte: endOfDay.toDate() },
+    }).sort({ startTime: 1 });
 
-    res.json(slots);
+    console.log(slots,'slots')
+
+    const uniqueSlots = Array.from(new Map(
+      slots.map(slot => [slot.startTime.toString(), slot])                                             
+    ).values());
+
+    res.json(uniqueSlots);
   } catch (error) {
     res.status(500).json({ message: "Error fetching slots", error });
   }
 };
+
+
+
 
 const getAddons = async (req, res) => {
   try {

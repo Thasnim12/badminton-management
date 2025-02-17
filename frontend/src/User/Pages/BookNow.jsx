@@ -35,6 +35,8 @@ import {
 } from "../../Slices/UserApi";
 import AddOnsDrawer from "../Components/Drawer";
 import DetailsCard from "../Components/DetailsCard";
+import moment from 'moment';
+
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   "& .MuiDialogContent-root": {
@@ -58,6 +60,7 @@ const CourtBooking = () => {
   const [selectedAddOns, setSelectedAddOns] = useState([]);
   const [open, setOpen] = useState(false);
   const [alert, setAlert] = useState(null);
+  const [selectedImage, setSelectedImage] = useState("")
 
   const [bookingData, setBookingData] = useState({
     courtId: "",
@@ -275,9 +278,12 @@ const CourtBooking = () => {
   };
 
   const handleCourtChange = (e) => {
-    setSelectedCourt(e.target.value);
+    const court = e.target.value;
+    setSelectedImage(court.court_image)
+    setSelectedCourt(court._id);
     setOpenDrawer(true);
   };
+
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -332,7 +338,7 @@ const CourtBooking = () => {
                 </LocalizationProvider>
                 <Select
                   fullWidth
-                  value={selectedCourt}
+                  value={courts.find((court) => court._id === selectedCourt) || ''}
                   onChange={handleCourtChange}
                   sx={{ mt: 2 }}
                 >
@@ -340,18 +346,21 @@ const CourtBooking = () => {
                     <MenuItem disabled>Loading courts...</MenuItem>
                   ) : (
                     courts?.map((court) => (
-                      <MenuItem key={court._id} value={court._id}>
+                      <MenuItem key={court._id} value={court}>
                         {court.court_name}
                       </MenuItem>
                     ))
                   )}
                 </Select>
+
                 <CardMedia
                   component="img"
                   height="150"
-                  image={courtImages[selectedCourt]}
+                  image={`http://localhost:5000/uploads/${selectedImage}`}
                   sx={{ marginTop: 2 }}
+                  alt="Court Image"
                 />
+
               </Card>
             </Grid>
 
@@ -378,16 +387,12 @@ const CourtBooking = () => {
                         <Grid item xs={4} key={slot._id}>
                           <Button
                             fullWidth
-                            variant={
-                              selectedSlots.some((s) => s._id === slot._id)
-                                ? "contained"
-                                : "outlined"
-                            }
+                            variant={selectedSlots.some((s) => s._id === slot._id) ? "contained" : "outlined"}
                             color={slot.isBooked ? "error" : "primary"}
                             disabled={slot.isBooked}
                             onClick={() => handleSlotToggle(slot)}
                           >
-                            {`${dayjs(slot.startTime).format("h:mm A")} - ${dayjs(slot.endTime).format("h:mm A")}`}
+                            {moment(slot.startTime).format('hh:mm A')} - {moment(slot.endTime).format('hh:mm A')}
                           </Button>
                         </Grid>
                       ))
@@ -459,8 +464,8 @@ const CourtBooking = () => {
               alt="Court"
               src={
                 courtImages[
-                  courts.find((court) => court._id === selectedCourt)
-                    ?.court_name
+                courts.find((court) => court._id === selectedCourt)
+                  ?.court_name
                 ]
               }
             />

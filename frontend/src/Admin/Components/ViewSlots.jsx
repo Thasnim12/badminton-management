@@ -65,7 +65,7 @@ export default function ViewSlots({ open, handleClose, slot, mode }) {
               margin="dense"
               variant="outlined"
               onChange={(e) => setStartTime(e.target.value)}
-              disabled={mode === "view"} // Disable in view mode
+              disabled={mode === "view"} 
             />
             <TextField
               label="End Time"

@@ -49,6 +49,9 @@ const bookingSchema = mongoose.Schema(
       razorpayPaymentId: { type: String }, 
       razorpaySignature: { type: String }, 
       amount: { type: Number, required: true }, 
+      method:{
+        type:String
+      },
       currency: { type: String, default: "INR" },
       status: {
         type: String,
