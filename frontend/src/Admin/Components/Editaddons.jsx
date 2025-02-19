@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Button,
   TextField,
@@ -9,32 +9,39 @@ import {
   Grid,
   CircularProgress,
   Box,
-  Snackbar,
-  Checkbox,
+  Typography,
   FormControlLabel,
   FormGroup,
-  Typography,
-  Alert,
+  Checkbox,
 } from "@mui/material";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import {
-  useAddaddonsMutation,
+  useEditAddonMutation,
   useGetAlladdonsQuery,
 } from "../../Slices/AdminApi";
 
-const Addaddons = ({ openForm, handleClose }) => {
-  const [addons, { isLoading }] = useAddaddonsMutation();
+const EditAddons = ({ openForm, handleClose, editData }) => {
+  const [updateAddon, { isLoading }] = useEditAddonMutation();
   const { data, refetch } = useGetAlladdonsQuery();
-  const [formData, setFormData] = useState({
-    item_name: "",
-    quantity: "",
-    price: "",
-    item_type: [],
-    item_image: null,
-  });
+  const [formData, setFormData] = useState(() => ({
+    item_name: editData?.item_name || "",
+    quantity: editData?.quantity || "",
+    price: editData?.price || "",
+    item_type: editData?.item_type || [],
+    item_image: null, // Keep null for new upload
+  }));
 
-  const [successMessage, setSuccessMessage] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
+  useEffect(() => {
+    if (editData) {
+      setFormData({
+        item_name: editData.item_name || "",
+        quantity: editData.quantity || "",
+        price: editData.price || "",
+        item_type: editData.item_type || [],
+        item_image: null, // Reset to null so new image can be uploaded
+      });
+    }
+  }, [editData]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -56,51 +63,41 @@ const Addaddons = ({ openForm, handleClose }) => {
       setFormData({ ...formData, item_image: file });
     }
   };
-
-  const handleAddons = async (e) => {
+  console.log("Edit Addon ID: ", editData._id);
+  const handleUpdateAddon = async (e) => {
     e.preventDefault();
     try {
       const formDataToSend = new FormData();
       formDataToSend.append("item_name", formData.item_name);
       formDataToSend.append("quantity", formData.quantity);
       formDataToSend.append("price", formData.price);
-      formDataToSend.append("item_image", formData.item_image);
+      if (formData.item_image) {
+        formDataToSend.append("item_image", formData.item_image);
+      }
       formData.item_type.forEach((type) =>
         formDataToSend.append("item_type[]", type)
       );
 
-      const response = await addons(formDataToSend).unwrap();
-      console.log("Addon Added Successfully:", response);
-
-      setSuccessMessage("Addon added successfully!");
+      await updateAddon({
+        addonsId: editData._id,
+        data: formDataToSend,
+      }).unwrap();
       refetch();
       handleClose();
     } catch (error) {
-      const errorMessage =
-        error?.data?.message || error?.message || "Something went wrong!";
-      setErrorMessage(errorMessage);
+      console.error("Update Failed:", error);
     }
   };
 
   return (
-    <Dialog
-      open={openForm}
-      onClose={handleClose}
-      maxWidth="sm"
-      fullWidth
-      PaperProps={{
-        component: "form",
-        onSubmit: handleAddons,
-      }}
-    >
+    <Dialog open={openForm} onClose={handleClose} maxWidth="sm" fullWidth>
       <DialogTitle sx={{ textAlign: "center", fontWeight: "bold" }}>
-        Add New Addon
+        Edit Addon
       </DialogTitle>
 
       <DialogContent>
         <Box sx={{ p: 2 }}>
           <Grid container spacing={2}>
-            {/* Item Name */}
             <Grid item xs={12}>
               <TextField
                 name="item_name"
@@ -112,7 +109,6 @@ const Addaddons = ({ openForm, handleClose }) => {
               />
             </Grid>
 
-            {/* Quantity */}
             <Grid item xs={12}>
               <TextField
                 name="quantity"
@@ -125,7 +121,6 @@ const Addaddons = ({ openForm, handleClose }) => {
               />
             </Grid>
 
-            {/* Price */}
             <Grid item xs={12}>
               <TextField
                 name="price"
@@ -137,7 +132,6 @@ const Addaddons = ({ openForm, handleClose }) => {
               />
             </Grid>
 
-            {/* Checkboxes for Item Type */}
             <Grid item xs={12}>
               <FormGroup row>
                 <FormControlLabel
@@ -167,23 +161,27 @@ const Addaddons = ({ openForm, handleClose }) => {
               <input
                 accept="image/*"
                 type="file"
-                id="file-upload"
+                id="file-upload-edit"
                 style={{ display: "none" }}
                 onChange={handleFileChange}
               />
-              <label htmlFor="file-upload">
+              <label htmlFor="file-upload-edit">
                 <Button
                   component="span"
                   variant="outlined"
                   startIcon={<CloudUploadIcon />}
                   sx={{ backgroundColor: "#2c387e", color: "white" }}
                 >
-                  Upload Image
+                  Upload New Image
                 </Button>
               </label>
-              {formData.item_image && (
+              {formData.item_image ? (
                 <Typography variant="body2" color="textSecondary">
                   {formData.item_image.name}
+                </Typography>
+              ) : (
+                <Typography variant="body2" color="textSecondary">
+                  (Current Image: {editData.item_image})
                 </Typography>
               )}
             </Grid>
@@ -191,49 +189,12 @@ const Addaddons = ({ openForm, handleClose }) => {
         </Box>
       </DialogContent>
 
-      {/* Success Alert in Snackbar */}
-      <Snackbar
-        open={!!successMessage}
-        autoHideDuration={3000}
-        onClose={() => setSuccessMessage("")}
-        anchorOrigin={{ vertical: "top", horizontal: "right" }}
-      >
-        <Alert
-          onClose={() => setSuccessMessage("")}
-          severity="success"
-          sx={{ width: "100%" }}
-        >
-          {successMessage}
-        </Alert>
-      </Snackbar>
-
-      {/* Error Alert in Snackbar */}
-      <Snackbar
-        open={!!errorMessage}
-        autoHideDuration={4000}
-        onClose={() => setErrorMessage("")}
-        anchorOrigin={{ vertical: "top", horizontal: "right" }}
-      >
-        <Alert
-          onClose={() => setErrorMessage("")}
-          severity="error"
-          sx={{ width: "100%" }}
-        >
-          {errorMessage}
-        </Alert>
-      </Snackbar>
-
       <DialogActions sx={{ p: 2, justifyContent: "center" }}>
-        <Button
-          onClick={handleClose}
-          variant="outlined"
-          color="primary"
-          disabled={isLoading}
-        >
+        <Button onClick={handleClose} variant="outlined" color="primary">
           Cancel
         </Button>
         <Button
-          type="submit"
+          onClick={handleUpdateAddon}
           sx={{ backgroundColor: "#2c387e", color: "white" }}
           disabled={isLoading}
         >
@@ -243,10 +204,10 @@ const Addaddons = ({ openForm, handleClose }) => {
                 size={20}
                 sx={{ color: "white", marginRight: 1 }}
               />
-              Adding...
+              Updating...
             </Box>
           ) : (
-            "Add Addon"
+            "Update Addon"
           )}
         </Button>
       </DialogActions>
@@ -254,4 +215,4 @@ const Addaddons = ({ openForm, handleClose }) => {
   );
 };
 
-export default Addaddons;
+export default EditAddons;

@@ -73,7 +73,7 @@ const Profile = () => {
   // console.log(userBookings, "BOOKINGS OF MINE");
 
   // console.log(loginBooking, "User BOoking");
-
+  const [focusedField, setFocusedField] = useState("");
   const [profileImage, setProfileImage] = useState("");
   const [formData, setFormData] = useState({
     name: "",
@@ -301,10 +301,15 @@ const Profile = () => {
                       name="name"
                       value={formData.name}
                       onChange={(e) =>
-                        setFormData({ ...formData, name: e.target.value })
+                        setFormData((prevFormData) => ({
+                          ...prevFormData,
+                          name: e.target.value,
+                        }))
                       }
                       variant="outlined"
                       disabled={!isEditing}
+                      autoFocus={focusedField === "name"} // Autofocus only if "name" field is being edited
+                      onFocus={() => setFocusedField("name")} // Track when the name field is focused
                     />
                   </Grid>
 
@@ -326,10 +331,15 @@ const Profile = () => {
                       name="mobile"
                       value={formData.mobile}
                       onChange={(e) =>
-                        setFormData({ ...formData, mobile: e.target.value })
+                        setFormData((prevFormData) => ({
+                          ...prevFormData,
+                          mobile: e.target.value,
+                        }))
                       }
                       variant="outlined"
                       disabled={!isEditing}
+                      autoFocus={focusedField === "mobile"} // Autofocus only if "mobile" field is being edited
+                      onFocus={() => setFocusedField("mobile")} // Track when the mobile field is focused
                     />
                   </Grid>
 
@@ -369,9 +379,7 @@ const Profile = () => {
             </Box>
           )}
 
-          {tabIndex === 1 && (
-        <BookingHistory />
-          )}
+          {tabIndex === 1 && <BookingHistory />}
           <Snackbar
             open={alert.open}
             autoHideDuration={3000}

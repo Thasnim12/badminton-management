@@ -1,31 +1,37 @@
-const mongoose = require('mongoose')
+const mongoose = require("mongoose");
 
-const staffSchema = mongoose.Schema({
+const staffSchema = mongoose.Schema(
+  {
     name: {
-        type: String
+      type: String,
     },
     email: {
-        type: String,
-        unique: true,
+      type: String,
+      unique: true,
     },
     phoneno: {
-        type: String,
+      type: String,
     },
     designation: {
-        type: String
+      type: String,
     },
     employee_id: {
-        type: String,
-        unique: true,
+      type: String,
+      unique: true,
     },
     joining_date: {
-        type: Date
+      type: Date,
+    },
+    staff_image: {
+      type: String,
     },
     create_at: {
-        type: Date,
-        default: Date.now
-    }
-}, { timestamps: true })
+      type: Date,
+      default: Date.now,
+    },
+  },
+  { timestamps: true }
+);
 
-const staff = mongoose.model('staff', staffSchema)
+const staff = mongoose.model("staff", staffSchema);
 module.exports = staff;
