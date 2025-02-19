@@ -9,6 +9,7 @@ const Court = require("../models/courtModel");
 const Slot = require("../models/slotModel");
 const Addons = require("../models/addonModel");
 const Booking = require("../models/bookingModel");
+const Enquiry = require("../models/enquiryModel")
 const { userUpload } = require("../helper/multer");
 const nodemailer = require("nodemailer");
 const Bookings = require('../models/bookingModel')

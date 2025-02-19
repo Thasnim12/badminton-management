@@ -173,7 +173,7 @@ const HomePage = () => {
           showArrows={true}
           autoPlay={true}
           infiniteLoop={true}
-          interval={1000}
+          interval={2000}
           showThumbs={false}
         >
           <div>

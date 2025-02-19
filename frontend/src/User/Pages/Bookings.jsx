@@ -1,9 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import { Box, Grid, Typography, Button, Paper, Container } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { Snackbar, Alert } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import Header from "../Global/Header";
 import Footer from "../Global/Footer";
@@ -43,21 +42,12 @@ const PaperCard = styled(Paper)({
 
 const Bookings = () => {
   const navigate = useNavigate();
-
+  const [openSnackbar, setOpenSnackbar] = useState(false);
   const isLoggedIn = localStorage.getItem("userInfo");
 
   const handleBookingClick = () => {
     if (!isLoggedIn) {
-      toast.error("You need to log in to book a court!", {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "colored",
-      });
+      setOpenSnackbar(true);
     } else {
       navigate("/book-now");
     }
@@ -67,8 +57,6 @@ const Bookings = () => {
       <Header />
 
       <HeroSection></HeroSection>
-
-      <ToastContainer />
 
       <Section>
         <Container maxWidth="lg">
@@ -251,6 +239,17 @@ const Bookings = () => {
           Reserve a Court Online
         </Button>
       </Section>
+
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={3000}
+        onClose={() => setOpenSnackbar(false)}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <Alert onClose={() => setOpenSnackbar(false)} severity="error">
+          You need to log in to book a court!
+        </Alert>
+      </Snackbar>
 
       <Footer />
     </>

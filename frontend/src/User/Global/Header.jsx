@@ -78,14 +78,14 @@ const Header = () => {
             src="/Logo.png"
             alt="Logo"
             style={{
-              width: "40px",
-              height: "40px",
+              width: "60px",
+              height: "60px",
               borderRadius: "50%",
               marginRight: "8px",
             }}
           />
           {/* Add your logo or title here */}
-          AVK Yadav Trust
+          AVK Raja Yadav Trust
         </Typography>
 
         {/* Desktop Navigation */}
