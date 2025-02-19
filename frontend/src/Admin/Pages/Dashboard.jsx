@@ -38,9 +38,9 @@ export default function Dashboard() {
             <Grid item xs={12}>
               <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <Cards />
-                <Button variant="outlined" sx={{ whiteSpace: "nowrap", }} onClick={handleClickOpen}>
+                {/* <Button variant="outlined" sx={{ whiteSpace: "nowrap", }} onClick={handleClickOpen}>
                   Manage Staff
-                </Button>
+                </Button> */}
               </Box>
             </Grid>
 

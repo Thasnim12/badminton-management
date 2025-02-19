@@ -10,12 +10,12 @@ import {
 } from "@mui/material";
 import Header from "../Global/Header";
 import Footer from "../Global/Footer";
-import { useGetStaffsQuery } from "../../Slices/AdminApi";
+import { useGetStaffsForUsersQuery } from "../../Slices/UserApi";
 
 const MembersPage = () => {
-  const { data, isLoading, isError } = useGetStaffsQuery();
+  const { data, isLoading, isError } = useGetStaffsForUsersQuery();
   const members = data?.staffs;
-
+  console.log(members, "members");
   if (isLoading) {
     return (
       <Box
@@ -42,7 +42,7 @@ const MembersPage = () => {
   return (
     <>
       <Header />
-      <Box sx={{ padding: 4, backgroundColor: "#f9f9f9", minHeight: "100vh" }}>
+      <Box sx={{ padding: 4, minHeight: "100vh" }}>
         <Typography variant="h4" align="center" gutterBottom>
           Our Team
         </Typography>

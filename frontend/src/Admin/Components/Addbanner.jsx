@@ -12,8 +12,11 @@ import {
 } from "@mui/material";
 import { useAddBannerMutation } from "../../Slices/AdminApi";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import { useGetAllBannersQuery } from "../../Slices/AdminApi";
+import { message } from "antd";
 
-const AddBanner = ({ open, handleClose }) => {
+const AddBanner = ({ open, handleClose, setSnackbar }) => {
+  const { data, refetch } = useGetAllBannersQuery();
   const [addBanner] = useAddBannerMutation();
   const [formData, setFormData] = useState({
     title: "",
@@ -48,20 +51,30 @@ const AddBanner = ({ open, handleClose }) => {
     try {
       const formDataToSend = new FormData();
       formDataToSend.append("title", formData.title);
-      formDataToSend.append("order", JSON.stringify(formData.order)); // Send as JSON string
+      formDataToSend.append("order", JSON.stringify(formData.order));
 
       formData.banner_image.forEach((file) => {
         formDataToSend.append("banner_image", file);
       });
 
       await addBanner(formDataToSend).unwrap();
+
+      setSnackbar({
+        open: true,
+        message: "Banner added successfully!",
+        type: "success",
+      });
+      refetch();
       handleClose();
     } catch (error) {
-      console.log(error.message);
+      console.error("Error adding banner:", error);
+      setSnackbar({
+        open: true,
+        message: error?.data?.message,
+        type: "error",
+      });
     }
   };
-
-
 
   return (
     <Dialog
@@ -78,7 +91,6 @@ const AddBanner = ({ open, handleClose }) => {
       <DialogContent>
         <TextField
           autoFocus
-          required
           margin="dense"
           id="title"
           name="title"
@@ -129,10 +141,10 @@ const AddBanner = ({ open, handleClose }) => {
         </Grid>
       </DialogContent>
       <DialogActions>
-        <Button variant="outlined" color="primary" onClick={handleClose}>
+        <Button variant="outlined" color="error" onClick={handleClose}>
           Cancel
         </Button>
-        <Button variant="outlined" color="primary" type="submit">
+        <Button variant="outlined" color="success" type="submit">
           Add
         </Button>
       </DialogActions>

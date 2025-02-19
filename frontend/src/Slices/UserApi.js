@@ -108,6 +108,12 @@ export const userApi = createApi({
         method: "Get",
       }),
     }),
+    getStaffsForUsers: builder.query({
+      query: () => ({
+        url: "/get-staffs-users",
+        method: "GET",
+      }),
+    }),
   }),
 });
 
@@ -126,7 +132,8 @@ export const {
   useVerifyBookingMutation,
   useSendMessageMutation,
   useUserBookingQuery,
-  useViewBannerQuery
+  useViewBannerQuery,
+  useGetStaffsForUsersQuery
 } = userApi;
 
 export default userApi;

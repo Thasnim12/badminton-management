@@ -20,7 +20,7 @@ import {
   useGetAlladdonsQuery,
 } from "../../Slices/AdminApi";
 
-const EditAddons = ({ openForm, handleClose, editData }) => {
+const EditAddons = ({ openForm, handleClose, editData, setSuccessMessage, setErrorMessage  }) => {
   const [updateAddon, { isLoading }] = useEditAddonMutation();
   const { data, refetch } = useGetAlladdonsQuery();
   const [formData, setFormData] = useState(() => ({
@@ -71,23 +71,29 @@ const EditAddons = ({ openForm, handleClose, editData }) => {
       formDataToSend.append("item_name", formData.item_name);
       formDataToSend.append("quantity", formData.quantity);
       formDataToSend.append("price", formData.price);
+      
       if (formData.item_image) {
         formDataToSend.append("item_image", formData.item_image);
       }
+      
       formData.item_type.forEach((type) =>
         formDataToSend.append("item_type[]", type)
       );
-
+  
       await updateAddon({
         addonsId: editData._id,
         data: formDataToSend,
       }).unwrap();
+  
+      setSuccessMessage("Addon updated successfully!");
       refetch();
       handleClose();
     } catch (error) {
       console.error("Update Failed:", error);
+      setErrorMessage(error?.data?.message);
     }
   };
+  
 
   return (
     <Dialog open={openForm} onClose={handleClose} maxWidth="sm" fullWidth>
@@ -190,7 +196,7 @@ const EditAddons = ({ openForm, handleClose, editData }) => {
       </DialogContent>
 
       <DialogActions sx={{ p: 2, justifyContent: "center" }}>
-        <Button onClick={handleClose} variant="outlined" color="primary">
+        <Button onClick={handleClose} variant="outlined" color="error">
           Cancel
         </Button>
         <Button

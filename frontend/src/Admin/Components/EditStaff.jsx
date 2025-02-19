@@ -19,7 +19,12 @@ import {
   useGetStaffsQuery,
 } from "../../Slices/AdminApi";
 
-export default function EditStaffs({ openForm, handleClose, editData }) {
+export default function EditStaffs({
+  openForm,
+  handleClose,
+  editData,
+  setSnackbar,
+}) {
   const { data, refetch } = useGetStaffsQuery();
   const [editStaff, { isLoading }] = useUpdateStaffMutation();
   const { enqueueSnackbar } = useSnackbar();
@@ -78,7 +83,7 @@ export default function EditStaffs({ openForm, handleClose, editData }) {
 
   const handleEditStaff = async (event) => {
     event.preventDefault();
-  
+
     try {
       const formDataToSend = new FormData();
       formDataToSend.append("name", staffData.name);
@@ -87,16 +92,18 @@ export default function EditStaffs({ openForm, handleClose, editData }) {
       formDataToSend.append("employee_id", staffData.employee_id);
       formDataToSend.append("joining_date", staffData.joining_date);
       formDataToSend.append("phoneno", staffData.phoneno);
-  
       if (staffData.staff_image) {
         formDataToSend.append("staff_image", staffData.staff_image);
       }
-      
+
       console.log(staffData.staff_image, "Image");
-  
-      const response = await editStaff({ employee_id: editData.employee_id, formData: formDataToSend }).unwrap(); 
+
+      const response = await editStaff({
+        employee_id: editData.employee_id,
+        formData: formDataToSend,
+      }).unwrap();
       console.log(response, "Response");
-  
+
       refetch();
       setSnackbar({
         open: true,
@@ -113,13 +120,6 @@ export default function EditStaffs({ openForm, handleClose, editData }) {
       });
     }
   };
-  
-
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: "",
-    severity: "success",
-  });
 
   const handleFieldChange = (field) => {
     if (errors[field]) {
@@ -130,7 +130,6 @@ export default function EditStaffs({ openForm, handleClose, editData }) {
     }
   };
 
-  // Handle image file selection
   const handleImageChange = (event) => {
     const file = event.target.files[0];
     if (file) {
@@ -157,7 +156,9 @@ export default function EditStaffs({ openForm, handleClose, editData }) {
               variant="outlined"
               fullWidth
               defaultValue={staffData.name}
-              onChange={() => handleFieldChange("name")}
+              onChange={(e) =>
+                setStaffData({ ...staffData, [e.target.name]: e.target.value })
+              }
             />
           </Grid>
           <Grid item xs={12} sm={6}>
@@ -168,7 +169,9 @@ export default function EditStaffs({ openForm, handleClose, editData }) {
               variant="outlined"
               fullWidth
               defaultValue={staffData.email}
-              onChange={() => handleFieldChange("email")}
+              onChange={(e) =>
+                setStaffData({ ...staffData, [e.target.name]: e.target.value })
+              }
             />
           </Grid>
           <Grid item xs={12} sm={6}>
@@ -178,7 +181,9 @@ export default function EditStaffs({ openForm, handleClose, editData }) {
               variant="outlined"
               fullWidth
               defaultValue={staffData.phoneno}
-              onChange={() => handleFieldChange("phoneno")}
+              onChange={(e) =>
+                setStaffData({ ...staffData, [e.target.name]: e.target.value })
+              }
             />
           </Grid>
           <Grid item xs={12} sm={6}>
@@ -188,7 +193,9 @@ export default function EditStaffs({ openForm, handleClose, editData }) {
               variant="outlined"
               fullWidth
               defaultValue={staffData.designation}
-              onChange={() => handleFieldChange("designation")}
+              onChange={(e) =>
+                setStaffData({ ...staffData, [e.target.name]: e.target.value })
+              }
             />
           </Grid>
           {/* Disable fields for employee_id and joining_date */}
@@ -235,7 +242,7 @@ export default function EditStaffs({ openForm, handleClose, editData }) {
         <Button
           onClick={handleClose}
           variant="outlined"
-          color="primary"
+          color="error"
           disabled={isLoading}
         >
           Cancel
@@ -249,6 +256,7 @@ export default function EditStaffs({ openForm, handleClose, editData }) {
               backgroundColor: "#1a237e",
             },
           }}
+          onClick={handleEditStaff}
           disabled={isLoading}
         >
           {isLoading ? (
@@ -264,20 +272,6 @@ export default function EditStaffs({ openForm, handleClose, editData }) {
           )}
         </Button>
       </DialogActions>
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={3000}
-        onClose={() => setSnackbar({ ...snackbar, open: false })}
-        anchorOrigin={{ vertical: "top", horizontal: "right" }}
-      >
-        <Alert
-          onClose={() => setSnackbar({ ...snackbar, open: false })}
-          severity={snackbar.severity}
-          sx={{ width: "100%" }}
-        >
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
     </Dialog>
   );
 }

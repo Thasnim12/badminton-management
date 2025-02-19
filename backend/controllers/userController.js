@@ -9,12 +9,13 @@ const Court = require("../models/courtModel");
 const Slot = require("../models/slotModel");
 const Addons = require("../models/addonModel");
 const Booking = require("../models/bookingModel");
-const Enquiry = require("../models/enquiryModel")
+const Staff = require("../models/staffModel");
+const Enquiry = require("../models/enquiryModel");
 const { userUpload } = require("../helper/multer");
 const nodemailer = require("nodemailer");
-const Bookings = require('../models/bookingModel')
-const Banner = require('../models/bannerModel')
-const moment = require('moment')
+const Bookings = require("../models/bookingModel");
+const Banner = require("../models/bannerModel");
+const moment = require("moment");
 require("dotenv").config();
 
 const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
@@ -96,7 +97,7 @@ const updateUserDetails = async (req, res) => {
     try {
       const { email, name, mobile } = req.body;
       const profileImage = req.file ? req.file.filename : null;
-      console.log(profileImage, 'img')
+      console.log(profileImage, "img");
 
       console.log("Request Body: ", req.body);
       console.log("Uploaded File: ", req.file);
@@ -202,7 +203,7 @@ const verifyOtp = async (req, res) => {
 
     await Otp.deleteMany({ _id: id });
 
-    res.status(200).json({user,status:"verified"})
+    res.status(200).json({ user, status: "verified" });
 
     // res.json({
     //   status: "verified",
@@ -305,6 +306,10 @@ const googleLogin = async (req, res) => {
 
     let user = await User.findOne({ $or: [{ googleId }, { email }] });
 
+    if (user.is_blocked) {
+      return res.status(401).json({ message: "Your Account is blocked" });
+    }
+
     if (!user) {
       user = new User({
         googleId,
@@ -344,8 +349,6 @@ const getCourts = async (req, res) => {
   }
 };
 
-
-
 const getSlots = async (req, res) => {
   try {
     const { courtId, date } = req.query;
@@ -356,28 +359,35 @@ const getSlots = async (req, res) => {
         .json({ message: "Court ID and Date are required" });
     }
 
-    const startOfDay = moment(date).set({ hour: 6, minute: 0, second: 0, millisecond: 0 });
-    const endOfDay = moment(date).set({ hour: 22, minute: 0, second: 0, millisecond: 0 });
+    const startOfDay = moment(date).set({
+      hour: 6,
+      minute: 0,
+      second: 0,
+      millisecond: 0,
+    });
+    const endOfDay = moment(date).set({
+      hour: 22,
+      minute: 0,
+      second: 0,
+      millisecond: 0,
+    });
 
     const slots = await Slot.find({
       court: courtId,
       startTime: { $gte: startOfDay.toDate(), $lte: endOfDay.toDate() },
     }).sort({ startTime: 1 });
 
-    console.log(slots,'slots')
+    console.log(slots, "slots");
 
-    const uniqueSlots = Array.from(new Map(
-      slots.map(slot => [slot.startTime.toString(), slot])                                             
-    ).values());
+    const uniqueSlots = Array.from(
+      new Map(slots.map((slot) => [slot.startTime.toString(), slot])).values()
+    );
 
     res.json(uniqueSlots);
   } catch (error) {
     res.status(500).json({ message: "Error fetching slots", error });
   }
 };
-
-
-
 
 const getAddons = async (req, res) => {
   try {
@@ -460,19 +470,35 @@ const getBookingHistory = async (req, res) => {
   }
 };
 
-const displayBanner= async(req,res) =>{
-  try{
-    const banner = await Banner.find({})
-    if(!banner){
-      return res.status(404).json({message:"no banner found!"})
+const displayBanner = async (req, res) => {
+  try {
+    const banner = await Banner.find({});
+    if (!banner) {
+      return res.status(404).json({ message: "no banner found!" });
     }
 
-    return res.status(200).json(banner)
+    return res.status(200).json(banner);
+  } catch (error) {
+    console.log(error.message);
   }
-  catch(error){
-    console.log(error.message)
+};
+
+const getAllStaffsForUsers = async (req, res) => {
+  try {
+    const staffs = await Staff.find();
+
+    if (!staffs || staffs.length === 0) {
+      return res.status(404).json({ message: "No staff found" });
+    }
+
+    return res
+      .status(200)
+      .json({ message: "Staffs fetched successfully", staffs });
+  } catch (error) {
+    console.error(error.message);
+    return res.status(500).json({ message: "Server error" });
   }
-}
+};
 
 module.exports = {
   userRegister,
@@ -486,5 +512,6 @@ module.exports = {
   updateUserDetails,
   sendMessage,
   getBookingHistory,
-  displayBanner
+  displayBanner,
+  getAllStaffsForUsers,
 };

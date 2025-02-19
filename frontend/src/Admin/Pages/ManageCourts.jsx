@@ -16,6 +16,8 @@ import {
   TableRow,
   Table,
   Container,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import BreadcrumbNav from "../Global/Breadcrumb";
 import TextField from "@mui/material/TextField";
@@ -44,12 +46,18 @@ const SlotManagement = () => {
   const [open, setOpen] = useState(false);
   const [courtName, setCourtName] = useState("");
   const [courtImage, setCourtImage] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
+  // const [errorMessage, setErrorMessage] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedcourt, SetSelectedCourt] = useState("");
   const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false); // for the status change confirmation
   const [deleteConfirmation, setDeleteConfirmation] = useState(false);
-
+  const [openImage, setOpenImage] = useState(false);
+  const [selectedImage, setSelectedImage] = useState("");
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    type: "success",
+  });
   const [addcourt] = useAddcourtsMutation();
   const { data: courts, refetch } = useGetAllcourtsQuery();
   const [editCourtStatus] = useEditCourtStatusMutation(); // Mutation for updating the court status
@@ -61,15 +69,35 @@ const SlotManagement = () => {
   };
 
   const handleConfirmDelete = async () => {
-    if (selectedcourt) {
-      try {
-        await deleteCourt({ courtId: selectedcourt._id }).unwrap();
-        refetch();
-        setDeleteConfirmation(false);
-      } catch (error) {
-        console.error("Failed to delete court:", error);
-      }
+    if (!selectedcourt) return;
+  
+    try {
+      await deleteCourt({ courtId: selectedcourt._id }).unwrap();
+      refetch();
+      setDeleteConfirmation(false);
+      setSnackbar({
+        open: true,
+        message: "Court deleted successfully!",
+        type: "success",
+      });
+    } catch (error) {
+      console.error("Failed to delete court:", error);
+      setSnackbar({
+        open: true,
+        message: "Failed to delete court. Please try again.",
+        type: "error",
+      });
     }
+  };
+  
+  const handleImageClick = (imageUrl) => {
+    setSelectedImage(imageUrl);
+    setOpenImage(true);
+  };
+
+  const handleCloseImage = () => {
+    setOpenImage(false);
+    setSelectedImage("");
   };
 
   const handleCancelDelete = () => {
@@ -103,16 +131,27 @@ const SlotManagement = () => {
   };
 
   const handleConfirmStatusChange = async () => {
-    if (selectedcourt) {
-      try {
-        await editCourtStatus({ courtId: selectedcourt._id }).unwrap();
-        refetch();
-        setConfirmationDialogOpen(false);
-      } catch (error) {
-        console.error("Failed to update court status:", error);
-      }
+    if (!selectedcourt) return;
+  
+    try {
+      await editCourtStatus({ courtId: selectedcourt._id }).unwrap();
+      refetch();
+      setConfirmationDialogOpen(false);
+      setSnackbar({
+        open: true,
+        message: "Court status updated successfully!",
+        type: "success",
+      });
+    } catch (error) {
+      console.error("Failed to update court status:", error);
+      setSnackbar({
+        open: true,
+        message: "Failed to update court status. Please try again.",
+        type: "error",
+      });
     }
   };
+  
 
   const VisuallyHiddenInput = styled("input")({
     clip: "rect(0 0 0 0)",
@@ -128,11 +167,13 @@ const SlotManagement = () => {
 
   const handleAddcourt = async () => {
     if (!courtName || !courtImage) {
-      setErrorMessage("Please enter a court name and select an image.");
+      setSnackbar({
+        open: true,
+        message: "Please enter a court name and select an image.",
+        type: "error",
+      });
       return;
     }
-
-    setErrorMessage("");
 
     const formData = new FormData();
     formData.append("court_name", courtName);
@@ -141,13 +182,23 @@ const SlotManagement = () => {
     try {
       const response = await addcourt(formData).unwrap();
       console.log("Court added:", response);
+
       setCourtImage("");
       setCourtName("");
       handleClose();
       refetch();
+      setSnackbar({
+        open: true,
+        message: "Court added successfully!",
+        type: "success",
+      });
     } catch (error) {
       console.error("Failed to add court:", error);
-      setErrorMessage("Failed to add court. Please try again.");
+      setSnackbar({
+        open: true,
+        message: "Failed to add court. Please try again.",
+        type: "error",
+      });
     }
   };
 
@@ -242,7 +293,6 @@ const SlotManagement = () => {
                 size="small"
                 value={courtName}
                 onChange={(e) => setCourtName(e.target.value)}
-                error={!courtName && errorMessage}
               />
               <Button
                 component="label"
@@ -263,10 +313,10 @@ const SlotManagement = () => {
             </Stack>
           </DialogContent>
           <DialogActions>
-            <Button variant="outlined" onClick={handleClose}>
+            <Button variant="outlined" color="error" onClick={handleClose}>
               Cancel
             </Button>
-            <Button variant="outlined" onClick={handleAddcourt}>
+            <Button variant="outlined" color="success" onClick={handleAddcourt}>
               Add
             </Button>
           </DialogActions>
@@ -296,6 +346,11 @@ const SlotManagement = () => {
                           src={`http://localhost:5000/uploads/${court.court_image}`}
                           alt={court.court_name}
                           style={{ width: 80, height: 50, objectFit: "cover" }}
+                          onClick={() =>
+                            handleImageClick(
+                              `http://localhost:5000/uploads/${court.court_image}`
+                            )
+                          }
                         />
                       ) : (
                         "No Image"
@@ -305,7 +360,7 @@ const SlotManagement = () => {
                       <Button
                         variant="outlined"
                         color={court.isActive ? "success" : "error"}
-                        onClick={() => handleStatusChange(court)} 
+                        onClick={() => handleStatusChange(court)}
                       >
                         {court.isActive ? "Active" : "Inactive"}
                       </Button>
@@ -344,13 +399,26 @@ const SlotManagement = () => {
             </Typography>
           </DialogContent>
           <DialogActions>
-            <Button onClick={handleConfirmationDialogClose} color="error"  variant="outlined">
+            <Button
+              onClick={handleConfirmationDialogClose}
+              color="error"
+              variant="outlined"
+            >
               Cancel
             </Button>
             <Button onClick={handleConfirmStatusChange} variant="outlined">
               Confirm
             </Button>
           </DialogActions>
+        </Dialog>
+
+        {/* Court Image Card */}
+
+        <Dialog open={openImage} onClose={handleCloseImage} maxWidth="md">
+          <DialogTitle>Court Image</DialogTitle>
+          <DialogContent>
+            <img src={selectedImage} alt="Addon" style={{ width: "300px" }} />
+          </DialogContent>
         </Dialog>
 
         {/* Confirmation Dialog for Delete */}
@@ -386,6 +454,19 @@ const SlotManagement = () => {
           />
         )}
       </Container>
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <Alert
+          onClose={() => setSnackbar({ ...snackbar, open: false })}
+          severity={snackbar.type}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Layout>
   );
 };

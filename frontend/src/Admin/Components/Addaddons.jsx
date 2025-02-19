@@ -22,7 +22,7 @@ import {
   useGetAlladdonsQuery,
 } from "../../Slices/AdminApi";
 
-const Addaddons = ({ openForm, handleClose }) => {
+const Addaddons = ({ openForm, handleClose,  setSuccessMessage, setErrorMessage  }) => {
   const [addons, { isLoading }] = useAddaddonsMutation();
   const { data, refetch } = useGetAlladdonsQuery();
   const [formData, setFormData] = useState({
@@ -33,8 +33,8 @@ const Addaddons = ({ openForm, handleClose }) => {
     item_image: null,
   });
 
-  const [successMessage, setSuccessMessage] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
+  // const [successMessage, setSuccessMessage] = useState("");
+  // const [errorMessage, setErrorMessage] = useState("");
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -191,43 +191,11 @@ const Addaddons = ({ openForm, handleClose }) => {
         </Box>
       </DialogContent>
 
-      {/* Success Alert in Snackbar */}
-      <Snackbar
-        open={!!successMessage}
-        autoHideDuration={3000}
-        onClose={() => setSuccessMessage("")}
-        anchorOrigin={{ vertical: "top", horizontal: "right" }}
-      >
-        <Alert
-          onClose={() => setSuccessMessage("")}
-          severity="success"
-          sx={{ width: "100%" }}
-        >
-          {successMessage}
-        </Alert>
-      </Snackbar>
-
-      {/* Error Alert in Snackbar */}
-      <Snackbar
-        open={!!errorMessage}
-        autoHideDuration={4000}
-        onClose={() => setErrorMessage("")}
-        anchorOrigin={{ vertical: "top", horizontal: "right" }}
-      >
-        <Alert
-          onClose={() => setErrorMessage("")}
-          severity="error"
-          sx={{ width: "100%" }}
-        >
-          {errorMessage}
-        </Alert>
-      </Snackbar>
-
       <DialogActions sx={{ p: 2, justifyContent: "center" }}>
         <Button
           onClick={handleClose}
           variant="outlined"
-          color="primary"
+          color="error"
           disabled={isLoading}
         >
           Cancel

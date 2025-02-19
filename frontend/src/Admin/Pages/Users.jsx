@@ -62,9 +62,14 @@ const Users = () => {
   const endIndex = startIndex + usersPerPage;
   const paginatedUsers = users.slice(startIndex, endIndex);
 
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
+  const [open, setOpen] = useState(false);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    type: "success",
+  });
+
+
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [userToBlock, setUserToBlock] = useState(null);
 
@@ -80,26 +85,30 @@ const Users = () => {
   const handleConfirmBlockUnblock = async () => {
     try {
       const response = await manageUsers(userToBlock._id).unwrap();
-      setSnackbarMessage(response.message);
-      setSnackbarSeverity("success");
-      setSnackbarOpen(true);
+  
+      setSnackbar({
+        open: true,
+        message: response.message || "User status updated successfully!",
+        type: "success",
+      });
+  
       setConfirmOpen(false);
       refetch();
     } catch (error) {
       console.error("Error updating user status:", error);
-      setSnackbarMessage("Failed to update user status");
-      setSnackbarSeverity("error");
-      setSnackbarOpen(true);
+  
+      setSnackbar({
+        open: true,
+        message: "Failed to update user status. Please try again.",
+        type: "error",
+      });
+  
       setConfirmOpen(false);
     }
   };
+  
 
-  const [open, setOpen] = useState(false);
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: "",
-    type: "success",
-  });
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -275,14 +284,14 @@ const Users = () => {
                 <Button
                   onClick={() => setOpen(false)}
                   variant="outlined"
-                  color="primary"
+                  color="error"
                 >
                   Cancel
                 </Button>
                 <Button
                   onClick={handleSubmit}
                   variant="outlined"
-                  color="primary"
+                  color="success"
                 >
                   Submit
                 </Button>

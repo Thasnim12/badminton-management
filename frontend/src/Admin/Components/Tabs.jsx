@@ -1,4 +1,4 @@
-import * as React from "react";
+import React, { useState } from "react";
 import {
   Box,
   Tabs,
@@ -14,64 +14,52 @@ import {
   Card,
   CardContent,
   Grid,
-  IconButton,
   Button,
+  Pagination,
 } from "@mui/material";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
-import {
-  useManageCsvMutation,
-  useGetBookingsQuery,
-} from "../../Slices/AdminApi";
+import { useManageCsvMutation, useGetBookingsQuery } from "../../Slices/AdminApi";
+
+const RECORDS_PER_PAGE = 7; // Limit to 7 records per page
 
 export default function ScrollableTabsButtonVisible() {
-  const [value, setValue] = React.useState(0);
+  const [value, setValue] = useState(0);
+  const [page, setPage] = useState(1);
   const [manageCsv] = useManageCsvMutation();
   const { data, isLoading: isLoadingBookings } = useGetBookingsQuery();
-  console.log(data, "boo");
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
+    setPage(1); // Reset to first page when switching tabs
   };
 
   const handleDownload = async () => {
     try {
       const response = await manageCsv().unwrap();
-
       if (!response || !(response instanceof Blob)) {
         throw new Error("Invalid CSV response");
       }
-
       const blob = new Blob([response], { type: "text/csv" });
       const url = window.URL.createObjectURL(blob);
-
       const a = document.createElement("a");
       a.href = url;
       a.download = "bookings.csv";
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-
       window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error("Download error:", error);
     }
   };
 
-  const pendingBookings = data?.bookings?.filter(
-    (b) => b.payment?.status === "Pending"
-  );
-  const completedBookings = data?.bookings?.filter(
-    (b) => b.payment?.status === "Completed"
-  );
-  const failedBookings = data?.bookings?.filter(
-    (b) => b.payment?.status === "Failed"
-  );
-  const summaryBookings = data?.bookings;
+  const filterBookings = (status) =>
+    data?.bookings?.filter((b) => b.payment?.status === status) || [];
 
-  const totalBookings = summaryBookings?.length;
-  const totalPending = pendingBookings?.length;
-  const totalCompleted = completedBookings?.length;
-  const totalFailed = failedBookings?.length;
+  const summaryBookings = data?.bookings || [];
+  const pendingBookings = filterBookings("Pending");
+  const completedBookings = filterBookings("Completed");
+  const failedBookings = filterBookings("Failed");
 
   const tabStatusMapping = {
     0: summaryBookings,
@@ -79,6 +67,16 @@ export default function ScrollableTabsButtonVisible() {
     2: completedBookings,
     3: failedBookings,
   };
+
+  const selectedBookings = tabStatusMapping[value] || [];
+  const totalRecords = selectedBookings.length;
+
+  // Pagination Logic
+  const totalPages = Math.ceil(totalRecords / RECORDS_PER_PAGE);
+  const paginatedBookings = selectedBookings.slice(
+    (page - 1) * RECORDS_PER_PAGE,
+    page * RECORDS_PER_PAGE
+  );
 
   const renderTable = (bookings = []) => (
     <TableContainer component={Paper} sx={{ marginTop: 2 }}>
@@ -101,12 +99,8 @@ export default function ScrollableTabsButtonVisible() {
                 <TableCell align="center">
                   {booking.payment?.razorpayOrderId}
                 </TableCell>
-                <TableCell align="center">
-                  {booking.user?.name || "N/A"}
-                </TableCell>
-                <TableCell align="center">
-                  {booking.court?.court_name || "N/A"}
-                </TableCell>
+                <TableCell align="center">{booking.user?.name || "N/A"}</TableCell>
+                <TableCell align="center">{booking.court?.court_name || "N/A"}</TableCell>
                 <TableCell align="center">
                   {booking.slot
                     ?.map(
@@ -118,17 +112,13 @@ export default function ScrollableTabsButtonVisible() {
                 <TableCell align="center">
                   {new Date(booking.bookingDate).toLocaleDateString()}
                 </TableCell>
-                <TableCell align="center">
-                  {booking.payment?.method || "N/A"}
-                </TableCell>
-                <TableCell align="center">
-                  {booking.payment?.status || "N/A"}
-                </TableCell>
+                <TableCell align="center">{booking.payment?.method || "N/A"}</TableCell>
+                <TableCell align="center">{booking.payment?.status || "N/A"}</TableCell>
               </TableRow>
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={6} align="center">
+              <TableCell colSpan={7} align="center">
                 No Bookings Available
               </TableCell>
             </TableRow>
@@ -140,7 +130,6 @@ export default function ScrollableTabsButtonVisible() {
 
   return (
     <Box sx={{ flexGrow: 1, bgcolor: "background.paper", margin: 5 }}>
-      {/* Show loading state */}
       {isLoadingBookings ? (
         <Typography variant="h6" align="center">
           Loading bookings...
@@ -157,57 +146,30 @@ export default function ScrollableTabsButtonVisible() {
             </Button>
           </Box>
 
+          {/* Booking Summary Cards */}
           <Grid container spacing={3} sx={{ marginBottom: 3 }}>
-            <Grid item xs={12} sm={3}>
-              <Card>
-                <CardContent>
-                  <Typography variant="h6" align="center">
-                    Total Bookings
-                  </Typography>
-                  <Typography variant="h4" align="center">
-                    {totalBookings || 0}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-            <Grid item xs={12} sm={3}>
-              <Card>
-                <CardContent>
-                  <Typography variant="h6" align="center">
-                    Pending Bookings
-                  </Typography>
-                  <Typography variant="h4" align="center">
-                    {totalPending || 0}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-            <Grid item xs={12} sm={3}>
-              <Card>
-                <CardContent>
-                  <Typography variant="h6" align="center">
-                    Completed Bookings
-                  </Typography>
-                  <Typography variant="h4" align="center">
-                    {totalCompleted || 0}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-            <Grid item xs={12} sm={3}>
-              <Card>
-                <CardContent>
-                  <Typography variant="h6" align="center">
-                    Failed Bookings
-                  </Typography>
-                  <Typography variant="h4" align="center">
-                    {totalFailed || 0}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
+            {[
+              { label: "Total Bookings", value: summaryBookings.length },
+              { label: "Pending Bookings", value: pendingBookings.length },
+              { label: "Completed Bookings", value: completedBookings.length },
+              { label: "Failed Bookings", value: failedBookings.length },
+            ].map((stat, index) => (
+              <Grid item xs={12} sm={3} key={index}>
+                <Card>
+                  <CardContent>
+                    <Typography variant="h6" align="center">
+                      {stat.label}
+                    </Typography>
+                    <Typography variant="h4" align="center">
+                      {stat.value || 0}
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
           </Grid>
 
+          {/* Tabs */}
           <Tabs
             value={value}
             onChange={handleChange}
@@ -221,8 +183,20 @@ export default function ScrollableTabsButtonVisible() {
             <Tab label="Failed" />
           </Tabs>
 
-          {/* Ensure bookings are always an array */}
-          {renderTable(tabStatusMapping[value] || [])}
+          {/* Table */}
+          {renderTable(paginatedBookings)}
+
+          {/* Pagination */}
+          {totalRecords > 0 && (
+            <Box sx={{ display: "flex", justifyContent: "center", mt: 3 }}>
+              <Pagination
+                count={totalPages}
+                page={page}
+                color="primary"
+                onChange={(event, value) => setPage(value)}
+              />
+            </Box>
+          )}
         </>
       )}
     </Box>

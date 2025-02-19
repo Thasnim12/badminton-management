@@ -19,7 +19,8 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  Pagination, // Import MUI Pagination
+  TablePagination, // Import MUI Pagination
+  Pagination,
 } from "@mui/material";
 import BreadcrumbNav from "../Global/Breadcrumb";
 import CurrencyRupeeOutlinedIcon from "@mui/icons-material/CurrencyRupeeOutlined";
@@ -38,9 +39,10 @@ const ManagePayments = () => {
   const [tabIndex, setTabIndex] = useState(0);
 
   const [donationPage, setDonationPage] = useState(1);
-  const [donationRowsPerPage, setDonationRowsPerPage] = useState(5);
+  const [donationRowsPerPage] = useState(7); // Fixed rows per page
+
   const [bookingPage, setBookingPage] = useState(1);
-  const [bookingRowsPerPage, setBookingRowsPerPage] = useState(5);
+  const [bookingRowsPerPage] = useState(7); // Fixed rows per page
 
   const handleTabChange = (event, newValue) => setTabIndex(newValue);
   const handleOpenDetails = (donation) => {
@@ -52,16 +54,12 @@ const ManagePayments = () => {
     setSelectedDonation(null);
   };
 
-  const handleDonationChangePage = (event, value) => setDonationPage(value);
-  const handleDonationChangeRowsPerPage = (event) => {
-    setDonationRowsPerPage(parseInt(event.target.value, 10));
-    setDonationPage(1);
+  const handleDonationPageChange = (event, value) => {
+    setDonationPage(value);
   };
 
-  const handleBookingChangePage = (event, value) => setBookingPage(value);
-  const handleBookingChangeRowsPerPage = (event) => {
-    setBookingRowsPerPage(parseInt(event.target.value, 10));
-    setBookingPage(1);
+  const handleBookingPageChange = (event, value) => {
+    setBookingPage(value);
   };
 
   const { data: donations } = useGetDonationsQuery();
@@ -233,15 +231,6 @@ const ManagePayments = () => {
                       <TableCell align="center">
                         {new Date(donation.created_at).toLocaleDateString()}
                       </TableCell>
-                      {/* <TableCell align="center">
-                        <IconButton
-                          color="primary"
-                          sx={{ marginRight: 1 }}
-                          onClick={() => handleOpenDetails(donation)}
-                        >
-                          <VisibilityIcon />
-                        </IconButton>
-                      </TableCell> */}
                     </TableRow>
                   ))}
               </TableBody>
@@ -256,9 +245,8 @@ const ManagePayments = () => {
               <Pagination
                 count={Math.ceil(donationHistory.length / donationRowsPerPage)}
                 page={donationPage}
-                onChange={handleDonationChangePage}
+                onChange={handleDonationPageChange}
                 color="primary"
-                siblingCount={1}
               />
             </Box>
           </Box>
@@ -280,60 +268,57 @@ const ManagePayments = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {bookingHistory.length > 0 ? (
-                  bookingHistory
-                    .slice(
-                      (bookingPage - 1) * bookingRowsPerPage,
-                      bookingPage * bookingRowsPerPage
-                    )
-                    .map((booking) => (
-                      <TableRow key={booking._id}>
-                        <TableCell align="center">
-                          {booking.payment?.razorpayOrderId}
-                        </TableCell>
-                        <TableCell align="center">
-                          {booking.user?.name || "N/A"}
-                        </TableCell>
-                        <TableCell align="center">
-                          {booking.court?.court_name || "N/A"}
-                        </TableCell>
-                        <TableCell align="center">
-                          {booking.slot
-                            ?.map(
-                              (s) =>
-                                `${new Date(s.startTime).toLocaleTimeString()} - ${new Date(s.endTime).toLocaleTimeString()}`
-                            )
-                            .join(", ") || "N/A"}
-                        </TableCell>
-                        <TableCell align="center">
-                          {new Date(booking.bookingDate).toLocaleDateString()}
-                        </TableCell>
-                        <TableCell align="center">
-                          {booking.payment?.status || "N/A"}
-                        </TableCell>
-                        <TableCell align="center">
-                          {booking.payment?.method || "N/A"}
-                        </TableCell>
-                      </TableRow>
-                    ))
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={6} align="center">
-                      No Bookings Available
-                    </TableCell>
-                  </TableRow>
-                )}
+                {bookingHistory
+                  .slice(
+                    (bookingPage - 1) * bookingRowsPerPage,
+                    bookingPage * bookingRowsPerPage
+                  )
+                  .map((booking) => (
+                    <TableRow key={booking._id}>
+                      <TableCell align="center">
+                        {booking.payment?.razorpayOrderId}
+                      </TableCell>
+                      <TableCell align="center">
+                        {booking.user?.name || "N/A"}
+                      </TableCell>
+                      <TableCell align="center">
+                        {booking.court?.court_name || "N/A"}
+                      </TableCell>
+                      <TableCell align="center">
+                        {booking.slot
+                          ?.map(
+                            (s) =>
+                              `${new Date(s.startTime).toLocaleTimeString()} - ${new Date(s.endTime).toLocaleTimeString()}`
+                          )
+                          .join(", ") || "N/A"}
+                      </TableCell>
+                      <TableCell align="center">
+                        {new Date(booking.bookingDate).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell align="center">
+                        {booking.payment?.status}
+                      </TableCell>
+                      <TableCell align="center">
+                        {booking.payment?.method || "N/A"}
+                      </TableCell>
+                    </TableRow>
+                  ))}
               </TableBody>
             </Table>
-            <Pagination
-              count={Math.ceil(totalBookings / bookingRowsPerPage)}
-              page={bookingPage}
-              onChange={handleBookingChangePage}
-              rowsPerPage={bookingRowsPerPage}
-              color="primary"
-              onRowsPerPageChange={handleBookingChangeRowsPerPage}
-              sx={{ mt: 2, display: "flex", justifyContent: "center" }}
-            />{" "}
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                marginTop: "20px",
+              }}
+            >
+              <Pagination
+                count={Math.ceil(bookingHistory.length / bookingRowsPerPage)}
+                page={bookingPage}
+                onChange={handleBookingPageChange}
+                color="primary"
+              />
+            </Box>
           </Box>
         )}
 

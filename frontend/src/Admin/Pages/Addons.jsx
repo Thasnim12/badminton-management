@@ -20,6 +20,8 @@ import {
   Typography,
   DialogActions,
   Pagination,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import Layout from "../Global/Layouts";
 import Addaddons from "../Components/Addaddons";
@@ -39,7 +41,8 @@ import BreadcrumbNav from "../Global/Breadcrumb";
 const Addons = () => {
   const [openForm, setOpenForm] = useState(false);
   const [selectedImage, setSelectedImage] = useState("");
-
+  const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
   const [page, setPage] = useState(1); // Default to page 1
   const [rowsPerPage] = useState(7); // 7 items per page
 
@@ -56,6 +59,11 @@ const Addons = () => {
   const [deleteAddon] = useDeleteAddonMutation();
   const [open, setOpen] = useState(false);
 
+  const handleCloseSnackbar = () => {
+    setSuccessMessage("");
+    setErrorMessage("");
+  };
+
   const handleOpenDialog = (addon) => {
     setSelectedAddon(addon);
     setOpen(true);
@@ -65,21 +73,21 @@ const Addons = () => {
     setPage(newPage);
   };
 
-  // Handle rows per page change
   const handleCloseDelete = () => {
     setOpen(false);
     setSelectedAddon(null);
   };
 
-  // Confirm delete action
   const handleConfirmDelete = async () => {
     if (selectedAddon) {
       try {
         await deleteAddon(selectedAddon._id).unwrap();
         refetch();
         console.log("Addon deleted successfully");
+        setSuccessMessage("Addon deleted successfully!");
       } catch (error) {
         console.error("Failed to delete addon:", error);
+        setErrorMessage("Failed to delete addon. Please try again.");
       }
     }
     handleCloseDelete();
@@ -359,7 +367,12 @@ const Addons = () => {
         </Dialog>
 
         {openForm && (
-          <Addaddons openForm={openForm} handleClose={handleClose} />
+          <Addaddons
+            openForm={openForm}
+            handleClose={handleClose}
+            setSuccessMessage={setSuccessMessage}
+            setErrorMessage={setErrorMessage}
+          />
         )}
 
         {openEditForm && selectedAddon && (
@@ -367,8 +380,41 @@ const Addons = () => {
             openForm={openEditForm}
             handleClose={handleCloseEdit}
             editData={selectedAddon}
+            setSuccessMessage={setSuccessMessage}
+            setErrorMessage={setErrorMessage}
           />
         )}
+
+        {/* Success Alert in Snackbar */}
+        <Snackbar
+          open={!!successMessage}
+          autoHideDuration={3000}
+          onClose={handleCloseSnackbar}
+          anchorOrigin={{ vertical: "top", horizontal: "right" }}
+        >
+          <Alert
+            onClose={handleCloseSnackbar}
+            severity="success"
+            sx={{ width: "100%" }}
+          >
+            {successMessage}
+          </Alert>
+        </Snackbar>
+
+        <Snackbar
+          open={!!errorMessage}
+          autoHideDuration={4000}
+          onClose={handleCloseSnackbar}
+          anchorOrigin={{ vertical: "top", horizontal: "right" }}
+        >
+          <Alert
+            onClose={handleCloseSnackbar}
+            severity="error"
+            sx={{ width: "100%" }}
+          >
+            {errorMessage}
+          </Alert>
+        </Snackbar>
       </Layout>
     </>
   );

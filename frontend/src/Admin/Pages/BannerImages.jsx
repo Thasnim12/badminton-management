@@ -23,6 +23,7 @@ import {
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
 import DeleteIcon from "@mui/icons-material/Delete";
+import { Snackbar, Alert } from "@mui/material";
 import {
   useAddBannerMutation,
   useGetAllBannersQuery,
@@ -38,6 +39,11 @@ const BannerImages = () => {
   const [openView, setOpenView] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success", // "error" or "success"
+  });
 
   const [banner, setBanner] = useState({
     title: "",
@@ -46,6 +52,9 @@ const BannerImages = () => {
     removedImages: [],
     newImages: [],
   });
+
+  const [openConfirm, setOpenConfirm] = useState(false);
+  const [bannerToDelete, setBannerToDelete] = useState(null);
 
   const [addBanner] = useAddBannerMutation();
   const { data, refetch } = useGetAllBannersQuery();
@@ -60,9 +69,22 @@ const BannerImages = () => {
       setBanner((prev) => ({
         ...prev,
         newImages: [...prev.newImages, ...files],
-        order: [...prev.order, ...files.map((_, i) => prev.order.length + i + 1)],
+        order: [
+          ...prev.order,
+          ...files.map((_, i) => prev.order.length + i + 1),
+        ],
       }));
     }
+  };
+
+  const handleOpenConfirm = (bannerId) => {
+    setBannerToDelete(bannerId);
+    setOpenConfirm(true);
+  };
+
+  const handleCloseConfirm = () => {
+    setOpenConfirm(false);
+    setBannerToDelete(null);
   };
 
   const handleRemoveNewImage = (index) => {
@@ -115,13 +137,20 @@ const BannerImages = () => {
     }
   };
 
+  const handleCloseSnackbar = () => {
+    setSnackbar({ ...snackbar, open: false });
+  };
+
   const handleEditBanner = async () => {
     const formDataToSend = new FormData();
     formDataToSend.append("title", banner.title);
     formDataToSend.append("order", JSON.stringify(banner.order));
 
     if (banner.removedImages.length > 0) {
-      formDataToSend.append("removedImages", JSON.stringify(banner.removedImages));
+      formDataToSend.append(
+        "removedImages",
+        JSON.stringify(banner.removedImages)
+      );
     }
 
     banner.newImages.forEach((file) =>
@@ -133,22 +162,47 @@ const BannerImages = () => {
         bannerId: banner._id,
         formData: formDataToSend,
       }).unwrap();
-      alert("Banner updated successfully!");
+
+      setSnackbar({
+        open: true,
+        message: "Banner updated successfully!",
+        severity: "success",
+      });
+
       setIsEditing(false);
+      setOpenView(false);
       refetch();
     } catch (error) {
       console.error("Error updating banner:", error);
-      alert("Failed to update banner. Please try again.");
+
+      setSnackbar({
+        open: true,
+        message: "Failed to update banner. Please try again.",
+        severity: "error",
+      });
     }
   };
 
-  const handleDelete = async (bannerId) => {
+  const handleDelete = async () => {
+    if (!bannerToDelete) return;
+
     try {
-      await deleteBanner(bannerId).unwrap();
+      await deleteBanner(bannerToDelete).unwrap();
       refetch();
+      setSnackbar({
+        open: true,
+        message: "Banner deleted successfully!",
+        type: "success",
+      });
     } catch (error) {
       console.error("Error deleting banner:", error);
-      alert("Failed to delete banner. Please try again.");
+      setSnackbar({
+        open: true,
+        message: "Failed to delete banner. Please try again.",
+        type: "error",
+      });
+    } finally {
+      handleCloseConfirm();
     }
   };
 
@@ -183,10 +237,13 @@ const BannerImages = () => {
             sx={{ backgroundColor: "#2c387e", color: "white" }}
             onClick={handleClickOpen}
           >
-            Add Staff
+            Add Banner
           </Button>
         </Box>
-        <TableContainer component={Paper} sx={{ maxWidth: 1300, margin: "auto" }}>
+        <TableContainer
+          component={Paper}
+          sx={{ maxWidth: 1300, margin: "auto" }}
+        >
           <Table sx={{ minWidth: 400 }} aria-label="simple table">
             <TableHead>
               <TableRow>
@@ -227,7 +284,7 @@ const BannerImages = () => {
                     </IconButton>
                     <IconButton
                       color="error"
-                      onClick={() => handleDelete(banner._id)}
+                      onClick={() => handleOpenConfirm(banner._id)}
                     >
                       <DeleteIcon />
                     </IconButton>
@@ -289,33 +346,34 @@ const BannerImages = () => {
                   </Box>
                 </Grid>
               ))}
-              {isEditing && banner.newImages.map((file, index) => (
-                <Grid item xs={6} sm={4} md={3} key={`new-${index}`}>
-                  <Box sx={{ position: "relative" }}>
-                    <img
-                      src={URL.createObjectURL(file)}
-                      alt={`New Banner ${index + 1}`}
-                      style={{
-                        width: "100%",
-                        height: "150px",
-                        objectFit: "cover",
-                        borderRadius: "8px",
-                      }}
-                    />
-                    <IconButton
-                      sx={{
-                        position: "absolute",
-                        top: 5,
-                        right: 5,
-                        backgroundColor: "white",
-                      }}
-                      onClick={() => handleRemoveNewImage(index)}
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                  </Box>
-                </Grid>
-              ))}
+              {isEditing &&
+                banner.newImages.map((file, index) => (
+                  <Grid item xs={6} sm={4} md={3} key={`new-${index}`}>
+                    <Box sx={{ position: "relative" }}>
+                      <img
+                        src={URL.createObjectURL(file)}
+                        alt={`New Banner ${index + 1}`}
+                        style={{
+                          width: "100%",
+                          height: "150px",
+                          objectFit: "cover",
+                          borderRadius: "8px",
+                        }}
+                      />
+                      <IconButton
+                        sx={{
+                          position: "absolute",
+                          top: 5,
+                          right: 5,
+                          backgroundColor: "white",
+                        }}
+                        onClick={() => handleRemoveNewImage(index)}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </Box>
+                  </Grid>
+                ))}
             </Grid>
           </DialogContent>
           <DialogActions>
@@ -335,19 +393,35 @@ const BannerImages = () => {
                     accept="image/*"
                   />
                 </Button>
-                <Button onClick={handleEditBanner} color="primary">
+                <Button
+                  onClick={handleEditBanner}
+                  variant="outlined"
+                  color="success"
+                >
                   Save Changes
                 </Button>
-                <Button onClick={() => setIsEditing(false)} color="error">
+                <Button
+                  onClick={() => setIsEditing(false)}
+                  variant="outlined"
+                  color="error"
+                >
                   Cancel
                 </Button>
               </>
             ) : (
               <>
-                <Button onClick={() => setIsEditing(true)} color="primary">
+                <Button
+                  onClick={() => setIsEditing(true)}
+                  variant="outlined"
+                  color="primary"
+                >
                   Edit
                 </Button>
-                <Button onClick={() => setOpenView(false)} color="error">
+                <Button
+                  onClick={() => setOpenView(false)}
+                  variant="outlined"
+                  color="error"
+                >
                   Close
                 </Button>
               </>
@@ -356,9 +430,39 @@ const BannerImages = () => {
         </Dialog>
       </Container>
 
+      <Dialog open={openConfirm} onClose={handleCloseConfirm}>
+        <DialogTitle>Confirm Delete</DialogTitle>
+        <DialogContent>
+          Are you sure you want to delete this banner?
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseConfirm} color="primary" variant="outlined">
+            Cancel
+          </Button>
+          <Button onClick={handleDelete} color="error" variant="outlined">
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       {open && (
-        <AddBanner open={open} handleClose={handleClose} />
+        <AddBanner
+          open={open}
+          handleClose={handleClose}
+          setSnackbar={setSnackbar}
+        />
       )}
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000} // 3 seconds
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <Alert onClose={handleCloseSnackbar}  severity={snackbar.type}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Layout>
   );
 };

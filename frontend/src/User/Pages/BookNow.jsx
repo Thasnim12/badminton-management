@@ -381,8 +381,12 @@ const CourtBooking = () => {
                     <MenuItem disabled>Loading courts...</MenuItem>
                   ) : (
                     courts?.map((court) => (
-                      <MenuItem key={court._id} value={court}>
-                        {court.court_name}
+                      <MenuItem
+                        key={court._id}
+                        value={court}
+                        disabled={!court.isActive}
+                      >
+                        {court.court_name} {!court.isActive ? "(Inactive)" : ""}
                       </MenuItem>
                     ))
                   )}
@@ -513,7 +517,8 @@ const CourtBooking = () => {
                 mb: 2,
               }}
               alt="Court"
-              src={`http://localhost:5000/uploads/${selectedImage}` ||
+              src={
+                `http://localhost:5000/uploads/${selectedImage}` ||
                 "https://via.placeholder.com/400x200?text=No+Image+Available"
               }
             />

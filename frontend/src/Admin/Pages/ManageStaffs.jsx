@@ -15,10 +15,9 @@ import {
 import { useSnackbar } from "notistack";
 import { useAddstaffsMutation, useGetStaffsQuery } from "../../Slices/AdminApi";
 
-export default function ManageStaffs({ openForm, handleClose }) {
+export default function ManageStaffs({ openForm, handleClose, setSnackbar }) {
   const { data, refetch } = useGetStaffsQuery();
   const [addStaff, { isLoading }] = useAddstaffsMutation();
-  const { enqueueSnackbar } = useSnackbar();
   const [errors, setErrors] = useState({});
   const [staffImage, setStaffImage] = useState(null); // State to store the uploaded image
 
@@ -106,12 +105,6 @@ export default function ManageStaffs({ openForm, handleClose }) {
       }
     }
   };
-
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: "",
-    severity: "success",
-  });
 
   const handleFieldChange = (field) => {
     if (errors[field]) {
@@ -215,7 +208,7 @@ export default function ManageStaffs({ openForm, handleClose }) {
         <Button
           onClick={handleClose}
           variant="outlined"
-          color="primary"
+          color="error"
           disabled={isLoading}
         >
           Cancel
@@ -244,20 +237,6 @@ export default function ManageStaffs({ openForm, handleClose }) {
           )}
         </Button>
       </DialogActions>
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={3000}
-        onClose={() => setSnackbar({ ...snackbar, open: false })}
-        anchorOrigin={{ vertical: "top", horizontal: "right" }}
-      >
-        <Alert
-          onClose={() => setSnackbar({ ...snackbar, open: false })}
-          severity={snackbar.severity}
-          sx={{ width: "100%" }}
-        >
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
     </Dialog>
   );
 }

@@ -21,6 +21,8 @@ import {
   DialogTitle,
   Pagination,
   Card,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import {
   useGetStaffsQuery,
@@ -50,6 +52,12 @@ const Staffs = () => {
   const [openEditForm, setOpenEditForm] = useState(false);
   const [openImage, setOpenImage] = useState(false);
   const [selectedImage, setSelectedImage] = useState("");
+
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    type: "success",
+  });
   if (isLoading) return <Typography>Loading...</Typography>;
 
   const paginatedStaffs = data?.staffs?.slice(
@@ -108,11 +116,24 @@ const Staffs = () => {
     if (selectedStaff) {
       try {
         await deleteStaff(selectedStaff._id).unwrap();
+
+        setSnackbar({
+          open: true,
+          message: "Staff member deleted successfully!",
+          type: "success",
+        });
+
         setOpenConfirmDialog(false);
         setSelectedStaff(null);
         refetch();
       } catch (err) {
         console.error("Error deleting staff:", err);
+
+        setSnackbar({
+          open: true,
+          message: "Failed to delete staff. Please try again.",
+          type: "error",
+        });
       }
     }
   };
@@ -296,7 +317,7 @@ const Staffs = () => {
               {selectedStaff && selectedStaff.staff_image && (
                 <Box sx={{ position: "relative" }}>
                   <img
-                    src={`http://localhost:5000/${selectedStaff.staff_image}`}
+                    src={`http://localhost:5000/uploads/${selectedStaff.staff_image}`}
                     alt="Staff"
                     style={{
                       width: 100,
@@ -385,18 +406,12 @@ const Staffs = () => {
         </Modal>
 
         {/* staff Image Card */}
-
         <Dialog open={openImage} onClose={handleCloseImage} maxWidth="md">
           <DialogTitle>Staff Image</DialogTitle>
           <DialogContent>
             <img
               src={selectedImage}
-              alt="Addon"
-              style={{
-                width: "100%",
-                maxHeight: "80vh",
-                objectFit: "contain",
-              }}
+              style={{ width: "100%", maxHeight: "80vh", objectFit: "contain" }}
             />
           </DialogContent>
         </Dialog>
@@ -416,13 +431,13 @@ const Staffs = () => {
             <Button
               onClick={() => setOpenConfirmDialog(false)}
               variant="outlined"
-              color="error"
+              color="primary"
             >
               Cancel
             </Button>
             <Button
               onClick={confirmDelete}
-              color="primary"
+              color="error"
               variant="outlined"
               disabled={isDeleting}
             >
@@ -436,6 +451,7 @@ const Staffs = () => {
           openForm={openForm}
           handleClickOpen={handleClickOpen}
           handleClose={handleClose}
+          setSnackbar={setSnackbar}
         />
       )}
 
@@ -444,8 +460,23 @@ const Staffs = () => {
           openForm={openEditForm}
           handleClose={handleCloseEdit}
           editData={selectedStaff}
+          setSnackbar={setSnackbar}
         />
       )}
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <Alert
+          onClose={() => setSnackbar({ ...snackbar, open: false })}
+          severity={snackbar.type}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Layout>
   );
 };

@@ -88,7 +88,7 @@ const Login = () => {
           setOpenSnackbar(true);
         }
       } catch (error) {
-        setAlertMessage("Google login failed. Please try again.");
+        setAlertMessage(error?.data?.message);
         setAlertSeverity("error");
         setOpenSnackbar(true);
       }
