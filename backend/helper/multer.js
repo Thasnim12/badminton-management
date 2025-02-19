@@ -34,7 +34,7 @@ const bannerUpload = multer({
     storage: storage, 
     fileFilter: fileFilter,
     limits: limits
-}).array('banner_image', 5);
+}).array('banner_image', 10);
 
 const courtUpload = multer({ 
   storage: storage, 

@@ -64,6 +64,7 @@ const CourtBooking = () => {
   const [open, setOpen] = useState(false);
   const [alert, setAlert] = useState(null);
   const [selectedImage, setSelectedImage] = useState("")
+  const [openSnackbar, setOpenSnackbar] = useState(false)
 
   const [bookingData, setBookingData] = useState({
     courtId: "",
@@ -509,11 +510,8 @@ const CourtBooking = () => {
                 mb: 2,
               }}
               alt="Court"
-              src={
-                courtImages[
-                courts.find((court) => court._id === selectedCourt)
-                  ?.court_name
-                ]
+              src={`http://localhost:5000/uploads/${selectedImage}` ||
+                "https://via.placeholder.com/400x200?text=No+Image+Available"
               }
             />
 

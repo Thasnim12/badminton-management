@@ -102,6 +102,12 @@ export const userApi = createApi({
         method: "Get",
       }),
     }),
+    viewBanner: builder.query({
+      query: () => ({
+        url: "/banner",
+        method: "Get",
+      }),
+    }),
   }),
 });
 
@@ -120,6 +126,7 @@ export const {
   useVerifyBookingMutation,
   useSendMessageMutation,
   useUserBookingQuery,
+  useViewBannerQuery
 } = userApi;
 
 export default userApi;

@@ -1,4 +1,4 @@
-import { React, useState } from "react";
+import { React, useState, useEffect } from "react";
 import {
   Container,
   Grid,
@@ -24,7 +24,7 @@ import "react-responsive-carousel/lib/styles/carousel.min.css";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
-import { useSendMessageMutation } from "../Slices/UserApi";
+import { useSendMessageMutation, useViewBannerQuery } from "../Slices/UserApi";
 
 const CarouselWrapper = styled(Box)({
   width: "100%",
@@ -102,6 +102,7 @@ const validationSchema = yup.object().shape({
 
 const HomePage = () => {
   const { userInfo } = useSelector((state) => state.userAuth);
+  const [banner, setBanner] = useState('')
   const handleJoinClick = (e) => {
     e.preventDefault();
     console.log("Button clicked, userInfo:", userInfo);
@@ -148,6 +149,15 @@ const HomePage = () => {
     severity: "",
   });
 
+  const { data } = useViewBannerQuery();
+
+  useEffect(() => {
+    if (data && data.length > 0) {
+      setBanner(data);
+    }
+  }, [data]);
+
+
   const onSubmit = async (data) => {
     try {
       await sendMessage(data).unwrap();
@@ -165,6 +175,8 @@ const HomePage = () => {
       });
     }
   };
+
+  console.log(banner, 'banner')
   return (
     <>
       <Header />
@@ -176,16 +188,27 @@ const HomePage = () => {
           interval={1000}
           showThumbs={false}
         >
-          <div>
-            <img src="/Carousal1.jpg" alt="Badminton Court" />
-          </div>
-          <div>
-            <img src="/Carousal2.jpg" alt="Training Session" />
-          </div>
-          <div>
-            <img src="/Carousal3.jpg" alt="Tournaments" />
-          </div>
+          {banner &&
+            banner
+              .flatMap((item) =>
+                item.imageUrl.map((image, index) => ({
+                  image,
+                  order: item.order[index], 
+                  _id: `${item._id}-${index}`,
+                }))
+              )
+              .sort((a, b) => a.order - b.order) 
+              .map((item) => (
+                <div key={item._id}>
+                  <img
+                    src={`http://localhost:5000/uploads/${item.image}`}
+                    alt={`Banner ${item.order}`}
+                    style={{ width: '100%', height: '400px', objectFit: 'cover' }}
+                  />
+                </div>
+              ))}
         </StyledCarousel>
+
       </CarouselWrapper>
 
       <QuoteSection>

@@ -305,7 +305,7 @@ const SlotManagement = () => {
                       <Button
                         variant="outlined"
                         color={court.isActive ? "success" : "error"}
-                        onClick={() => handleStatusChange(court)} // Open the status change confirmation dialog
+                        onClick={() => handleStatusChange(court)} 
                       >
                         {court.isActive ? "Active" : "Inactive"}
                       </Button>
@@ -332,7 +332,6 @@ const SlotManagement = () => {
           </TableContainer>
         </Box>
 
-        {/* Confirmation Dialog for status change */}
         <Dialog
           open={confirmationDialogOpen}
           onClose={handleConfirmationDialogClose}

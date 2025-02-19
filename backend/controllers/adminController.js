@@ -886,6 +886,7 @@ const deleteBanner = async (req, res) => {
     }
 
     await Banner.deleteOne({ _id: bannerId });
+    return res.status(200).json({message:"banner deleted successfully!"})
   } catch (error) {
     console.log(error.message);
   }
@@ -934,6 +935,8 @@ const deleteAddons = async (req, res) => {
     console.log(error.message);
   }
 };
+
+
 
 module.exports = {
   adminLogin,

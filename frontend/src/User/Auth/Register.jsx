@@ -53,7 +53,6 @@ const validationSchema = Yup.object({
 });
 
 const Register = () => {
-  const navigate = useNavigate();
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
@@ -69,6 +68,7 @@ const Register = () => {
   } = useForm({ resolver: yupResolver(validationSchema) });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const navigate = useNavigate();
 
   const [registerUser, { isLoading: isRegistering, error: registerError }] =
     useRegisterUserMutation();
@@ -116,21 +116,20 @@ const Register = () => {
     }
   };
 
-  const handleOtpSubmit = async (event) => {
-    event.preventDefault();
-
+  const handleOtpSubmit = async (e) => {
+    e.preventDefault();
     try {
       const response = await verifyOtp({ userId, otp }).unwrap();
-      if (response?.data?.status === "verified") {
-        const { name, email, phoneno } = response.data;
+      if (response?.user) {
+        console.log('hey')
+        const user = response.user;
+        const name = user.name
+        const email = user.email
+        const phoneno = user.phoneno
         dispatch(setUserCredentials({ name, email, phoneno }));
         showSnackbar("Registration successful!", "success");
         setOpenOtpModal(false);
-        
-        // Force navigation after a small delay
-        setTimeout(() => {
-          navigate("/login", { replace: true });
-        }, 100);
+        navigate("/");
       }
     } catch (error) {
       console.error("OTP validation failed:", error);
@@ -315,7 +314,6 @@ const Register = () => {
         </Container>
       </div>
 
-      {/* OTP Modal */}
       <Modal
         open={openOtpModal}
         onClose={() => setOpenOtpModal(false)}

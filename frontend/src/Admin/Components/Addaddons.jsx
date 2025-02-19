@@ -18,6 +18,7 @@ import {
 } from "@mui/material";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { useAddaddonsMutation } from "../../Slices/AdminApi";
+import AddBanner from "./Addbanner";
 
 const Addaddons = ({ openForm, handleClose }) => {
   const [addons, { isLoading }] = useAddaddonsMutation();

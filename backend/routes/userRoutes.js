@@ -19,6 +19,7 @@ const {
   getAddons,
   sendMessage,
   getBookingHistory,
+  displayBanner
 } = require("../controllers/userController");
 
 const authenticateUser = require("../middlewares/userMiddleware");
@@ -42,6 +43,8 @@ userroute.get("/get-courts", authenticateUser, getCourts);
 userroute.get("/get-slots", authenticateUser, getSlots);
 userroute.get("/get-addons", authenticateUser, getAddons);
 userroute.get("/user-history", authenticateUser, getBookingHistory);
+userroute.get('/banner',authenticateUser,displayBanner)
+
 
 // Update route
 userroute.put("/update-profile", authenticateUser, updateUserDetails);

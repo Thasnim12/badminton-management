@@ -12,6 +12,7 @@ const Booking = require("../models/bookingModel");
 const { userUpload } = require("../helper/multer");
 const nodemailer = require("nodemailer");
 const Bookings = require('../models/bookingModel')
+const Banner = require('../models/bannerModel')
 const moment = require('moment')
 require("dotenv").config();
 
@@ -200,13 +201,15 @@ const verifyOtp = async (req, res) => {
 
     await Otp.deleteMany({ _id: id });
 
-    res.json({
-      status: "verified",
-      name: user.name,
-      email: user.email,
-      phoneno: user.phoneno,
-    });
-    return;
+    res.status(200).json({user,status:"verified"})
+
+    // res.json({
+    //   status: "verified",
+    //   name: user.name,
+    //   email: user.email,
+    //   phoneno: user.phoneno,
+    // });
+    // return;
   } catch (error) {
     res.status(500).json({
       status: "Failed",
@@ -456,6 +459,20 @@ const getBookingHistory = async (req, res) => {
   }
 };
 
+const displayBanner= async(req,res) =>{
+  try{
+    const banner = await Banner.find({})
+    if(!banner){
+      return res.status(404).json({message:"no banner found!"})
+    }
+
+    return res.status(200).json(banner)
+  }
+  catch(error){
+    console.log(error.message)
+  }
+}
+
 module.exports = {
   userRegister,
   userLogin,
@@ -468,4 +485,5 @@ module.exports = {
   updateUserDetails,
   sendMessage,
   getBookingHistory,
+  displayBanner
 };

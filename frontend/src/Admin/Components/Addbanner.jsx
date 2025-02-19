@@ -61,6 +61,8 @@ const AddBanner = ({ open, handleClose }) => {
     }
   };
 
+
+
   return (
     <Dialog
       open={open}
