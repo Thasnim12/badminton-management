@@ -103,10 +103,10 @@ export const adminApi = createApi({
       }),
     }),
     UpdateStaff: builder.mutation({
-      query: (updatedStaff) => ({
-        url: `/staffs/${updatedStaff.employee_id}`,
+      query: ({employee_id, formData}) => ({
+        url: `/staffs/${employee_id}`,
         method: "PUT",
-        body: updatedStaff,
+        body: formData,
       }),
     }),
     DeleteStaff: builder.mutation({
@@ -193,6 +193,13 @@ export const adminApi = createApi({
         body: courtId,
       }),
     }),
+    editAddon: builder.mutation({
+      query: ({ addonsId, data }) => ({
+        url: `edit-addons/${addonsId}`,
+        method: "PUT",
+        body: data,
+      }),
+    }),
   }),
 });
 
@@ -226,7 +233,8 @@ export const {
   useDeleteBannerMutation,
   useDeleteAddonMutation,
   useEditCourtStatusMutation,
-  useDeleteCourtMutation
+  useDeleteCourtMutation,
+  useEditAddonMutation,
 } = adminApi;
 
 export default adminApi;

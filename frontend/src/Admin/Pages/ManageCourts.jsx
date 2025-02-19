@@ -293,7 +293,7 @@ const SlotManagement = () => {
                     <TableCell align="center">
                       {court.court_image ? (
                         <img
-                          src={court.court_image}
+                          src={`http://localhost:5000/uploads/${court.court_image}`}
                           alt={court.court_name}
                           style={{ width: 80, height: 50, objectFit: "cover" }}
                         />
@@ -344,7 +344,7 @@ const SlotManagement = () => {
             </Typography>
           </DialogContent>
           <DialogActions>
-            <Button onClick={handleConfirmationDialogClose} variant="outlined">
+            <Button onClick={handleConfirmationDialogClose} color="error"  variant="outlined">
               Cancel
             </Button>
             <Button onClick={handleConfirmStatusChange} variant="outlined">

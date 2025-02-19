@@ -19,9 +19,8 @@ const fileFilter = (req, file, cb) => {
 };
 
 const limits = {
-  fileSize: 5 * 1024 * 1024 // 5MB
+  fileSize: 5 * 1024 * 1024, // 5MB
 };
-
 
 const upload = multer({
   storage: storage,
@@ -29,24 +28,28 @@ const upload = multer({
   fileFilter: fileFilter,
 }).single("item_image");
 
+const bannerUpload = multer({
+  storage: storage,
+  fileFilter: fileFilter,
+  limits: limits,
+}).array("banner_image", 5);
 
-const bannerUpload = multer({ 
-    storage: storage, 
-    fileFilter: fileFilter,
-    limits: limits
-}).array('banner_image', 10);
-
-const courtUpload = multer({ 
-  storage: storage, 
-  fileFilter: fileFilter ,
-  limits: limits
-}).single('court_image');
+const courtUpload = multer({
+  storage: storage,
+  fileFilter: fileFilter,
+  limits: limits,
+}).single("court_image");
 
 const userUpload = multer({
-  storage: storage, 
+  storage: storage,
   limits: limits,
-  fileFilter: fileFilter 
-}).single('profileImage');
+  fileFilter: fileFilter,
+}).single("profileImage");
 
+const staffUpload = multer({
+  storage: storage,
+  limits: limits,
+  fileFilter: fileFilter,
+}).single("staff_image");
 
-module.exports = { upload,bannerUpload, courtUpload, userUpload };
+module.exports = { upload, bannerUpload, courtUpload, userUpload, staffUpload };

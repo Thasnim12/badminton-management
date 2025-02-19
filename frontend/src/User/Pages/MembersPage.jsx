@@ -51,10 +51,18 @@ const MembersPage = () => {
             <Grid item key={index} xs={12} sm={6} md={3}>
               <Card sx={{ textAlign: "center", padding: 2, borderRadius: 3 }}>
                 <Avatar
-                  src={member.image || "https://via.placeholder.com/150"}
+                  src={`http://localhost:5000/uploads/${member.staff_image}`}
                   alt={member.name}
-                  sx={{ width: 80, height: 80, margin: "auto", mb: 2 }}
+                  sx={{
+                    width: 100,
+                    height: 100,
+                    margin: "auto",
+                    mb: 2,
+                    objectFit: "cover",
+                    objectPosition: "center",
+                  }}
                 />
+
                 <CardContent>
                   <Typography variant="h6">{member.name}</Typography>
                   <Typography variant="body2" color="textSecondary">

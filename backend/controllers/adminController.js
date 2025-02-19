@@ -12,7 +12,12 @@ const courtConfig = require("../models/courtConfig");
 const generateAdminToken = require("../authentication/generateAdminToken");
 const Staff = require("../models/staffModel");
 const Addons = require("../models/addonModel");
-const { upload, bannerUpload, courtUpload } = require("../helper/multer");
+const {
+  upload,
+  bannerUpload,
+  courtUpload,
+  staffUpload,
+} = require("../helper/multer");
 const Donations = require("../models/donationModel");
 const Banner = require("../models/bannerModel");
 const Enquiry = require("../models/enquiryModel");
@@ -241,9 +246,9 @@ const generateSlots = async (req, res) => {
     const slotMap = new Map();
 
     const existingSlotMap = new Map(
-      existingSlots.map(slot => [
+      existingSlots.map((slot) => [
         `${courtId}-${moment(slot.startTime).format("YYYY-MM-DD-HH")}`,
-        slot
+        slot,
       ])
     );
 
@@ -251,7 +256,10 @@ const generateSlots = async (req, res) => {
       const currentDate = moment(today).add(day, "days");
 
       for (let hour = 6; hour < 22; hour++) {
-        const startTime = moment(currentDate).set("hour", hour).set("minute", 0).utc();
+        const startTime = moment(currentDate)
+          .set("hour", hour)
+          .set("minute", 0)
+          .utc();
         const endTime = moment(startTime).add(1, "hour").utc();
 
         const slotKey = `${courtId}-${startTime.format("YYYY-MM-DD-HH")}`;
@@ -425,52 +433,66 @@ const updateSlot = async (req, res) => {
 };
 
 const addStaff = async (req, res) => {
-  try {
-    const { name, email, designation, employee_id, joining_date, phoneno } =
-      req.body;
-
-    if (
-      !name ||
-      !email ||
-      !designation ||
-      !employee_id ||
-      !joining_date ||
-      !phoneno
-    ) {
-      return res.status(400).json({ message: "missing required fields" });
+  staffUpload(req, res, async (err) => {
+    if (err) {
+      return res.status(400).json({ message: err.message });
     }
 
-    const existingStaff = await Staff.findOne({ email: email });
+    try {
+      const {
+        name,
+        email,
+        designation,
+        employee_id,
+        joining_date,
+        phoneno,
+        staff_image,
+      } = req.body;
+      console.log(req.body);
+      if (
+        !name ||
+        !email ||
+        !designation ||
+        !employee_id ||
+        !joining_date ||
+        !phoneno
+      ) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
 
-    if (existingStaff) {
+      const existingStaff = await Staff.findOne({ email: email });
+
+      if (existingStaff) {
+        return res
+          .status(400)
+          .json({ message: "Staff with the same email already exists" });
+      }
+
+      const newStaff = new Staff({
+        name: name,
+        email: email,
+        phoneno: phoneno,
+        designation: designation,
+        employee_id: employee_id,
+        joining_date: joining_date,
+      });
+
+      if (req.file) {
+        newStaff.staff_image = req.file ? req.file.filename : null;
+      }
+      await newStaff.save();
+
       return res
-        .status(400)
-        .json({ message: "staff with same email already exists" });
+        .status(200)
+        .json({ message: "Staff added successfully", newStaff });
+    } catch (error) {
+      console.log(error.message);
+      return res.status(500).json({
+        message: "Staff with same employee Id Exists ",
+        error: error.message,
+      });
     }
-
-    const newStaff = new Staff({
-      name: name,
-      email: email,
-      phoneno: phoneno,
-      designation: designation,
-      employee_id: employee_id,
-      joining_date: joining_date,
-    });
-
-    if (existingStaff) {
-      return res
-        .status(400)
-        .json({ message: "staff with same email already exists" });
-    }
-
-    await newStaff.save();
-
-    return res
-      .status(200)
-      .json({ message: "user addedd successfully", newStaff });
-  } catch (error) {
-    console.log(error.message);
-  }
+  });
 };
 
 const getAllStaffs = async (req, res) => {
@@ -567,44 +589,62 @@ const getAlladdons = async (req, res) => {
 };
 
 const manageStaffs = async (req, res) => {
-  try {
-    const { name, email, designation, employee_id, joining_date, phoneno } =
-      req.body;
-    if (
-      !name &&
-      !email &&
-      !designation &&
-      !employee_id &&
-      !joining_date &&
-      !phoneno
-    ) {
-      return res.status(400).json({ message: "No fields provided to update" });
-    }
-    const existingStaff = await Staff.findOne({
-      employee_id: req.params.employee_id,
-    });
-
-    if (!existingStaff) {
-      return res.status(404).json({ message: "Staff not found" });
+  staffUpload(req, res, async (err) => {
+    if (err) {
+      return res.status(400).json({ message: err.message });
     }
 
-    existingStaff.name = name || existingStaff.name;
-    existingStaff.email = email || existingStaff.email;
-    existingStaff.phoneno = phoneno || existingStaff.phoneno;
-    existingStaff.designation = designation || existingStaff.designation;
-    existingStaff.joining_date = joining_date || existingStaff.joining_date;
+    try {
+      const { name, email, designation, employee_id, joining_date, phoneno } =
+        req.body;
+      const staff_image = req.file ? req.file.filename : null; // Get uploaded image filename
 
-    await existingStaff.save();
-    return res.status(200).json({
-      message: "Staff updated successfully",
-      updatedStaff: existingStaff,
-    });
-  } catch (error) {
-    console.log(error.message);
-    return res
-      .status(500)
-      .json({ message: "Server error", error: error.message });
-  }
+      if (
+        !name &&
+        !email &&
+        !designation &&
+        !employee_id &&
+        !joining_date &&
+        !phoneno
+      ) {
+        return res
+          .status(400)
+          .json({ message: "No fields provided to update" });
+      }
+
+      const existingStaff = await Staff.findOne({
+        employee_id: req.params.employee_id,
+      });
+
+      if (!existingStaff) {
+        return res.status(404).json({ message: "Staff not found" });
+      }
+
+      // Update staff details
+      existingStaff.name = name || existingStaff.name;
+      existingStaff.email = email || existingStaff.email;
+      existingStaff.phoneno = phoneno || existingStaff.phoneno;
+      existingStaff.designation = designation || existingStaff.designation;
+      existingStaff.joining_date = joining_date || existingStaff.joining_date;
+
+      // Update image if a new one is uploaded
+      if (staff_image) {
+        existingStaff.staff_image = staff_image;
+      }
+
+      await existingStaff.save();
+
+      return res.status(200).json({
+        message: "Staff updated successfully",
+        updatedStaff: existingStaff,
+      });
+    } catch (error) {
+      console.error("Error updating staff:", error.message);
+      return res
+        .status(500)
+        .json({ message: "Server error", error: error.message });
+    }
+  });
 };
 
 const deleteStaff = async (req, res) => {
@@ -924,19 +964,66 @@ const deleteAddons = async (req, res) => {
   try {
     const { addonsId } = req.params;
     const id = new mongoose.Types.ObjectId(addonsId);
-    const addons = await Addons.findById({ _id: id });
+    const result = await Addons.findByIdAndDelete(id);
 
-    if (!addons) {
+    if (!result) {
       return res.status(404).json({ message: "Addons not found!" });
     }
 
-    await Addons.deleteOne({ _id: id });
+    return res.status(200).json({ message: "Addon deleted successfully!" });
   } catch (error) {
-    console.log(error.message);
+    console.error(error.message);
+    return res.status(500).json({ message: "Failed to delete addon" });
   }
 };
 
+const editAddons = async (req, res) => {
+  upload(req, res, async (err) => {
+    if (err) {
+      return res.status(400).json({ message: err.message });
+    }
 
+    try {
+      const { addonsId } = req.params;
+      if (!mongoose.Types.ObjectId.isValid(addonsId)) {
+        return res.status(400).json({ message: "Invalid Addon ID format" });
+      }
+      const { item_name, item_type, quantity, price } = req.body;
+      const item_image = req.file ? req.file.filename : null;
+
+      if (!item_name || !item_type || !quantity || !price) {
+        return res.status(400).json({ message: "Missing required fields!" });
+      }
+
+      const updatedAddon = await Addons.findByIdAndUpdate(
+        addonsId,
+        {
+          item_name,
+          item_type,
+          quantity,
+          price,
+          item_image: item_image || undefined,
+        },
+        { new: true, runValidators: true }
+      );
+
+      if (!updatedAddon) {
+        return res.status(404).json({ message: "Addon not found!" });
+      }
+
+      return res.status(200).json({
+        message: "Addon updated successfully!",
+        updatedAddon,
+      });
+    } catch (error) {
+      console.error("Error in updating addon:", error.message);
+      return res.status(500).json({
+        message: "Failed to update addon. Please try again later.",
+        error: error.message,
+      });
+    }
+  });
+};
 
 module.exports = {
   adminLogin,
@@ -966,4 +1053,5 @@ module.exports = {
   deleteBanner,
   editStatus,
   deleteAddons,
+  editAddons,
 };

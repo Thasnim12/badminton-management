@@ -33,6 +33,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import Layout from "../Global/Layouts";
 import BreadcrumbNav from "../Global/Breadcrumb";
 import ManageStaffs from "./ManageStaffs";
+import EditStaffs from "../Components/EditStaff";
 
 const Staffs = () => {
   const { data, error, isLoading, refetch } = useGetStaffsQuery();
@@ -46,14 +47,25 @@ const Staffs = () => {
   const [page, setPage] = useState(1);
   const rowsPerPage = 5;
   const [openForm, setOpenform] = useState(false);
-
+  const [openEditForm, setOpenEditForm] = useState(false);
+  const [openImage, setOpenImage] = useState(false);
+  const [selectedImage, setSelectedImage] = useState("");
   if (isLoading) return <Typography>Loading...</Typography>;
-  if (error) return <Typography>Error fetching staff data</Typography>;
 
   const paginatedStaffs = data?.staffs?.slice(
     (page - 1) * rowsPerPage,
     page * rowsPerPage
   );
+
+  const handleImageClick = (imageUrl) => {
+    setSelectedImage(imageUrl);
+    setOpenImage(true);
+  };
+
+  const handleCloseImage = () => {
+    setOpenImage(false);
+    setSelectedImage("");
+  };
 
   const handleClickOpen = () => {
     setOpenform(true);
@@ -61,6 +73,16 @@ const Staffs = () => {
 
   const handleClose = () => {
     setOpenform(false);
+  };
+
+  const handleOpenEdit = (staff) => {
+    setSelectedStaff(staff);
+    setOpenEditForm(true);
+  };
+
+  const handleCloseEdit = () => {
+    setOpenEditForm(false);
+    setSelectedStaff(null);
   };
 
   const handlePageChange = (event, value) => setPage(value);
@@ -106,6 +128,7 @@ const Staffs = () => {
     if (selectedStaff) {
       try {
         await updateStaff(selectedStaff).unwrap();
+
         handleCloseModal();
         refetch();
       } catch (err) {
@@ -134,19 +157,22 @@ const Staffs = () => {
         >
           <Button
             variant="contained"
-            sx={{ backgroundColor: "#2c387e", color: "white"}}
+            sx={{ backgroundColor: "#2c387e", color: "white" }}
             onClick={handleClickOpen}
           >
-           Add Staff
+            Add Staff
           </Button>
         </Box>
         <TableContainer
           component={Paper}
-          sx={{ boxShadow: 3, borderRadius: 2 ,  marginTop: "25px",}}
+          sx={{ boxShadow: 3, borderRadius: 2, marginTop: "25px" }}
         >
           <Table sx={{ minWidth: 650 }} aria-label="staff table">
             <TableHead>
               <TableRow>
+                <TableCell align="center" sx={{ fontSize: 16 }}>
+                  Staff Image
+                </TableCell>
                 <TableCell sx={{ fontSize: 16 }}>Staff Name</TableCell>
                 <TableCell align="center" sx={{ fontSize: 16 }}>
                   Email Address
@@ -163,48 +189,80 @@ const Staffs = () => {
                 <TableCell align="center" sx={{ fontSize: 16 }}>
                   Joining Date
                 </TableCell>
+
                 <TableCell align="center" sx={{ fontSize: 16 }}>
                   Actions
                 </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {paginatedStaffs?.map((staff) => (
-                <TableRow key={staff._id}>
-                  <TableCell component="th" scope="row">
-                    {staff.name}
-                  </TableCell>
-                  <TableCell align="center">{staff.email}</TableCell>
-                  <TableCell align="center">{staff.phoneno}</TableCell>
-                  <TableCell align="center">{staff.designation}</TableCell>
-                  <TableCell align="center">{staff.employee_id}</TableCell>
-                  <TableCell align="center">
-                    {new Date(staff.joining_date).toLocaleDateString()}
-                  </TableCell>
-                  <TableCell align="center">
-                    <IconButton
-                      color="primary"
-                      sx={{ marginRight: 1 }}
-                      onClick={() => handleViewStaff(staff)}
-                    >
-                      <VisibilityIcon />
-                    </IconButton>
-                    <IconButton
-                      color="primary"
-                      sx={{ marginRight: 1 }}
-                      onClick={() => handleEditStaff(staff)}
-                    >
-                      <EditIcon />
-                    </IconButton>
-                    <IconButton
-                      color="error"
-                      onClick={() => handleDeleteStaff(staff)}
-                    >
-                      <DeleteIcon />
-                    </IconButton>
+              {paginatedStaffs && paginatedStaffs.length > 0 ? (
+                paginatedStaffs.map((staff) => (
+                  <TableRow key={staff._id}>
+                    <TableCell align="center">
+                      {staff.staff_image ? (
+                        <img
+                          src={`http://localhost:5000/uploads/${staff.staff_image}`}
+                          alt={staff.name}
+                          style={{
+                            width: "50px",
+                            height: "50px",
+                            objectFit: "cover",
+                            borderRadius: "5px",
+                            cursor: "pointer",
+                          }}
+                          onClick={() =>
+                            handleImageClick(
+                              `http://localhost:5000/uploads/${staff.staff_image}`
+                            )
+                          }
+                        />
+                      ) : (
+                        "No Image"
+                      )}
+                    </TableCell>
+                    <TableCell component="th" scope="row">
+                      {staff.name}
+                    </TableCell>
+                    <TableCell align="center">{staff.email}</TableCell>
+                    <TableCell align="center">{staff.phoneno}</TableCell>
+                    <TableCell align="center">{staff.designation}</TableCell>
+                    <TableCell align="center">{staff.employee_id}</TableCell>
+                    <TableCell align="center">
+                      {new Date(staff.joining_date).toLocaleDateString()}
+                    </TableCell>
+
+                    <TableCell align="center">
+                      <IconButton
+                        color="primary"
+                        sx={{ marginRight: 1 }}
+                        onClick={() => handleViewStaff(staff)}
+                      >
+                        <VisibilityIcon />
+                      </IconButton>
+                      <IconButton
+                        color="primary"
+                        sx={{ marginRight: 1 }}
+                        onClick={() => handleOpenEdit(staff)}
+                      >
+                        <EditIcon />
+                      </IconButton>
+                      <IconButton
+                        color="error"
+                        onClick={() => handleDeleteStaff(staff)}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={9} align="center">
+                    No data available
                   </TableCell>
                 </TableRow>
-              ))}
+              )}
             </TableBody>
           </Table>
         </TableContainer>
@@ -219,7 +277,7 @@ const Staffs = () => {
         </Box>
 
         {/* Modal for viewing/editing staff */}
-        <Modal open={openModal} onClose={handleCloseModal}>
+        <Modal open={openModal} onClose={() => setOpenModal(false)}>
           <Box
             sx={{
               position: "absolute",
@@ -230,13 +288,33 @@ const Staffs = () => {
               bgcolor: "background.paper",
               boxShadow: 24,
               p: 4,
+              textAlign: "center",
             }}
           >
+            {/* Profile Image Display */}
+            <Box sx={{ mb: 2 }}>
+              {selectedStaff && selectedStaff.staff_image && (
+                <Box sx={{ position: "relative" }}>
+                  <img
+                    src={`http://localhost:5000/${selectedStaff.staff_image}`}
+                    alt="Staff"
+                    style={{
+                      width: 100,
+                      height: 100,
+                      borderRadius: "50%",
+                      objectFit: "cover",
+                      marginBottom: 10,
+                    }}
+                  />
+                </Box>
+              )}
+            </Box>
+
             <Typography variant="h6" mb={2}>
               {mode === "edit" ? "Edit Staff" : "View Staff"}
             </Typography>
             {selectedStaff && (
-              <form onSubmit={handleSubmit}>
+              <form onSubmit={() => {}}>
                 <TextField
                   label="Name"
                   value={selectedStaff.name}
@@ -286,12 +364,15 @@ const Staffs = () => {
                   margin="normal"
                   InputProps={{ readOnly: mode === "view" }}
                 />
+
+                {/* Submit Button for Editing */}
                 {mode === "edit" && (
                   <Button
                     type="submit"
                     variant="outlined"
                     color="primary"
                     fullWidth
+                    onClick={handleSubmit}
                     sx={{ mt: 2 }}
                     disabled={isUpdating}
                   >
@@ -302,6 +383,23 @@ const Staffs = () => {
             )}
           </Box>
         </Modal>
+
+        {/* staff Image Card */}
+
+        <Dialog open={openImage} onClose={handleCloseImage} maxWidth="md">
+          <DialogTitle>Staff Image</DialogTitle>
+          <DialogContent>
+            <img
+              src={selectedImage}
+              alt="Addon"
+              style={{
+                width: "100%",
+                maxHeight: "80vh",
+                objectFit: "contain",
+              }}
+            />
+          </DialogContent>
+        </Dialog>
 
         {/* Confirmation Dialog for Deletion */}
         <Dialog
@@ -315,10 +413,19 @@ const Staffs = () => {
             </DialogContentText>
           </DialogContent>
           <DialogActions>
-            <Button onClick={() => setOpenConfirmDialog(false)} variant="outlined" color="primary">
+            <Button
+              onClick={() => setOpenConfirmDialog(false)}
+              variant="outlined"
+              color="error"
+            >
               Cancel
             </Button>
-            <Button onClick={confirmDelete} color="error" variant="outlined"  disabled={isDeleting}>
+            <Button
+              onClick={confirmDelete}
+              color="primary"
+              variant="outlined"
+              disabled={isDeleting}
+            >
               {isDeleting ? "Deleting..." : "Delete"}
             </Button>
           </DialogActions>
@@ -329,6 +436,14 @@ const Staffs = () => {
           openForm={openForm}
           handleClickOpen={handleClickOpen}
           handleClose={handleClose}
+        />
+      )}
+
+      {openEditForm && selectedStaff && (
+        <EditStaffs
+          openForm={openEditForm}
+          handleClose={handleCloseEdit}
+          editData={selectedStaff}
         />
       )}
     </Layout>

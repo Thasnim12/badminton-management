@@ -352,7 +352,7 @@ const Users = () => {
                 <Button
                   onClick={() => setConfirmOpen(false)}
                   variant="outlined"
-                  color="primary"
+                  color="error"
                 >
                   Cancel
                 </Button>

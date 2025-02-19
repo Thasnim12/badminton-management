@@ -25,7 +25,7 @@ import BreadcrumbNav from "../Global/Breadcrumb";
 const Enquiries = () => {
   const { data, error, isLoading } = useGetMessagesQuery();
   const [page, setPage] = useState(1);
-  const [rowsPerPage] = useState(5);
+  const [rowsPerPage] = useState(7);
   const [open, setOpen] = useState(false);
   const [selectedEnquiry, setSelectedEnquiry] = useState(null);
 

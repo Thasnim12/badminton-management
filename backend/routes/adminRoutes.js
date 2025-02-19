@@ -27,7 +27,8 @@ const {
   deleteCourt,
   deleteBanner,
   editStatus,
-  deleteAddons
+  deleteAddons,
+  editAddons,
 
 } = require("../controllers/adminController");
 
@@ -35,7 +36,7 @@ const { getBookings } = require('../controllers/bookingController')
 const { downloadDonations } = require('../controllers/donationController')
 const { downloadBookings } = require('../controllers/bookingController')
 
-const { bannerUpload, courtUpload } = require('../helper/multer')
+const { bannerUpload, courtUpload,staffUpload } = require('../helper/multer')
 
 
 
@@ -74,6 +75,7 @@ adminroute.post('/add-user', authenticateAdmin, addUser)
 adminroute.put("/users/:userId", authenticateAdmin, manageUsers);
 adminroute.put("/edit-slots/:slotId", authenticateAdmin, updateSlot);
 adminroute.put("/staffs/:employee_id", authenticateAdmin, manageStaffs);
+adminroute.put('/edit-addons/:addonsId', authenticateAdmin, editAddons)
 adminroute.put('/banner/:bannerId',authenticateAdmin,bannerUpload,editBanner)
 adminroute.put('/status',authenticateAdmin,editStatus)
 

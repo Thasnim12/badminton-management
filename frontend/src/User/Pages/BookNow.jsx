@@ -38,8 +38,7 @@ import {
 } from "../../Slices/UserApi";
 import AddOnsDrawer from "../Components/Drawer";
 import DetailsCard from "../Components/DetailsCard";
-import moment from 'moment';
-
+import moment from "moment";
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   "& .MuiDialogContent-root": {
@@ -63,8 +62,7 @@ const CourtBooking = () => {
   const [selectedAddOns, setSelectedAddOns] = useState([]);
   const [open, setOpen] = useState(false);
   const [alert, setAlert] = useState(null);
-  const [selectedImage, setSelectedImage] = useState("")
-  const [openSnackbar, setOpenSnackbar] = useState(false)
+  const [selectedImage, setSelectedImage] = useState("");
 
   const [bookingData, setBookingData] = useState({
     courtId: "",
@@ -78,7 +76,7 @@ const CourtBooking = () => {
   const [verifyBooking] = useVerifyBookingMutation();
   const [bookingHistory, setBookingHistory] = useState(null);
   const [processing, setProcessing] = useState(false);
-
+  const [openSnackbar, setOpenSnackbar] = useState(false);
   const { data, isLoading: courtsLoading } = useGetAllcourtsQuery();
   const courts = data?.court || [];
 
@@ -287,11 +285,10 @@ const CourtBooking = () => {
 
   const handleCourtChange = (e) => {
     const court = e.target.value;
-    setSelectedImage(court.court_image)
+    setSelectedImage(court.court_image);
     setSelectedCourt(court._id);
     setOpenDrawer(true);
   };
-
 
   const handleClickOpen = () => {
     if (selectedSlots.length === 0) {
@@ -374,7 +371,9 @@ const CourtBooking = () => {
                 {/* Court Select */}
                 <Select
                   fullWidth
-                  value={courts.find((court) => court._id === selectedCourt) || ''}
+                  value={
+                    courts.find((court) => court._id === selectedCourt) || ""
+                  }
                   onChange={handleCourtChange}
                   sx={{ mt: 2 }}
                 >
@@ -396,7 +395,6 @@ const CourtBooking = () => {
                   sx={{ marginTop: 2 }}
                   alt="Court Image"
                 />
-
               </Card>
             </Grid>
 
@@ -425,12 +423,17 @@ const CourtBooking = () => {
                         <Grid item xs={4} key={slot._id}>
                           <Button
                             fullWidth
-                            variant={selectedSlots.some((s) => s._id === slot._id) ? "contained" : "outlined"}
+                            variant={
+                              selectedSlots.some((s) => s._id === slot._id)
+                                ? "contained"
+                                : "outlined"
+                            }
                             color={slot.isBooked ? "error" : "primary"}
                             disabled={slot.isBooked}
                             onClick={() => handleSlotToggle(slot)}
                           >
-                            {moment(slot.startTime).format('hh:mm A')} - {moment(slot.endTime).format('hh:mm A')}
+                            {moment(slot.startTime).format("hh:mm A")} -{" "}
+                            {moment(slot.endTime).format("hh:mm A")}
                           </Button>
                         </Grid>
                       ))

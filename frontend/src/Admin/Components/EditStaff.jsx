@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Button,
   TextField,
@@ -11,16 +11,45 @@ import {
   Box,
   Snackbar,
   Alert,
+  Typography,
 } from "@mui/material";
 import { useSnackbar } from "notistack";
-import { useAddstaffsMutation, useGetStaffsQuery } from "../../Slices/AdminApi";
+import {
+  useUpdateStaffMutation,
+  useGetStaffsQuery,
+} from "../../Slices/AdminApi";
 
-export default function ManageStaffs({ openForm, handleClose }) {
+export default function EditStaffs({ openForm, handleClose, editData }) {
   const { data, refetch } = useGetStaffsQuery();
-  const [addStaff, { isLoading }] = useAddstaffsMutation();
+  const [editStaff, { isLoading }] = useUpdateStaffMutation();
   const { enqueueSnackbar } = useSnackbar();
   const [errors, setErrors] = useState({});
-  const [staffImage, setStaffImage] = useState(null); // State to store the uploaded image
+  const [staffData, setStaffData] = useState({
+    name: editData.name || "",
+    email: editData.email || "",
+    phoneno: editData.phoneno || "",
+    designation: editData.designation || "",
+    employee_id: editData.employee_id || "",
+    joining_date: editData.joining_date || "",
+    staff_image: null,
+  });
+
+  useEffect(() => {
+    if (editData) {
+      //   const editData = data?.find((staff) => staff.id === editData);
+      //   if (editData) {
+      setStaffData({
+        name: editData.name || "",
+        email: editData.email || "",
+        phoneno: editData.phoneno || "",
+        designation: editData.designation || "",
+        employee_id: editData.employee_id || "",
+        joining_date: editData.joining_date || "",
+        staff_image: null,
+      });
+      //   }
+    }
+  }, [editData]);
 
   const validateForm = (formData) => {
     const newErrors = {};
@@ -43,69 +72,48 @@ export default function ManageStaffs({ openForm, handleClose }) {
       newErrors.designation = "Designation is required";
     }
 
-    if (!formData.employee_id || formData.employee_id.trim() === "") {
-      newErrors.employee_id = "Employee ID is required";
-    }
-
-    if (!formData.joining_date) {
-      newErrors.joining_date = "Joining date is required";
-    }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleAddStaff = async (event) => {
+  const handleEditStaff = async (event) => {
     event.preventDefault();
-    const formData = new FormData(event.currentTarget);
-    const staffData = Object.fromEntries(formData.entries());
-    console.log(staffData);
-    // Append the staff image if available
-    if (staffImage) {
-      formData.append("staff_image", staffImage);
-    }
-    console.log(staffImage);
-    if (!validateForm(staffData)) {
-      setSnackbar({
-        open: true,
-        message: "Please check all required fields",
-        severity: "error",
-      });
-      return;
-    }
-
+  
     try {
-      const response = await addStaff(formData).unwrap();
+      const formDataToSend = new FormData();
+      formDataToSend.append("name", staffData.name);
+      formDataToSend.append("email", staffData.email);
+      formDataToSend.append("designation", staffData.designation);
+      formDataToSend.append("employee_id", staffData.employee_id);
+      formDataToSend.append("joining_date", staffData.joining_date);
+      formDataToSend.append("phoneno", staffData.phoneno);
+  
+      if (staffData.staff_image) {
+        formDataToSend.append("staff_image", staffData.staff_image);
+      }
+      
+      console.log(staffData.staff_image, "Image");
+  
+      const response = await editStaff({ employee_id: editData.employee_id, formData: formDataToSend }).unwrap(); 
       console.log(response, "Response");
+  
       refetch();
       setSnackbar({
         open: true,
-        message: "Staff added successfully!",
+        message: "Staff details updated successfully!",
         severity: "success",
       });
       handleClose();
     } catch (error) {
-      if (error?.data?.message?.includes("email")) {
-        setSnackbar({
-          open: true,
-          message: "Email already exists!",
-          severity: "error",
-        });
-      } else if (error?.data?.message?.includes("employee_id")) {
-        setSnackbar({
-          open: true,
-          message: "Employee ID already exists!",
-          severity: "error",
-        });
-      } else {
-        setSnackbar({
-          open: true,
-          message: error?.data?.message || "Error adding staff",
-          severity: "error",
-        });
-      }
+      console.error("Update Failed:", error);
+      setSnackbar({
+        open: true,
+        message: error?.data?.message || "Error updating staff details",
+        severity: "error",
+      });
     }
   };
+  
 
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -122,10 +130,11 @@ export default function ManageStaffs({ openForm, handleClose }) {
     }
   };
 
+  // Handle image file selection
   const handleImageChange = (event) => {
     const file = event.target.files[0];
     if (file) {
-      setStaffImage(file);
+      setStaffData({ ...staffData, staff_image: file }); // Store the selected file
     }
   };
 
@@ -135,10 +144,10 @@ export default function ManageStaffs({ openForm, handleClose }) {
       onClose={handleClose}
       PaperProps={{
         component: "form",
-        onSubmit: handleAddStaff,
+        onSubmit: handleEditStaff,
       }}
     >
-      <DialogTitle>Add New Staff</DialogTitle>
+      <DialogTitle>Edit Staff Details</DialogTitle>
       <DialogContent>
         <Grid container spacing={2} sx={{ mt: 1 }}>
           <Grid item xs={12} sm={6}>
@@ -147,6 +156,7 @@ export default function ManageStaffs({ openForm, handleClose }) {
               label="Name"
               variant="outlined"
               fullWidth
+              defaultValue={staffData.name}
               onChange={() => handleFieldChange("name")}
             />
           </Grid>
@@ -157,6 +167,7 @@ export default function ManageStaffs({ openForm, handleClose }) {
               type="email"
               variant="outlined"
               fullWidth
+              defaultValue={staffData.email}
               onChange={() => handleFieldChange("email")}
             />
           </Grid>
@@ -166,6 +177,7 @@ export default function ManageStaffs({ openForm, handleClose }) {
               label="Phone Number"
               variant="outlined"
               fullWidth
+              defaultValue={staffData.phoneno}
               onChange={() => handleFieldChange("phoneno")}
             />
           </Grid>
@@ -175,16 +187,19 @@ export default function ManageStaffs({ openForm, handleClose }) {
               label="Designation"
               variant="outlined"
               fullWidth
+              defaultValue={staffData.designation}
               onChange={() => handleFieldChange("designation")}
             />
           </Grid>
+          {/* Disable fields for employee_id and joining_date */}
           <Grid item xs={12} sm={6}>
             <TextField
               name="employee_id"
               label="Employee ID"
               variant="outlined"
               fullWidth
-              onChange={() => handleFieldChange("employee_id")}
+              value={staffData.employee_id}
+              disabled
             />
           </Grid>
           <Grid item xs={12} sm={6}>
@@ -195,7 +210,8 @@ export default function ManageStaffs({ openForm, handleClose }) {
               InputLabelProps={{ shrink: true }}
               variant="outlined"
               fullWidth
-              onChange={() => handleFieldChange("joining_date")}
+              value={staffData.joining_date}
+              disabled
             />
           </Grid>
           <Grid item xs={12}>
@@ -203,10 +219,14 @@ export default function ManageStaffs({ openForm, handleClose }) {
               Upload Staff Image
               <input type="file" hidden onChange={handleImageChange} />
             </Button>
-            {staffImage && (
-              <Box mt={2}>
-                <span>{staffImage.name}</span>
-              </Box>
+            {staffData.staff_image ? (
+              <Typography variant="body2" color="textSecondary">
+                {staffData.staff_image.name}
+              </Typography>
+            ) : (
+              <Typography variant="body2" color="textSecondary">
+                (Current Image: {editData.staff_image})
+              </Typography>
             )}
           </Grid>
         </Grid>
@@ -237,10 +257,10 @@ export default function ManageStaffs({ openForm, handleClose }) {
                 size={20}
                 sx={{ color: "white", marginRight: 1 }}
               />
-              Adding...
+              Updating...
             </Box>
           ) : (
-            "Add Staff"
+            "Update Staff"
           )}
         </Button>
       </DialogActions>

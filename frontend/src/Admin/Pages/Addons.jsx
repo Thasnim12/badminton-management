@@ -16,24 +16,88 @@ import {
   DialogContent,
   Card,
   CardContent,
+  IconButton,
   Typography,
+  DialogActions,
+  Pagination,
 } from "@mui/material";
 import Layout from "../Global/Layouts";
 import Addaddons from "../Components/Addaddons";
-import VolunteerActivismIcon from "@mui/icons-material/VolunteerActivism";
+import EditAddons from "../Components/Editaddons";
+import InventoryOutlinedIcon from "@mui/icons-material/InventoryOutlined";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
 import ErrorIcon from "@mui/icons-material/Error";
-import { useGetAlladdonsQuery } from "../../Slices/AdminApi"; // RTK Query hook
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+import {
+  useGetAlladdonsQuery,
+  useDeleteAddonMutation,
+} from "../../Slices/AdminApi"; // RTK Query hook
 import BreadcrumbNav from "../Global/Breadcrumb";
 
 const Addons = () => {
   const [openForm, setOpenForm] = useState(false);
   const [selectedImage, setSelectedImage] = useState("");
 
-  const { data, error, isLoading } = useGetAlladdonsQuery();
+  const [page, setPage] = useState(1); // Default to page 1
+  const [rowsPerPage] = useState(7); // 7 items per page
+
+  const { data, error, isLoading, refetch } = useGetAlladdonsQuery();
   const addons = data?.addons || [];
+  const totalAddons = addons ? addons.length : 0;
+  const rentedAddons = addons
+    ? addons.filter((addon) => addon.item_type.includes("For Rent")).length
+    : 0;
+  const soldOutAddons = addons
+    ? addons.filter((addon) => addon.item_type.includes("For Sale")).length
+    : 0;
+
+  const [deleteAddon] = useDeleteAddonMutation();
+  const [open, setOpen] = useState(false);
+
+  const handleOpenDialog = (addon) => {
+    setSelectedAddon(addon);
+    setOpen(true);
+  };
+
+  const handlePageChange = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  // Handle rows per page change
+  const handleCloseDelete = () => {
+    setOpen(false);
+    setSelectedAddon(null);
+  };
+
+  // Confirm delete action
+  const handleConfirmDelete = async () => {
+    if (selectedAddon) {
+      try {
+        await deleteAddon(selectedAddon._id).unwrap();
+        refetch();
+        console.log("Addon deleted successfully");
+      } catch (error) {
+        console.error("Failed to delete addon:", error);
+      }
+    }
+    handleCloseDelete();
+  };
+
   const [openImage, setOpenImage] = useState(false);
+  const [openEditForm, setOpenEditForm] = useState(false);
+  const [selectedAddon, setSelectedAddon] = useState(null);
+
+  const handleOpenEdit = (addon) => {
+    setSelectedAddon(addon);
+    setOpenEditForm(true);
+  };
+
+  const handleCloseEdit = () => {
+    setOpenEditForm(false);
+    setSelectedAddon(null);
+  };
 
   const handleClickOpen = () => setOpenForm(true);
   const handleClose = () => setOpenForm(false);
@@ -47,6 +111,11 @@ const Addons = () => {
     setOpenImage(false);
     setSelectedImage("");
   };
+
+  // Pagination logic
+  const startIndex = (page - 1) * rowsPerPage;
+  const endIndex = page * rowsPerPage;
+  const paginatedAddons = addons.slice(startIndex, endIndex);
 
   return (
     <>
@@ -84,42 +153,10 @@ const Addons = () => {
                         alignItems: "center",
                       }}
                     >
-                      <VolunteerActivismIcon sx={{ mr: 1 }} />
+                      <InventoryOutlinedIcon />
                       Total
                     </Typography>
-                    <Typography variant="h4"></Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-
-              <Grid item xs={3}>
-                <Card
-                  sx={{
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    textAlign: "center",
-                  }}
-                >
-                  <CardContent
-                    sx={{
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                    }}
-                  >
-                    <Typography
-                      variant="h6"
-                      sx={{
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                      }}
-                    >
-                      <CheckCircleIcon sx={{ mr: 1 }} />
-                      Rented
-                    </Typography>
-                    <Typography variant="h4"></Typography>
+                    <Typography variant="h4">{totalAddons}</Typography>
                   </CardContent>
                 </Card>
               </Grid>
@@ -149,14 +186,47 @@ const Addons = () => {
                       }}
                     >
                       <HourglassEmptyIcon sx={{ mr: 1 }} />
-                      Sold Out
+                      For Rent
                     </Typography>
-                    <Typography variant="h4"></Typography>
+                    <Typography variant="h4">{rentedAddons}</Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+
+              <Grid item xs={3}>
+                <Card
+                  sx={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    textAlign: "center",
+                  }}
+                >
+                  <CardContent
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                      }}
+                    >
+                      <CheckCircleIcon sx={{ mr: 1 }} />
+                      For Sales
+                    </Typography>
+                    <Typography variant="h4">{soldOutAddons}</Typography>
                   </CardContent>
                 </Card>
               </Grid>
             </Grid>
           </Box>
+
           <Grid item xs={12}>
             <Box
               sx={{
@@ -190,10 +260,11 @@ const Addons = () => {
                     <TableCell align="center">Quantity</TableCell>
                     <TableCell align="center">Price</TableCell>
                     <TableCell align="center">Item Type</TableCell>
+                    <TableCell align="center">Actions</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {addons.map((addon) => (
+                  {paginatedAddons.map((addon) => (
                     <TableRow key={addon._id}>
                       <TableCell align="center">
                         <img
@@ -219,12 +290,61 @@ const Addons = () => {
                       <TableCell align="center">
                         {addon.item_type.join(", ")}
                       </TableCell>
+                      <TableCell align="center">
+                        <IconButton
+                          color="primary"
+                          sx={{ marginRight: 1 }}
+                          onClick={() => handleOpenEdit(addon)}
+                        >
+                          <EditIcon />
+                        </IconButton>
+
+                        <IconButton
+                          key={addon._id}
+                          color="error"
+                          onClick={() => handleOpenDialog(addon)}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+
+                        {/* Delete Confirmation Dialog */}
+                        <Dialog open={open} onClose={handleCloseDelete}>
+                          <DialogTitle>
+                            Are you sure you want to delete this addon?
+                          </DialogTitle>
+                          <DialogActions>
+                            <Button
+                              onClick={handleCloseDelete}
+                              variant="outlined"
+                              color="primary"
+                            >
+                              Cancel
+                            </Button>
+                            <Button
+                              onClick={handleConfirmDelete}
+                              variant="outlined"
+                              color="error"
+                            >
+                              Delete
+                            </Button>
+                          </DialogActions>
+                        </Dialog>
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
               </Table>
             </TableContainer>
           )}
+
+          {/* Pagination Component */}
+          <Pagination
+            count={Math.ceil(addons.length / rowsPerPage)} // Adjust based on the total items
+            page={page}
+            onChange={handlePageChange}
+            color="primary"
+            sx={{ marginTop: 2, display: "flex", justifyContent: "center" }}
+          />
         </Container>
 
         <Dialog open={openImage} onClose={handleCloseImage} maxWidth="md">
@@ -240,6 +360,14 @@ const Addons = () => {
 
         {openForm && (
           <Addaddons openForm={openForm} handleClose={handleClose} />
+        )}
+
+        {openEditForm && selectedAddon && (
+          <EditAddons
+            openForm={openEditForm}
+            handleClose={handleCloseEdit}
+            editData={selectedAddon}
+          />
         )}
       </Layout>
     </>
