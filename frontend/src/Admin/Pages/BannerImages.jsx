@@ -263,7 +263,7 @@ const BannerImages = () => {
                       {banner.imageUrl.map((img, index) => (
                         <img
                           key={index}
-                          src={`http://localhost:5000/uploads/${img}`}
+                          src={`https://res.cloudinary.com/dj0rho12o/image/upload/${img}`}
                           alt={`Banner ${index + 1}`}
                           style={{
                             width: 80,
@@ -321,7 +321,7 @@ const BannerImages = () => {
                 <Grid item xs={6} sm={4} md={3} key={index}>
                   <Box sx={{ position: "relative" }}>
                     <img
-                      src={`http://localhost:5000/uploads/${image}`}
+                      src={`https://res.cloudinary.com/dj0rho12o/image/upload/${image}`}
                       alt={`Banner ${index + 1}`}
                       style={{
                         width: "100%",

@@ -410,7 +410,7 @@ const CourtBooking = () => {
                   <CardMedia
                     component="img"
                     height="150"
-                    image={`http://localhost:5000/uploads/${selectedImage}`}
+                    image={`https://res.cloudinary.com/dj0rho12o/image/upload/${selectedImage}`}
                     sx={{ marginTop: 2}}
                     alt="Court Image"
                   />
@@ -435,7 +435,7 @@ const CourtBooking = () => {
                   <Box
                     sx={{
                       overflowY: "auto",
-                      maxHeight: { xs: "auto", md: 300 }, // No height restriction on mobile
+                      maxHeight: { xs: "auto", md: 300 },
                       mt: 2,
                       flexGrow: 1,
                     }}
@@ -546,7 +546,7 @@ const CourtBooking = () => {
               }}
               alt="Court"
               src={
-                `http://localhost:5000/uploads/${selectedImage}` ||
+                `https://res.cloudinary.com/dj0rho12o/image/upload/${selectedImage}` ||
                 "https://via.placeholder.com/400x200?text=No+Image+Available"
               }
             />

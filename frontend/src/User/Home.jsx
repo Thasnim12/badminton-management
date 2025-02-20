@@ -201,7 +201,7 @@ const HomePage = () => {
               .map((item) => (
                 <div key={item._id}>
                   <img
-                    src={`http://localhost:5000/uploads/${item.image}`}
+                    src={`https://res.cloudinary.com/dj0rho12o/image/upload/${item.image}`}
                     alt={`Banner ${item.order}`}
                     style={{ width: '100%', height: '400px', objectFit: 'cover' }}
                   />

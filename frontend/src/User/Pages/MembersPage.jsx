@@ -62,11 +62,9 @@ const MembersPage = () => {
             <Grid container spacing={3} justifyContent="center">
               {members.map((member, index) => (
                 <Grid item key={index} xs={12} sm={6} md={3}>
-                  <Card
-                    sx={{ textAlign: "center", padding: 2, borderRadius: 3 }}
-                  >
+                  <Card sx={{ textAlign: "center", padding: 2, borderRadius: 3 }}>
                     <Avatar
-                      src={`http://localhost:5000/uploads/${member.staff_image}`}
+                      src={`http://res.cloudinary.com/dj0rho12o/image/upload/${member.staff_image}`}
                       alt={member.name}
                       sx={{
                         width: 100,

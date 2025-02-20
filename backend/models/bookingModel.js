@@ -7,6 +7,9 @@ const bookingSchema = mongoose.Schema(
       ref: "User", 
       required: true,
     },
+    name:{
+      type:String
+    },
     court: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Court",
