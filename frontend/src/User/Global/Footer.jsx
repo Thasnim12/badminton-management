@@ -30,6 +30,7 @@ const Footer = () => {
       setIsTermsOpen(true);
     } else {
       navigate(routes[index].path);
+      window.scrollTo({ top: 0, behavior: "smooth" }); // Scrolls to top smoothly
     }
   };
 

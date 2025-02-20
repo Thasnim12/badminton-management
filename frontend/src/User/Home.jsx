@@ -73,23 +73,42 @@ const AboutSection = styled(Box)({
   padding: "60px 0",
 });
 
-const InvolvedSection = styled(Box)({
-  padding: "60px 50px",
-});
-
 const ContactSection = styled(Box)({
   backgroundColor: "#0D47A1",
   padding: "60px 0",
   color: "white",
 });
 
-const PaperCard = styled(Paper)({
-  padding: "30px",
-  backgroundColor: "#fff",
-  boxShadow: "0px 4px 6px rgba(0,0,0,0.1)",
-  borderRadius: "8px",
+const InvolvedSection = styled(Box)(({ theme }) => ({
+  padding: "60px 50px",
+  [theme.breakpoints.down("md")]: {
+    padding: "40px 30px",
+  },
+  [theme.breakpoints.down("sm")]: {
+    padding: "30px 20px",
+  },
+  [theme.breakpoints.down("xs")]: {
+    padding: "20px 15px",
+  },
+}));
+
+const PaperCard = styled(Paper)(({ theme }) => ({
+  display: "flex",
+  flexDirection: "column",
+  justifyContent: "space-between",
+  alignItems: "center",
   textAlign: "center",
-});
+  padding: "30px",
+  minHeight: "200px", // Ensures all cards have equal height
+  height: "100%",
+  borderRadius: "12px",
+  boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)", // Custom fallback shadow
+
+  [theme.breakpoints.down("sm")]: {
+    padding: "20px",
+    minHeight: "280px",
+  },
+}));
 
 const validationSchema = yup.object().shape({
   name: yup.string().required("Name is required"),
@@ -343,57 +362,52 @@ const HomePage = () => {
 
       {/* Get Involved Section */}
       <InvolvedSection>
-        <Typography variant="h4" gutterBottom align="center">
-          How You Can Get Involved
-        </Typography>
-        <Grid container spacing={4}>
-          <Grid item xs={12} md={4}>
-            <PaperCard>
-              <Typography variant="h6">Participate</Typography>
-              <Typography variant="body1">
-                Join our tournaments and show your skills on the court while
-                helping those in need.
-              </Typography>
-              <Button
-                variant="outlined"
-                color="primary"
-                onClick={handleJoinClick}
-              >
-                {userInfo ? "Book Now" : "Join now"}
-              </Button>
-            </PaperCard>
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <PaperCard>
-              <Typography variant="h6">Sponsor</Typography>
-              <Typography variant="body1">
-                Become a sponsor of our tournaments and show your support for a
-                good cause.
-              </Typography>
-              <Link to="/donate">
-                <Button variant="outlined" color="primary">
-                  Sponsor
-                </Button>
-              </Link>
-            </PaperCard>
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <PaperCard>
-              <Typography variant="h6">Donate</Typography>
-              <Typography variant="body1">
-                Even if you can’t participate in the tournaments, your donations
-                will go a long way in making a difference in someone’s life.
-              </Typography>
-              <Link to="/donate">
-                <Button variant="outlined" color="primary">
-                  Donate Now
-                </Button>
-              </Link>
-            </PaperCard>
-          </Grid>
+      <Typography variant="h4" gutterBottom align="center">
+        How You Can Get Involved
+      </Typography>
+      <Grid container spacing={4} justifyContent="center">
+        <Grid item xs={12} sm={6} md={4}>
+          <PaperCard>
+            <Typography variant="h6">Participate</Typography>
+            <Typography variant="body1" sx={{ flexGrow: 1 }}>
+              Join our tournaments and show your skills on the court while
+              helping those in need.
+            </Typography>
+            <Button variant="outlined" color="primary" onClick={handleJoinClick}>
+              {userInfo ? "Book Now" : "Join now"}
+            </Button>
+          </PaperCard>
         </Grid>
-      </InvolvedSection>
-
+        <Grid item xs={12} sm={6} md={4}>
+          <PaperCard>
+            <Typography variant="h6">Sponsor</Typography>
+            <Typography variant="body1" sx={{ flexGrow: 1 }}>
+              Become a sponsor of our tournaments and show your support for a
+              good cause.
+            </Typography>
+            <Link to="/donate">
+              <Button variant="outlined" color="primary">
+                Sponsor
+              </Button>
+            </Link>
+          </PaperCard>
+        </Grid>
+        <Grid item xs={12} sm={6} md={4}>
+          <PaperCard>
+            <Typography variant="h6">Donate</Typography>
+            <Typography variant="body1" sx={{ flexGrow: 1 }}>
+              Even if you can’t participate in the tournaments, your donations
+              will go a long way in making a difference in someone’s life.
+            </Typography>
+            <Link to="/donate">
+              <Button variant="outlined" color="primary">
+                Donate Now
+              </Button>
+            </Link>
+          </PaperCard>
+        </Grid>
+      </Grid>
+    </InvolvedSection>
       {/* Scholarships for Education Section */}
 
       <Section>

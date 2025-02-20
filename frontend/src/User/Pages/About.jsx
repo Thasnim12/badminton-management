@@ -43,10 +43,6 @@ const HeroSection = styled(Box)(({ theme }) => ({
   },
 }));
 
-const InvolvedSection = styled(Box)({
-  padding: "60px 50px",
-});
-
 const Section = styled(Box)(({ theme }) => ({
   padding: "60px 20px",
   width: "100%",
@@ -54,13 +50,36 @@ const Section = styled(Box)(({ theme }) => ({
   backgroundColor: theme.palette.background.default,
 }));
 
-const PaperCard = styled(Paper)({
-  padding: "30px",
-  backgroundColor: "#fff",
-  boxShadow: "0px 4px 6px rgba(0,0,0,0.1)",
-  borderRadius: "8px",
+const InvolvedSection = styled(Box)(({ theme }) => ({
+  padding: "60px 50px",
+  [theme.breakpoints.down("md")]: {
+    padding: "40px 30px",
+  },
+  [theme.breakpoints.down("sm")]: {
+    padding: "30px 20px",
+  },
+  [theme.breakpoints.down("xs")]: {
+    padding: "20px 15px",
+  },
+}));
+
+const PaperCard = styled(Paper)(({ theme }) => ({
+  display: "flex",
+  flexDirection: "column",
+  justifyContent: "space-between",
+  alignItems: "center",
   textAlign: "center",
-});
+  padding: "30px",
+  minHeight: "200px", // Ensures all cards have equal height
+  height: "100%",
+  borderRadius: "12px",
+  boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)", // Custom fallback shadow
+
+  [theme.breakpoints.down("sm")]: {
+    padding: "20px",
+    minHeight: "280px",
+  },
+}));
 
 const AboutUs = () => {
   const navigate = useNavigate();
