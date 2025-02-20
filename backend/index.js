@@ -42,10 +42,12 @@ app.use((req, res, next) => {
     try {
         await connectDB();
         console.log("Database connected, starting server...");
+        app.listen(port, '0.0.0.0', () => {
+            console.log(`Server running on port ${port}`);
+        });
     } catch (error) {
         console.error("Failed to connect to database. Server not started.");
         process.exit(1);
     }
 })();
 
-module.exports = app;
