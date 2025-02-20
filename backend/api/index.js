@@ -3,9 +3,9 @@ const dotenv = require('dotenv')
 const cors = require('cors')
 const path = require('path')
 const cookieParser = require('cookie-parser');
-const connectDB = require('./connections/dbConnection')
-const userroute = require('./routes/userRoutes')
-const adminroute = require('./routes/adminRoutes')
+const connectDB = require('../connections/dbConnection')
+const userroute = require('../routes/userRoutes')
+const adminroute = require('../routes/adminRoutes')
 
 
 const app = express();
