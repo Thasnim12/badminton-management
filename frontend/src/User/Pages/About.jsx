@@ -17,12 +17,30 @@ const HeroSection = styled(Box)(({ theme }) => ({
   backgroundImage: 'url("/Carousal1.jpg")', // Image path from the public folder
   backgroundSize: "cover",
   backgroundPosition: "center",
+  backgroundRepeat: "no-repeat",
   padding: "80px 20px",
   color: "white",
   height: "400px",
   textAlign: "center",
   width: "100%",
   // marginTop: "5px",
+
+  [theme.breakpoints.down("md")]: {
+    padding: "60px 15px",
+    height: "350px",
+  },
+
+  [theme.breakpoints.down("sm")]: {
+    padding: "40px 10px",
+    height: "300px",
+    backgroundSize: "contain", // Ensures full image visibility on smaller screens
+  },
+
+  [theme.breakpoints.down("xs")]: {
+    height: "250px",
+    padding: "30px 5px",
+    backgroundSize: "contain", // Further adjustments for extra small screens
+  },
 }));
 
 const InvolvedSection = styled(Box)({
@@ -48,8 +66,8 @@ const AboutUs = () => {
   const navigate = useNavigate();
   const { userInfo } = useSelector((state) => state.userAuth);
   const handleJoinClick = (e) => {
-    e.preventDefault(); 
-    console.log("Button clicked, userInfo:", userInfo); 
+    e.preventDefault();
+    console.log("Button clicked, userInfo:", userInfo);
     if (userInfo) {
       navigate("/bookings");
     } else {
