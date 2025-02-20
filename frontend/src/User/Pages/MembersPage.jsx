@@ -62,7 +62,18 @@ const MembersPage = () => {
             <Grid container spacing={3} justifyContent="center">
               {members.map((member, index) => (
                 <Grid item key={index} xs={12} sm={6} md={3}>
-                  <Card sx={{ textAlign: "center", padding: 2, borderRadius: 3 }}>
+                  <Card
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      textAlign: "center",
+                      padding: 2,
+                      borderRadius: 3,
+                      height: "100%", // Ensure cards take full height within their container
+                    }}
+                  >
                     <Avatar
                       src={`http://res.cloudinary.com/dj0rho12o/image/upload/${member.staff_image}`}
                       alt={member.name}
@@ -75,7 +86,7 @@ const MembersPage = () => {
                         objectPosition: "center",
                       }}
                     />
-                    <CardContent>
+                    <CardContent sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
                       <Typography variant="h6">{member.name}</Typography>
                       <Typography variant="body2" color="textSecondary">
                         {member.designation}
