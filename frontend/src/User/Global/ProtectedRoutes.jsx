@@ -4,9 +4,13 @@ import { useSelector } from "react-redux";
 
 const ProtectedRoute = ({ element }) => {
     
-  const user = useSelector((state) => state.userInfo);
-
-  return user ? element : <Navigate to="/login" />;
+  const { userInfo } = useSelector((state) => state.userAuth);
+   
+   if (!userInfo) {
+     return <Navigate to="/login" />;
+   }
+ 
+   return element; 
 };
 
 export default ProtectedRoute;
