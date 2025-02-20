@@ -223,7 +223,7 @@ const Staffs = () => {
                     <TableCell align="center">
                       {staff.staff_image ? (
                         <img
-                          src={`http://localhost:5000/uploads/${staff.staff_image}`}
+                          src={`https://res.cloudinary.com/dj0rho12o/image/upload/${staff.staff_image}`}
                           alt={staff.name}
                           style={{
                             width: "50px",
@@ -234,7 +234,7 @@ const Staffs = () => {
                           }}
                           onClick={() =>
                             handleImageClick(
-                              `http://localhost:5000/uploads/${staff.staff_image}`
+                              `https://res.cloudinary.com/dj0rho12o/image/upload/${staff.staff_image}`
                             )
                           }
                         />
@@ -317,7 +317,7 @@ const Staffs = () => {
               {selectedStaff && selectedStaff.staff_image && (
                 <Box sx={{ position: "relative" }}>
                   <img
-                    src={`http://localhost:5000/uploads/${selectedStaff.staff_image}`}
+                    src={`https://res.cloudinary.com/dj0rho12o/image/upload/${selectedStaff.staff_image}`}
                     alt="Staff"
                     style={{
                       width: 100,

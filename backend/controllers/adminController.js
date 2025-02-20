@@ -21,6 +21,7 @@ const {
 const Donations = require("../models/donationModel");
 const Banner = require("../models/bannerModel");
 const Enquiry = require("../models/enquiryModel");
+const Booking = require('../models/bookingModel')
 
 const adminLogin = async (req, res) => {
   try {
@@ -145,9 +146,8 @@ const manageUsers = async (req, res) => {
     );
 
     return res.status(200).json({
-      message: `User ${
-        updatedUser.is_blocked ? "blocked" : "unblocked"
-      } successfully`,
+      message: `User ${updatedUser.is_blocked ? "blocked" : "unblocked"
+        } successfully`,
       user: updatedUser,
     });
   } catch (error) {
@@ -161,6 +161,8 @@ const addCourt = async (req, res) => {
     if (err) {
       return res.status(400).json({ message: err.message });
     }
+
+    console.log(req.file,'file')
 
     try {
       const { court_name } = req.body;
@@ -926,7 +928,7 @@ const deleteBanner = async (req, res) => {
     }
 
     await Banner.deleteOne({ _id: bannerId });
-    return res.status(200).json({message:"banner deleted successfully!"})
+    return res.status(200).json({ message: "banner deleted successfully!" })
   } catch (error) {
     console.log(error.message);
   }
@@ -949,9 +951,8 @@ const editStatus = async (req, res) => {
     );
 
     return res.status(200).json({
-      message: `Court has been successfully ${
-        updatedCourt.isActive ? "activated" : "deactivated"
-      }`,
+      message: `Court has been successfully ${updatedCourt.isActive ? "activated" : "deactivated"
+        }`,
       court: updatedCourt,
     });
   } catch (error) {
@@ -1024,6 +1025,38 @@ const editAddons = async (req, res) => {
     }
   });
 };
+
+const offlineBooking = async (req, res) => {
+  try {
+    const { slotId, name, bookingDate, courtId } = req.body;
+
+    if (!slotId || !name || !bookingDate || !courtId) {
+      return res.status(400).json({ message: "missing required fields!" })
+    }
+
+
+    const user = await User.findOne({ name: name })
+
+    if (user) {
+      const booking = new Booking({
+        user: user._id,
+        slot: slotId,
+        court: courtId,
+        bookingDate,
+        paymentMode: paymentMode,
+        price
+      })
+      return res.status(200).json(booking)
+    }
+
+    
+  }
+  catch (error) {
+    console.log(error.message)
+  }
+}
+
+
 
 module.exports = {
   adminLogin,

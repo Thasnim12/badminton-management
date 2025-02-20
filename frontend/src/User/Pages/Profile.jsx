@@ -246,7 +246,7 @@ const Profile = () => {
                 <Grid container spacing={3} alignItems="center">
                   <Grid item xs={12} display="flex" justifyContent="center">
                     <Avatar
-                      src={`http://localhost:5000/uploads/${user.profileImage}` || "/default-profile.jpg"}
+                      src={`https://res.cloudinary.com/dj0rho12o/image/upload/${user.profileImage}` || "/default-profile.jpg"}
                       sx={{ width: 100, height: 100 }}
                     />
                   </Grid>

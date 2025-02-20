@@ -276,7 +276,7 @@ const Addons = () => {
                     <TableRow key={addon._id}>
                       <TableCell align="center">
                         <img
-                          src={`http://localhost:5000/uploads/${addon.item_image}`}
+                          src={`https://res.cloudinary.com/dj0rho12o/image/upload/${addon.item_image}`}
                           alt={addon.item_name}
                           style={{
                             width: "50px",
@@ -287,7 +287,7 @@ const Addons = () => {
                           }}
                           onClick={() =>
                             handleImageClick(
-                              `http://localhost:5000/uploads/${addon.item_image}`
+                              `https://res.cloudinary.com/dj0rho12o/image/upload/${addon.item_image}`
                             )
                           }
                         />

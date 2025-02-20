@@ -29,6 +29,7 @@ const {
   editStatus,
   deleteAddons,
   editAddons,
+  createBooking
 
 } = require("../controllers/adminController");
 
@@ -36,7 +37,8 @@ const { getBookings } = require('../controllers/bookingController')
 const { downloadDonations } = require('../controllers/donationController')
 const { downloadBookings } = require('../controllers/bookingController')
 
-const { bannerUpload, courtUpload,staffUpload } = require('../helper/multer')
+const { bannerUpload, courtUpload,staffUpload } = require('../helper/multer');
+const authenticateUser = require('../middlewares/userMiddleware');
 
 
 

@@ -343,12 +343,12 @@ const SlotManagement = () => {
                     <TableCell align="center">
                       {court.court_image ? (
                         <img
-                          src={`http://localhost:5000/uploads/${court.court_image}`}
+                          src={`https://res.cloudinary.com/dj0rho12o/image/upload/${court.court_image}`}
                           alt={court.court_name}
                           style={{ width: 80, height: 50, objectFit: "cover" }}
                           onClick={() =>
                             handleImageClick(
-                              `http://localhost:5000/uploads/${court.court_image}`
+                              `https://res.cloudinary.com/dj0rho12o/image/upload/${court.court_image}`
                             )
                           }
                         />

@@ -29,7 +29,7 @@ const AddOnsDrawer = ({ open, onClose, addons, selectedAddOns, onToggle, loading
             {addon.map((addOn) => (
               <ListItem key={addOn._id}>
                 <ListItemAvatar>
-                  <Avatar src={`http://localhost:5000/uploads/${addOn.item_image}`} alt={addOn.item_name} />
+                  <Avatar src={`https://res.cloudinary.com/dj0rho12o/image/upload/${addOn.item_image}`} alt={addOn.item_name} />
                 </ListItemAvatar>
                 <ListItemText
                   primary={addOn.item_name}
