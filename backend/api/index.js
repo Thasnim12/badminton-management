@@ -15,7 +15,9 @@ dotenv.config();
 const port = process.env.PORT || 5000;
 
 const corsOptions = {
-    origin: 'http://localhost:3000',  
+    origin: process.env.NODE_ENV === 'production' 
+    ? process.env.FRONTEND_URL
+    : 'http://localhost:3000',  
     methods: ['GET', 'POST', 'PUT', 'DELETE','PATCH'],  
     credentials: true
 };
@@ -40,11 +42,10 @@ app.use((req, res, next) => {
     try {
         await connectDB();
         console.log("Database connected, starting server...");
-        app.listen(port, () => {
-            console.log(`Server is listening on port ${port}`);
-        });
     } catch (error) {
         console.error("Failed to connect to database. Server not started.");
         process.exit(1);
     }
 })();
+
+module.exports = app;
