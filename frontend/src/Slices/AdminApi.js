@@ -3,7 +3,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 export const adminApi = createApi({
   reducerPath: "adminApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: "https://badminton-management-p7w1.vercel.app/api/admin",
+    baseUrl: "https://badminton-management-2.onrender.com/api/admin",
     credentials: "include",
   }),
   endpoints: (builder) => ({
