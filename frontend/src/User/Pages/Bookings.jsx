@@ -13,17 +13,35 @@ const ContentWrapper = styled(Box)({
   padding: "0 20px",
 });
 
-const HeroSection = styled(Box)({
+const HeroSection = styled(Box)(({ theme }) => ({
   backgroundImage: 'url("/Carousal2.jpg")',
   backgroundSize: "cover",
   backgroundPosition: "center",
-  padding: "80px 20px",
-  height: "400px",
+  backgroundRepeat: "no-repeat",
   color: "white",
   textAlign: "center",
   width: "100%",
-  // marginTop: "5px",
-});
+  padding: "80px 20px",
+  height: "400px",
+
+  [theme.breakpoints.down("md")]: {
+    padding: "60px 15px",
+    height: "350px",
+  },
+
+  [theme.breakpoints.down("sm")]: {
+    padding: "40px 10px",
+    height: "300px",
+    backgroundSize: "contain", // Ensures full image visibility on smaller screens
+  },
+
+  [theme.breakpoints.down("xs")]: {
+    height: "250px",
+    padding: "30px 5px",
+    backgroundSize: "contain", // Further adjustments for extra small screens
+  },
+}));
+
 
 const Section = styled(Box)(({ theme }) => ({
   padding: "60px 20px",
@@ -64,7 +82,7 @@ const Bookings = () => {
             <Grid item xs={12} md={5} display="flex" justifyContent="center">
               <Box
                 component="img"
-                src="https://t3.ftcdn.net/jpg/00/38/59/44/360_F_38594431_y0XRoIsqk7hj1VLv8WzNFuccl2OTmpia.jpg"
+                src="https://media.istockphoto.com/id/1192023529/photo/asian-badminton-player-is-hitting-in-court.jpg?s=612x612&w=0&k=20&c=32rDisHRvLTxaetdlFHZ0lsaWqu3yYO21w-hv4Z29xs="
                 alt="Online Badminton Court Booking in Chennai"
                 sx={{
                   width: "80%", // Adjust the width to make it smaller

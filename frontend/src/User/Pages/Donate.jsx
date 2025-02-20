@@ -198,11 +198,29 @@ const Donate = () => {
     backgroundImage: 'url("/Carousal3.jpg")',
     backgroundSize: "cover",
     backgroundPosition: "center",
+    backgroundRepeat: "no-repeat",
     padding: "80px 20px",
     color: "white",
     height: "400px",
     textAlign: "center",
     width: "100%",
+
+    [theme.breakpoints.down("md")]: {
+      padding: "60px 15px",
+      height: "350px",
+    },
+
+    [theme.breakpoints.down("sm")]: {
+      padding: "40px 10px",
+      height: "300px",
+      backgroundSize: "contain", // Ensures full image visibility on smaller screens
+    },
+
+    [theme.breakpoints.down("xs")]: {
+      height: "250px",
+      padding: "30px 5px",
+      backgroundSize: "contain", // Further adjustments for extra small screens
+    },
   }));
 
   const Section = styled(Box)(({ theme }) => ({

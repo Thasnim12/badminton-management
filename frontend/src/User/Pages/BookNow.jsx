@@ -322,138 +322,166 @@ const CourtBooking = () => {
           spacing={2}
           sx={{ maxWidth: "80%", marginLeft: "10px", padding: "5px" }}
         >
-          <Grid item xs={12} md={4} sx={{ height: "100vh", marginTop: "3px" }}>
-            <DetailsCard />
-          </Grid>
-
-          <Grid
-            item
-            xs={12}
-            md={8}
-            container
-            spacing={2}
-            sx={{ marginTop: "3px", height: "90vh" }}
-          >
-            <Grid item xs={12}>
-              <Card
-                sx={{
-                  padding: 3,
-                  display: "flex",
-                  flexDirection: "column",
-                  height: "100%",
-                  position: "relative", // For positioning the button
-                }}
-              >
-                <Typography variant="h6" fontWeight="bold">
-                  Select Court & Date
-                </Typography>
-
-                {/* Add button on the top right */}
-                <Button
-                  variant="outlined"
-                  startIcon={<AddCircleOutlineIcon />}
-                  sx={{
-                    position: "absolute",
-                    top: 10,
-                    right: 10,
-                    padding: "6px 16px", // Adjust padding for better fit
-                  }}
-                  onClick={handleOpenDrawer}
-                >
-                  Add Ons
-                </Button>
-
-                {/* Date Picker */}
-                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                  <DatePicker value={selectedDate} onChange={setSelectedDate} />
-                </LocalizationProvider>
-
-                {/* Court Select */}
-                <Select
-                  fullWidth
-                  value={
-                    courts.find((court) => court._id === selectedCourt) || ""
-                  }
-                  onChange={handleCourtChange}
-                  sx={{ mt: 2 }}
-                >
-                  {courtsLoading ? (
-                    <MenuItem disabled>Loading courts...</MenuItem>
-                  ) : (
-                    courts?.map((court) => (
-                      <MenuItem
-                        key={court._id}
-                        value={court}
-                        disabled={!court.isActive}
-                      >
-                        {court.court_name} {!court.isActive ? "(Inactive)" : ""}
-                      </MenuItem>
-                    ))
-                  )}
-                </Select>
-
-                <CardMedia
-                  component="img"
-                  height="150"
-                  image={`http://localhost:5000/uploads/${selectedImage}`}
-                  sx={{ marginTop: 2 }}
-                  alt="Court Image"
-                />
-              </Card>
+          <Grid container spacing={2}>
+            {/* Left Panel - DetailsCard */}
+            <Grid
+              item
+              xs={12}
+              md={4}
+              sx={{ height: { xs: "auto", md: "100vh" }, marginTop: "3px" }}
+            >
+              <DetailsCard />
             </Grid>
 
-            <Grid item xs={12}>
-              <Card
-                sx={{
-                  padding: 3,
-                  display: "flex",
-                  flexDirection: "column",
-                  height: "100%",
-                }}
-              >
-                <Typography variant="h6" fontWeight="bold">
-                  Select Time Slot
-                </Typography>
-                <Box
-                  sx={{ overflowY: "auto", maxHeight: 300, mt: 2, flexGrow: 1 }}
+            {/* Right Panel - Booking Section */}
+            <Grid
+              item
+              xs={12}
+              md={8}
+              container
+              spacing={2}
+              sx={{ marginTop: "3px", height: { xs: "auto", md: "90vh" } }}
+            >
+              {/* Select Court & Date */}
+              <Grid item xs={12}>
+                <Card
+                  sx={{
+                    padding: 3,
+                    display: "flex",
+                    flexDirection: "column",
+                    height: "100%",
+                    position: "relative",
+                  }}
                 >
-                  <Grid container spacing={1}>
-                    {isLoading ? (
-                      <Typography>Loading slots...</Typography>
-                    ) : slots?.length === 0 ? (
-                      <Typography>No slots available.</Typography>
+                  <Typography variant="h6" fontWeight="bold">
+                    Select Court & Date
+                  </Typography>
+
+                  {/* Add button (Responsive Positioning) */}
+                  <Button
+                    variant="outlined"
+                    startIcon={<AddCircleOutlineIcon />}
+                    sx={{
+                      position: { xs: "relative", md: "absolute" },
+                      top: { md: 10 },
+                      right: { md: 10 },
+                      marginTop: { xs: 2, md: 0 }, // Adds margin on mobile to avoid overlap
+                      width: { xs: "100%", sm: "auto" }, // Full width button on small screens
+                    }}
+                    onClick={handleOpenDrawer}
+                  >
+                    Add Ons
+                  </Button>
+
+                  {/* Date Picker */}
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DatePicker
+                      value={selectedDate}
+                      onChange={setSelectedDate}
+                    />
+                  </LocalizationProvider>
+
+                  {/* Court Select */}
+                  <Select
+                    fullWidth
+                    value={
+                      courts.find((court) => court._id === selectedCourt) || ""
+                    }
+                    onChange={handleCourtChange}
+                    sx={{ mt: 2 }}
+                  >
+                    {courtsLoading ? (
+                      <MenuItem disabled>Loading courts...</MenuItem>
                     ) : (
-                      slots.map((slot) => (
-                        <Grid item xs={4} key={slot._id}>
-                          <Button
-                            fullWidth
-                            variant={
-                              selectedSlots.some((s) => s._id === slot._id)
-                                ? "contained"
-                                : "outlined"
-                            }
-                            color={slot.isBooked ? "error" : "primary"}
-                            disabled={slot.isBooked}
-                            onClick={() => handleSlotToggle(slot)}
-                          >
-                            {moment(slot.startTime).format("hh:mm A")} -{" "}
-                            {moment(slot.endTime).format("hh:mm A")}
-                          </Button>
-                        </Grid>
+                      courts?.map((court) => (
+                        <MenuItem
+                          key={court._id}
+                          value={court}
+                          disabled={!court.isActive}
+                        >
+                          {court.court_name}{" "}
+                          {!court.isActive ? "(Inactive)" : ""}
+                        </MenuItem>
                       ))
                     )}
-                  </Grid>
-                </Box>
+                  </Select>
 
-                <Button
-                  variant="outlined"
-                  color="success"
-                  sx={{ marginTop: 2, alignSelf: "flex-end" }}
-                  onClick={handleClickOpen}
+                  {/* Court Image */}
+                  <CardMedia
+                    component="img"
+                    height="150"
+                    image={`http://localhost:5000/uploads/${selectedImage}`}
+                    sx={{ marginTop: 2}}
+                    alt="Court Image"
+                  />
+                </Card>
+              </Grid>
+
+              {/* Select Time Slot */}
+              <Grid item xs={12}>
+                <Card
+                  sx={{
+                    padding: 3,
+                    display: "flex",
+                    flexDirection: "column",
+                    height: "100%",
+                  }}
                 >
-                  Proceed to Booking
-                </Button>
-              </Card>
+                  <Typography variant="h6" fontWeight="bold">
+                    Select Time Slot
+                  </Typography>
+
+                  {/* Time Slots Grid */}
+                  <Box
+                    sx={{
+                      overflowY: "auto",
+                      maxHeight: { xs: "auto", md: 300 }, // No height restriction on mobile
+                      mt: 2,
+                      flexGrow: 1,
+                    }}
+                  >
+                    <Grid container spacing={1}>
+                      {isLoading ? (
+                        <Typography>Loading slots...</Typography>
+                      ) : slots?.length === 0 ? (
+                        <Typography>No slots available.</Typography>
+                      ) : (
+                        slots.map((slot) => (
+                          <Grid item xs={6} sm={4} md={4} key={slot._id}>
+                            <Button
+                              fullWidth
+                              variant={
+                                selectedSlots.some((s) => s._id === slot._id)
+                                  ? "contained"
+                                  : "outlined"
+                              }
+                              color={slot.isBooked ? "error" : "primary"}
+                              disabled={slot.isBooked}
+                              onClick={() => handleSlotToggle(slot)}
+                            >
+                              {moment(slot.startTime).format("hh:mm A")} -{" "}
+                              {moment(slot.endTime).format("hh:mm A")}
+                            </Button>
+                          </Grid>
+                        ))
+                      )}
+                    </Grid>
+                  </Box>
+
+                  {/* Proceed Button (Responsive Sizing) */}
+                  <Button
+                    variant="outlined"
+                    color="success"
+                    sx={{
+                      marginTop: 2,
+                      alignSelf: { xs: "stretch", sm: "flex-end" }, // Full width on mobile, right-aligned on larger screens
+                    }}
+                    onClick={handleClickOpen}
+                  >
+                    Proceed to Booking
+                  </Button>
+                </Card>
+              </Grid>
             </Grid>
           </Grid>
         </Grid>
