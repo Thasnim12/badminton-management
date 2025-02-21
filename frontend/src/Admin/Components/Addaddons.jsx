@@ -118,19 +118,6 @@ const Addaddons = ({ openForm, handleClose, setSuccessMessage, setErrorMessage }
               />
             </Grid>
 
-            {/* Quantity */}
-            <Grid item xs={12}>
-              <TextField
-                name="quantity"
-                label="Quantity"
-                type="number"
-                variant="outlined"
-                fullWidth
-                value={formData.quantity}
-                onChange={handleChange}
-              />
-            </Grid>
-
             {/* Price */}
             <Grid item xs={12}>
               <TextField
@@ -143,6 +130,18 @@ const Addaddons = ({ openForm, handleClose, setSuccessMessage, setErrorMessage }
               />
             </Grid>
 
+            <Grid item xs={12}>
+              <TextField
+                name="quantity"
+                label="Quantity"
+                type="number"
+                variant="outlined"
+                fullWidth
+                value={formData.quantity}
+                onChange={handleChange}
+              />
+            </Grid>
+
             {formData.quantity && formData.price && (
               <Grid item xs={12}>
                 <Typography variant="subtitle1" fontWeight="bold">
@@ -151,7 +150,6 @@ const Addaddons = ({ openForm, handleClose, setSuccessMessage, setErrorMessage }
               </Grid>
             )}
 
-            {/* Checkboxes for Item Type */}
             <Grid item xs={12}>
               <FormGroup row>
                 <FormControlLabel
