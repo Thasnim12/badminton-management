@@ -284,7 +284,7 @@ const googleLogin = async (req, res) => {
     const client = new OAuth2Client(
       CLIENT_ID,
       CLIENT_SECRET,
-      "http://localhost:3000"
+      process.env.FRONTEND_URL
     );
 
     const { tokens } = await client.getToken(code);
