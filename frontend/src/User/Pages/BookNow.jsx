@@ -265,14 +265,23 @@ const CourtBooking = () => {
     }
   };
 
-  const handleAddOnToggle = (addOn) => {
+  const handleAddOnToggle = (addOn, quantity) => {
     setSelectedAddOns((prev) => {
       const exists = prev.find((item) => item._id === addOn._id);
-      return exists
-        ? prev.filter((item) => item._id !== addOn._id)
-        : [...prev, addOn];
+  
+      if (quantity === 0) {
+        return prev.filter((item) => item._id !== addOn._id);
+      }
+  
+      if (exists) {
+        return prev.map((item) =>
+          item._id === addOn._id ? { ...item, quantity } : item
+        );
+      }
+      return [...prev, { ...addOn, quantity }];
     });
   };
+  
 
   const handleSlotToggle = (slot) => {
     setSelectedSlots((prevSlots) => {

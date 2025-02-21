@@ -3,7 +3,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 const baseUrl =
   process.env.NODE_ENV === "development"
     ? "http://localhost:5000/api/admin"
-    : "https://badminton-management-2.onrender.com/api/users";
+    : "https://badminton-management-2.onrender.com/api/admin";
 
 
 export const adminApi = createApi({

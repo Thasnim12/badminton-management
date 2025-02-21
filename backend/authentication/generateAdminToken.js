@@ -5,6 +5,12 @@ dotenv.config();
 
 
 const generateAdminToken = (res,adminId) => {
+
+    if (!process.env.JWT_ADMIN_SECRET) {
+        console.error('JWT_ADMIN_SECRET is missing!');
+        return;
+    }
+    
     const token = jwt.sign({ id: adminId }, process.env.JWT_ADMIN_SECRET, {
         expiresIn: '30d',
     });
