@@ -13,51 +13,34 @@ const ContentWrapper = styled(Box)({
   padding: "0 20px",
 });
 
- const HeroSection = styled(Box)(({ theme }) => ({
-    backgroundImage: 'url("/Carousal2.jpg")',
-    backgroundPosition: "center",
-    backgroundRepeat: "no-repeat",
-    width: "100vw",
-    height: "400px", // Fixed height for desktop
-    backgroundSize: "cover", // Ensures full coverage without stretching
-    color: "white",
-    textAlign: "center",
-    padding: "80px 20px",
-  
-    [theme.breakpoints.down("xl")]: {
-      height: "380px", // Slightly reduced for large screens
-    },
-  
-    [theme.breakpoints.between(900, 1157)]: {
-      height: "100%", // Allow dynamic height
-      minHeight: "350px",
-      backgroundSize: "100% 100%", // Stretches the image to fill height & width
-    },
-  
-    [theme.breakpoints.between("sm", "md")]: {
-      height: "auto", // Dynamic height for mid-range screens
-      minHeight: "350px",
-      backgroundSize: "100% 100%", // Ensures full fit
-    },
-  
-    [theme.breakpoints.down("sm")]: {
-      height: "300px",
-      backgroundSize: "100% 100%", // Ensures the image always fits without cut-off
-      padding: "40px 10px",
-    },
-  
-    [theme.breakpoints.down("xs")]: {
-      height: "250px",
-      backgroundSize: "100% 100%",
-      padding: "30px 5px",
-    },
-  
-    [theme.breakpoints.down(600)]: {
-      height: "220px", // Extra small screens
-      backgroundSize: "100% 100%",
-    },
-  }));
+const HeroSection = styled(Box)(({ theme }) => ({
+  width: "100vw",
+  height: "400px", // Fixed height
+  backgroundImage: 'url("/Carousal2.jpg")',
+  backgroundPosition: "center",
+  backgroundRepeat: "no-repeat",
+  backgroundSize: "100% 100%", // Stretches image to fit width & height
+  textAlign: "center",
+  padding: "80px 20px",
 
+  [theme.breakpoints.down("lg")]: {
+    height: "380px", // Slightly reduce for large screens
+  },
+
+  [theme.breakpoints.down("md")]: {
+    height: "350px", // Adjust for medium screens
+  },
+
+  [theme.breakpoints.down("sm")]: {
+    height: "300px", // Reduce height on small screens
+    padding: "40px 10px",
+  },
+
+  [theme.breakpoints.down("xs")]: {
+    height: "250px", // Reduce height for extra small screens
+    padding: "30px 5px",
+  },
+}));
 
 const Section = styled(Box)(({ theme }) => ({
   padding: "60px 20px",
@@ -84,13 +67,16 @@ const Bookings = () => {
       setOpenSnackbar(true);
     } else {
       navigate("/book-now");
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+      }, 100); // 
     }
   };
   return (
     <>
       <Header />
 
-      <HeroSection></HeroSection>
+      <HeroSection />
 
       <Section>
         <Container maxWidth="lg">

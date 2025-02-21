@@ -22,7 +22,7 @@ const Footer = () => {
     const currentIndex = routes.findIndex(
       (route) => route.path === location.pathname
     );
-    setValue(currentIndex !== -1 ? currentIndex : 0);
+    setValue(currentIndex !== -1 ? currentIndex : false);
   }, [location.pathname]);
 
   const handleTabClick = (index) => {
@@ -30,14 +30,17 @@ const Footer = () => {
       setIsTermsOpen(true);
     } else {
       navigate(routes[index].path);
-      window.scrollTo({ top: 0, behavior: "smooth" }); // Scrolls to top smoothly
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
 
   return (
     <>
-      <Box component="footer" sx={{ backgroundColor: "#333", color: "#fff" }}>
-        <Container sx={{ backgroundColor: "#333", color: "#fff" }}>
+      <Box
+        component="footer"
+        sx={{ backgroundColor: "#333", color: "#fff", py: 2 }}
+      >
+        <Container>
           <Grid container spacing={2} justifyContent="center">
             <Grid item xs={12} sm={4}>
               <Typography variant="h6" gutterBottom>
@@ -45,7 +48,7 @@ const Footer = () => {
               </Typography>
               <Tabs
                 value={value}
-                onChange={(event, newValue) => handleTabClick(newValue)}
+                onChange={(event, newValue) => setValue(newValue)}
                 textColor="inherit"
                 indicatorColor="primary"
                 orientation="vertical"
@@ -63,6 +66,7 @@ const Footer = () => {
                   <Tab
                     key={index}
                     label={route.label}
+                    onClick={() => handleTabClick(index)}
                     sx={{
                       transition: "0.3s",
                       ":hover": { color: "primary.light" },
@@ -77,16 +81,12 @@ const Footer = () => {
               <Typography variant="h6" gutterBottom>
                 Contact Us
               </Typography>
-              <Typography variant="body1" paragraph>
-                AVK Raja Yadav Trust
-              </Typography>
-              <Typography variant="body1" paragraph>
+              <Typography variant="body1">AVK Raja Yadav Trust</Typography>
+              <Typography variant="body1">
                 Register Number: R/V/B4/39/2024
               </Typography>
-              <Typography variant="body1" paragraph>
-                Phone: +91 6385224527
-              </Typography>
-              <Typography variant="body1" paragraph>
+              <Typography variant="body1">Phone: +91 6385224527</Typography>
+              <Typography variant="body1">
                 Email: avkrajayadavtrust@gmail.com
               </Typography>
               <Box

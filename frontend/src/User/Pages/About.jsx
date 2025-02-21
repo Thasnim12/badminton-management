@@ -14,49 +14,34 @@ const ContentWrapper = styled(Box)({
 });
 
 const HeroSection = styled(Box)(({ theme }) => ({
+  width: "100vw",
+  height: "400px", // Fixed height
   backgroundImage: 'url("/Carousal1.jpg")',
   backgroundPosition: "center",
   backgroundRepeat: "no-repeat",
-  width: "100vw",
-  height: "400px", // Fixed height for desktop
-  backgroundSize: "cover", // Ensures full coverage without stretching
-  color: "white",
+  backgroundSize: "100% 100%", // Stretches image to fit width & height
   textAlign: "center",
   padding: "80px 20px",
 
-  [theme.breakpoints.down("xl")]: {
-    height: "380px", // Slightly reduced for large screens
+  [theme.breakpoints.down("lg")]: {
+    height: "380px", // Slightly reduce for large screens
   },
 
-  [theme.breakpoints.between(900, 1157)]: {
-    height: "100%", // Allow dynamic height
-    minHeight: "350px",
-    backgroundSize: "100% 100%", // Stretches the image to fill height & width
-  },
-
-  [theme.breakpoints.between("sm", "md")]: {
-    height: "auto", // Dynamic height for mid-range screens
-    minHeight: "350px",
-    backgroundSize: "100% 100%", // Ensures full fit
+  [theme.breakpoints.down("md")]: {
+    height: "350px", // Adjust for medium screens
   },
 
   [theme.breakpoints.down("sm")]: {
-    height: "300px",
-    backgroundSize: "100% 100%", // Ensures the image always fits without cut-off
+    height: "300px", // Reduce height on small screens
     padding: "40px 10px",
   },
 
   [theme.breakpoints.down("xs")]: {
-    height: "250px",
-    backgroundSize: "100% 100%",
+    height: "250px", // Reduce height for extra small screens
     padding: "30px 5px",
   },
-
-  [theme.breakpoints.down(600)]: {
-    height: "220px", // Extra small screens
-    backgroundSize: "100% 100%",
-  },
 }));
+
 
 const Section = styled(Box)(({ theme }) => ({
   padding: "60px 20px",
@@ -107,11 +92,13 @@ const AboutUs = () => {
     } else {
       navigate("/register");
     }
+    window.scrollTo(0, 0);
   };
   return (
     <>
       <Header />
       <HeroSection />
+      
       <Section>
         <Container maxWidth="lg">
           <Grid container spacing={4} alignItems="center">
@@ -238,7 +225,7 @@ const AboutUs = () => {
                 Become a sponsor of our tournaments and show your support for a
                 good cause.
               </Typography>
-              <Link to="/donate">
+              <Link to="/donate"  onClick={() => window.scrollTo(0, 0)}>
                 <Button variant="outlined" color="primary">
                   Sponsor
                 </Button>
@@ -252,7 +239,7 @@ const AboutUs = () => {
                 Even if you can’t participate in the tournaments, your donations
                 will go a long way in making a difference in someone’s life.
               </Typography>
-              <Link to="/donate">
+              <Link to="/donate"  onClick={() => window.scrollTo(0, 0)}>
                 <Button variant="outlined" color="primary">
                   Donate Now
                 </Button>
@@ -276,7 +263,7 @@ const AboutUs = () => {
             generation of leaders, innovators, and change-makers.
           </Typography>
 
-          <Link to="/donate">
+          <Link to="/donate"  onClick={() => window.scrollTo(0, 0)}>
             <Button variant="outlined" color="primary">
               Make a change
             </Button>
