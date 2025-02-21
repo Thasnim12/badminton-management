@@ -109,7 +109,7 @@ export const adminApi = createApi({
       }),
     }),
     UpdateStaff: builder.mutation({
-      query: ({employee_id, formData}) => ({
+      query: ({ employee_id, formData }) => ({
         url: `/staffs/${employee_id}`,
         method: "PUT",
         body: formData,
@@ -206,6 +206,12 @@ export const adminApi = createApi({
         body: data,
       }),
     }),
+    getSlots: builder.query({
+      query: ({ courtId, date }) => ({
+        url: `/get-slots/?courtId=${courtId}&date=${date}`,
+        method: "GET",
+      }),
+    }),
   }),
 });
 
@@ -241,6 +247,7 @@ export const {
   useEditCourtStatusMutation,
   useDeleteCourtMutation,
   useEditAddonMutation,
+  useGetSlotsQuery
 } = adminApi;
 
 export default adminApi;

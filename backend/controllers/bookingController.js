@@ -7,6 +7,7 @@ const crypto = require("crypto");
 const Addons = require('../models/addonModel')
 const Rental = require('../models/addonrentalModel')
 const { fetchPaymentDetails } = require('../helper/paymentHelper')
+const User = require('../models/userModel')
 
 
 const razorpay = new Razorpay({
@@ -248,13 +249,125 @@ const downloadBookings = async (req, res) => {
     }
   };
 
+  const createOfflineBooking = async (req, res) => {
+    try {
+        const { courtId, slotId, amount, addons, paymentMethod, userId, phoneno, userName } = req.body;
+
+        if (!req.admin) {
+            return res.status(403).json({ message: "Access denied. Only admins can create offline bookings." });
+        }
+
+        if (!phoneno) {
+            return res.status(400).json({ message: "Phone number is required for offline booking." });
+        }
+
+        if (!Array.isArray(slotId)) {
+            return res.status(400).json({ message: "slotId must be an array" });
+        }
+
+        let user = await User.findOne({ phoneno });
+
+        if (!user) {
+            user = new User({
+                name: userName || "Guest User",
+                phoneno,
+                role: "user",
+                isGuest: true,
+            });
+
+            await user.save();
+        }
+
+        const userIdToUse = user._id; 
+
+        const slotPromises = slotId.map(id => Slot.findById(id));
+        const slots = await Promise.all(slotPromises);
+
+        const invalidSlot = slots.find(slot => !slot || slot.isBooked);
+        if (invalidSlot) {
+            return res.status(400).json({ message: "Some slots are already booked or unavailable" });
+        }
+
+        let totalAmount = amount;
+        const validatedAddons = [];
+
+        if (addons && addons.length > 0) {
+            for (const addon of addons) {
+                const addonItem = await Addons.findById(addon.addonId);
+                if (!addonItem) {
+                    return res.status(400).json({ message: `Addon ${addon.addonId} not found` });
+                }
+
+                if (!addonItem.item_type.includes(addon.type === 'rent' ? 'For Rent' : 'For Sale')) {
+                    return res.status(400).json({
+                        message: `Addon ${addonItem.item_name} is not available for ${addon.type}`
+                    });
+                }
+
+                if (addon.type === 'buy' && addonItem.quantity < addon.quantity) {
+                    return res.status(400).json({
+                        message: `Insufficient quantity for ${addonItem.item_name}`
+                    });
+                }
+
+                const addonCost = addonItem.price * addon.quantity;
+                totalAmount += addonCost;
+
+                validatedAddons.push({
+                    addon: addon.addonId,
+                    quantity: addon.quantity,
+                    type: addon.type,
+                    price: addonItem.price,
+                    totalPrice: addonCost
+                });
+            }
+        }
+
+        let paymentDetails = {
+            amount: totalAmount,
+            method: paymentMethod || "Cash",
+            status: "Completed",
+        };
+
+        const newBooking = new Booking({
+            user: userIdToUse,
+            court: courtId,
+            slot: slotId,
+            bookingDate: new Date(),
+            addons: validatedAddons,
+            bookingType: "Offline",
+            payment: paymentDetails,
+        });
+
+        await newBooking.save();
+
+        res.status(200).json({
+            success: true,
+            message: "Offline booking created successfully.",
+            bookingId: newBooking._id,
+            user: {
+                id: user._id,
+                name: user.name,
+                phoneno: user.phoneno,
+                isGuest: user.isGuest,
+            },
+        });
+
+    } catch (error) {
+        console.error("Error in createOfflineBooking:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+
 
 
 module.exports = {
     createBooking,
     verifyBookingPayment,
     getBookings,
-    downloadBookings
+    downloadBookings,
+    createOfflineBooking
 }
 
 

@@ -29,7 +29,7 @@ const {
   editStatus,
   deleteAddons,
   editAddons,
-  createBooking
+  getAllslots
 
 } = require("../controllers/adminController");
 
@@ -46,12 +46,12 @@ const adminroute = express.Router();
 
 //Get route
 adminroute.get('/users',authenticateAdmin,getAllusers)
-adminroute.get('/courts',authenticateAdmin,getAllcourts)
+adminroute.get('/courts',getAllcourts)
 adminroute.get('/slots/:courtId',authenticateAdmin,getAllSlots)
 adminroute.get('/addons',authenticateAdmin,getAlladdons)
-adminroute.get("/admin-profile", getAdminDetails);
+adminroute.get("/admin-profile", authenticateAdmin,getAdminDetails);
 adminroute.get("/users", authenticateAdmin, getAllusers);
-adminroute.get("/courts", authenticateAdmin, getAllcourts);
+adminroute.get("/courts", getAllcourts);
 adminroute.get("/slots/:courtId", authenticateAdmin, getAllSlots);
 adminroute.get("/get-staffs", authenticateAdmin, getAllStaffs);
 adminroute.get("/get-donations", authenticateAdmin, getAllDonations);
@@ -61,6 +61,7 @@ adminroute.get("/get-message", authenticateAdmin, getMessages);
 adminroute.get('/bookings', authenticateAdmin, getBookings)
 adminroute.get('/download-donation', authenticateAdmin, downloadDonations)
 adminroute.get('/download-booking', authenticateAdmin, downloadBookings)
+adminroute.get('/get-slots',getAllslots)
 
 
 //Post route

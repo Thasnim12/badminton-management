@@ -7,8 +7,8 @@ const bookingSchema = mongoose.Schema(
       ref: "User", 
       required: true,
     },
-    name:{
-      type:String
+    name: {
+      type: String
     },
     court: {
       type: mongoose.Schema.Types.ObjectId,
@@ -42,23 +42,31 @@ const bookingSchema = mongoose.Schema(
           type: Number,
           required: true
       }
-  }],
+    }],
     bookingDate: {
       type: Date,
       required: true,
     },
+    bookingType: {  
+      type: String,
+      enum: ["Online", "Offline"],  
+      required: true,
+      default: "Online",
+    },
     payment: {
-      razorpayOrderId: { type: String, required: true }, 
-      razorpayPaymentId: { type: String }, 
-      razorpaySignature: { type: String }, 
-      amount: { type: Number, required: true }, 
-      method:{
-        type:String
+      razorpayOrderId: { type: String },  
+      razorpayPaymentId: { type: String },
+      razorpaySignature: { type: String },
+      amount: { type: Number, required: true },
+      method: { 
+        type: String, 
+        enum: ["Razorpay", "Cash", "UPI", "Card", "Bank Transfer"], 
+        required: true 
       },
       currency: { type: String, default: "INR" },
       status: {
         type: String,
-        enum: ["Pending", "Completed", "Failed"],
+        enum: ["Pending", "Completed", "Failed", "Unpaid"], 
         default: "Pending",
       },
     },

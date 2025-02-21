@@ -19,6 +19,7 @@ import {
 } from "@mui/material";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import { useManageCsvMutation, useGetBookingsQuery } from "../../Slices/AdminApi";
+import Offlinemodal from "./Offlinemodal";
 
 const RECORDS_PER_PAGE = 7; // Limit to 7 records per page
 
@@ -27,10 +28,11 @@ export default function ScrollableTabsButtonVisible() {
   const [page, setPage] = useState(1);
   const [manageCsv] = useManageCsvMutation();
   const { data, isLoading: isLoadingBookings } = useGetBookingsQuery();
+  const [open,setOpen] = useState(false)
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
-    setPage(1); // Reset to first page when switching tabs
+    setPage(1);
   };
 
   const handleDownload = async () => {
@@ -128,7 +130,12 @@ export default function ScrollableTabsButtonVisible() {
     </TableContainer>
   );
 
+  const handleOffline = () => {
+   setOpen(true)
+  }
+
   return (
+    <>
     <Box sx={{ flexGrow: 1, bgcolor: "background.paper", margin: 5 }}>
       {isLoadingBookings ? (
         <Typography variant="h6" align="center">
@@ -138,6 +145,12 @@ export default function ScrollableTabsButtonVisible() {
         <>
           <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
             <Button
+              onClick={handleOffline}
+              sx={{ ml: 1, backgroundColor: "#2c387e", color: "white" }}
+            >
+              Offline Bookings
+            </Button>
+            <Button
               startIcon={<FileDownloadIcon />}
               onClick={handleDownload}
               sx={{ ml: 1, backgroundColor: "#2c387e", color: "white" }}
@@ -146,7 +159,6 @@ export default function ScrollableTabsButtonVisible() {
             </Button>
           </Box>
 
-          {/* Booking Summary Cards */}
           <Grid container spacing={3} sx={{ marginBottom: 3 }}>
             {[
               { label: "Total Bookings", value: summaryBookings.length },
@@ -200,5 +212,14 @@ export default function ScrollableTabsButtonVisible() {
         </>
       )}
     </Box>
+
+    {open && (
+          <Offlinemodal
+          setOpen={setOpen}
+          open={open}
+          />
+        )}
+
+    </>
   );
 }
