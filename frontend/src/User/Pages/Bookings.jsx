@@ -14,34 +14,33 @@ const ContentWrapper = styled(Box)({
 });
 
 const HeroSection = styled(Box)(({ theme }) => ({
+  width: "100vw",
+  height: "400px", // Fixed height
   backgroundImage: 'url("/Carousal2.jpg")',
-  backgroundSize: "cover",
   backgroundPosition: "center",
   backgroundRepeat: "no-repeat",
-  color: "white",
+  backgroundSize: "100% 100%", // Stretches image to fit width & height
   textAlign: "center",
-  width: "100%",
   padding: "80px 20px",
-  height: "400px",
+
+  [theme.breakpoints.down("lg")]: {
+    height: "380px", // Slightly reduce for large screens
+  },
 
   [theme.breakpoints.down("md")]: {
-    padding: "60px 15px",
-    height: "350px",
+    height: "350px", // Adjust for medium screens
   },
 
   [theme.breakpoints.down("sm")]: {
+    height: "300px", // Reduce height on small screens
     padding: "40px 10px",
-    height: "300px",
-    backgroundSize: "contain", // Ensures full image visibility on smaller screens
   },
 
   [theme.breakpoints.down("xs")]: {
-    height: "250px",
+    height: "250px", // Reduce height for extra small screens
     padding: "30px 5px",
-    backgroundSize: "contain", // Further adjustments for extra small screens
   },
 }));
-
 
 const Section = styled(Box)(({ theme }) => ({
   padding: "60px 20px",
@@ -68,13 +67,16 @@ const Bookings = () => {
       setOpenSnackbar(true);
     } else {
       navigate("/book-now");
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+      }, 100); // 
     }
   };
   return (
     <>
       <Header />
 
-      <HeroSection></HeroSection>
+      <HeroSection />
 
       <Section>
         <Container maxWidth="lg">

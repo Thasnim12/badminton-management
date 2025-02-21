@@ -26,28 +26,53 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
 import { useSendMessageMutation, useViewBannerQuery } from "../Slices/UserApi";
 
-const CarouselWrapper = styled(Box)({
-  width: "100%",
-  height: "400px", // Set the height same as HeroSection
-  textAlign: "center",
+const CarouselWrapper = styled(Box)(({ theme }) => ({
+  width: "100vw",
+  height: "400px", // Allow height to adjust dynamically
+  minHeight: "300px", // Ensures it doesn't get too small
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
   overflow: "hidden",
-  // marginTop: "5px", // Adjust if needed
-});
+
+  [theme.breakpoints.down("md")]: {
+    minHeight: "250px",
+  },
+
+  [theme.breakpoints.down("sm")]: {
+    minHeight: "200px",
+  },
+}));
 
 const StyledCarousel = styled(Carousel)({
+  width: "100%",
+  "& .carousel .slide": {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+  },
   "& .carousel .slide img": {
+    width: "100%",
     height: "400px",
-    objectFit: "cover",
+    maxHeight: "400px",
   },
 });
 
-const QuoteSection = styled(Box)({
-  padding: "40px 0",
+const QuoteSection = styled(Box)(({ theme }) => ({
+  padding: "40px 0", // Default padding for larger screens
   textAlign: "center",
   display: "flex",
   justifyContent: "center",
   alignItems: "center",
-});
+
+  [theme.breakpoints.down("md")]: {
+    padding: "0 0", // Reduce padding for medium screens
+  },
+
+  [theme.breakpoints.down("sm")]: {
+    padding: "0 0", // Minimal padding for smaller screens
+  },
+}));
 
 const QuoteImage = styled(Box)({
   width: "100px",
@@ -121,7 +146,7 @@ const validationSchema = yup.object().shape({
 
 const HomePage = () => {
   const { userInfo } = useSelector((state) => state.userAuth);
-  const [banner, setBanner] = useState('')
+  const [banner, setBanner] = useState("");
   const handleJoinClick = (e) => {
     e.preventDefault();
     console.log("Button clicked, userInfo:", userInfo);
@@ -130,6 +155,8 @@ const HomePage = () => {
     } else {
       navigate("/register");
     }
+
+    window.scrollTo(0, 0);
   };
   const {
     register,
@@ -144,23 +171,6 @@ const HomePage = () => {
 
   const isLoggedIn = localStorage.getItem("userInfo");
 
-  const handleBookingClick = () => {
-    if (!isLoggedIn) {
-      toast.error("You need to log in to book a court!", {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "colored",
-      });
-    } else {
-      navigate("/book-now");
-    }
-  };
-
   const [sendMessage, { isLoading }] = useSendMessageMutation();
   const [alert, setAlert] = useState({
     open: false,
@@ -170,12 +180,26 @@ const HomePage = () => {
 
   const { data } = useViewBannerQuery();
 
+  const handleBookingClick = () => {
+    if (!isLoggedIn) {
+      setAlert({
+        open: true,
+        message: "You need to log in to book a court!",
+        severity: "error",
+      });
+    } else {
+      navigate("/book-now");
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+      }, 100);
+    }
+  };
+
   useEffect(() => {
     if (data && data.length > 0) {
       setBanner(data);
     }
   }, [data]);
-
 
   const onSubmit = async (data) => {
     try {
@@ -195,7 +219,12 @@ const HomePage = () => {
     }
   };
 
-  console.log(banner, 'banner')
+  const handleNavigation = (path) => {
+    window.scrollTo(0, 0); // Scroll to the top of the page
+    navigate(path);
+  };
+
+  console.log(banner, "banner");
   return (
     <>
       <Header />
@@ -212,22 +241,20 @@ const HomePage = () => {
               .flatMap((item) =>
                 item.imageUrl.map((image, index) => ({
                   image,
-                  order: item.order[index], 
+                  order: item.order[index],
                   _id: `${item._id}-${index}`,
                 }))
               )
-              .sort((a, b) => a.order - b.order) 
+              .sort((a, b) => a.order - b.order)
               .map((item) => (
                 <div key={item._id}>
                   <img
                     src={`https://res.cloudinary.com/dj0rho12o/image/upload/${item.image}`}
                     alt={`Banner ${item.order}`}
-                    style={{ width: '100%', height: '400px', objectFit: 'cover' }}
                   />
                 </div>
               ))}
         </StyledCarousel>
-
       </CarouselWrapper>
 
       <QuoteSection>
@@ -238,14 +265,32 @@ const HomePage = () => {
             style={{ width: "100%", height: "100%", objectFit: "cover" }}
           />
         </QuoteImage>
-        <Box>
+        <Box textAlign="center" mt={4}>
           <Typography variant="h6" paragraph>
             "We make a living by what we get, but we make a life by what we
             give."
           </Typography>
-          <Typography variant="body2" color="textSecondary">
+          <Typography variant="body2" color="textSecondary" mb={2}>
             - Winston Churchill
           </Typography>
+
+          {/* Buttons Section */}
+          <Box display="flex" justifyContent="center" gap={2} mt={2}>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => handleNavigation("/bookings")}
+            >
+              Book a Court
+            </Button>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => handleNavigation("/donate")}
+            >
+              Donate
+            </Button>
+          </Box>
         </Box>
       </QuoteSection>
 
@@ -270,7 +315,7 @@ const HomePage = () => {
             </Grid>
 
             <Grid item xs={12} md={7}>
-              <Typography variant="h4" gutterBottom>
+              <Typography variant="h4"gutterBottom>
                 Welcome to AVK Raja Yadav Trust!
               </Typography>
               <Typography variant="body1" paragraph>
@@ -280,6 +325,15 @@ const HomePage = () => {
                 goes beyond the game — it is about making a positive impact in
                 the lives of others.
               </Typography>
+              <Box display="flex" justifyContent="center" mt={2}>
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  onClick={() => handleNavigation("/about")}
+                >
+                  About Us
+                </Button>
+              </Box>
             </Grid>
           </Grid>
         </Container>
@@ -299,6 +353,15 @@ const HomePage = () => {
                 communities. Your support helps us provide scholarships,
                 educational resources, and more.
               </Typography>
+              <Box display="flex" justifyContent="center" mt={2}>
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  onClick={() => handleNavigation("/donate")}
+                >
+                  Donate now
+                </Button>
+              </Box>
             </Grid>
             <Grid item xs={12} md={5} display="flex" justifyContent="center">
               <Box
@@ -348,13 +411,15 @@ const HomePage = () => {
                 the perfect way to enjoy a game at a reasonable price. Just book
                 your desired session, show up, and play!
               </Typography>
-              <Button
-                variant="outlined"
-                color="primary"
-                onClick={handleBookingClick}
-              >
-                Book Now
-              </Button>
+              <Box display="flex" justifyContent="center" mt={2}>
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  onClick={handleBookingClick}
+                >
+                  Book a court
+                </Button>
+              </Box>
             </Grid>
           </Grid>
         </Container>
@@ -362,52 +427,56 @@ const HomePage = () => {
 
       {/* Get Involved Section */}
       <InvolvedSection>
-      <Typography variant="h4" gutterBottom align="center">
-        How You Can Get Involved
-      </Typography>
-      <Grid container spacing={4} justifyContent="center">
-        <Grid item xs={12} sm={6} md={4}>
-          <PaperCard>
-            <Typography variant="h6">Participate</Typography>
-            <Typography variant="body1" sx={{ flexGrow: 1 }}>
-              Join our tournaments and show your skills on the court while
-              helping those in need.
-            </Typography>
-            <Button variant="outlined" color="primary" onClick={handleJoinClick}>
-              {userInfo ? "Book Now" : "Join now"}
-            </Button>
-          </PaperCard>
-        </Grid>
-        <Grid item xs={12} sm={6} md={4}>
-          <PaperCard>
-            <Typography variant="h6">Sponsor</Typography>
-            <Typography variant="body1" sx={{ flexGrow: 1 }}>
-              Become a sponsor of our tournaments and show your support for a
-              good cause.
-            </Typography>
-            <Link to="/donate">
-              <Button variant="outlined" color="primary">
-                Sponsor
+        <Typography variant="h4" gutterBottom align="center">
+          How You Can Get Involved
+        </Typography>
+        <Grid container spacing={4} justifyContent="center">
+          <Grid item xs={12} sm={6} md={4}>
+            <PaperCard>
+              <Typography variant="h6">Participate</Typography>
+              <Typography variant="body1" sx={{ flexGrow: 1 }}>
+                Join our tournaments and show your skills on the court while
+                helping those in need.
+              </Typography>
+              <Button
+                variant="outlined"
+                color="primary"
+                onClick={handleJoinClick}
+              >
+                {userInfo ? "Book Now" : "Join now"}
               </Button>
-            </Link>
-          </PaperCard>
+            </PaperCard>
+          </Grid>
+          <Grid item xs={12} sm={6} md={4}>
+            <PaperCard>
+              <Typography variant="h6">Sponsor</Typography>
+              <Typography variant="body1" sx={{ flexGrow: 1 }}>
+                Become a sponsor of our tournaments and show your support for a
+                good cause.
+              </Typography>
+              <Link to="/donate" onClick={() => window.scrollTo(0, 0)}>
+                <Button variant="outlined" color="primary">
+                  Sponsor
+                </Button>
+              </Link>
+            </PaperCard>
+          </Grid>
+          <Grid item xs={12} sm={6} md={4}>
+            <PaperCard>
+              <Typography variant="h6">Donate</Typography>
+              <Typography variant="body1" sx={{ flexGrow: 1 }}>
+                Even if you can’t participate in the tournaments, your donations
+                will go a long way in making a difference in someone’s life.
+              </Typography>
+              <Link to="/donate" onClick={() => window.scrollTo(0, 0)}>
+                <Button variant="outlined" color="primary">
+                  Donate Now
+                </Button>
+              </Link>
+            </PaperCard>
+          </Grid>
         </Grid>
-        <Grid item xs={12} sm={6} md={4}>
-          <PaperCard>
-            <Typography variant="h6">Donate</Typography>
-            <Typography variant="body1" sx={{ flexGrow: 1 }}>
-              Even if you can’t participate in the tournaments, your donations
-              will go a long way in making a difference in someone’s life.
-            </Typography>
-            <Link to="/donate">
-              <Button variant="outlined" color="primary">
-                Donate Now
-              </Button>
-            </Link>
-          </PaperCard>
-        </Grid>
-      </Grid>
-    </InvolvedSection>
+      </InvolvedSection>
       {/* Scholarships for Education Section */}
 
       <Section>
@@ -425,11 +494,13 @@ const HomePage = () => {
                 possible. Together, we can build a brighter future for the next
                 generation of leaders, innovators, and change-makers.
               </Typography>
-              <Link to="/donate">
-                <Button variant="outlined" color="primary">
-                  Make a change
-                </Button>
-              </Link>
+              <Box display="flex" justifyContent="center" mt={2}>
+                <Link to="/donate" onClick={() => window.scrollTo(0, 0)}>
+                  <Button variant="outlined" color="primary">
+                    Make a change
+                  </Button>
+                </Link>
+              </Box>
             </Grid>
             <Grid item xs={12} md={5} display="flex" justifyContent="center">
               <Box
