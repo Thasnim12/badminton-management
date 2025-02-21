@@ -21,6 +21,8 @@ const authenticateUser = async (req, res, next) => {
         }
 
         req.user = user;
+        req.role = "user";
+
         next();
     } catch (error) {
         console.error('Auth error:', error);

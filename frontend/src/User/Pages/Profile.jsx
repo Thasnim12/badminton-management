@@ -308,8 +308,8 @@ const Profile = () => {
                       }
                       variant="outlined"
                       disabled={!isEditing}
-                      autoFocus={focusedField === "name"} // Autofocus only if "name" field is being edited
-                      onFocus={() => setFocusedField("name")} // Track when the name field is focused
+                      autoFocus={focusedField === "name"} 
+                      onFocus={() => setFocusedField("name")} 
                     />
                   </Grid>
 
@@ -338,8 +338,8 @@ const Profile = () => {
                       }
                       variant="outlined"
                       disabled={!isEditing}
-                      autoFocus={focusedField === "mobile"} // Autofocus only if "mobile" field is being edited
-                      onFocus={() => setFocusedField("mobile")} // Track when the mobile field is focused
+                      autoFocus={focusedField === "mobile"} 
+                      onFocus={() => setFocusedField("mobile")} 
                     />
                   </Grid>
 

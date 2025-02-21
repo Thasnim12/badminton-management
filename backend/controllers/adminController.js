@@ -162,7 +162,7 @@ const addCourt = async (req, res) => {
       return res.status(400).json({ message: err.message });
     }
 
-    console.log(req.file,'file')
+    console.log(req.file, 'file')
 
     try {
       const { court_name } = req.body;
@@ -1026,36 +1026,45 @@ const editAddons = async (req, res) => {
   });
 };
 
-const offlineBooking = async (req, res) => {
+const getAllslots = async (req, res) => {
   try {
-    const { slotId, name, bookingDate, courtId } = req.body;
+    const { courtId, date } = req.query;
 
-    if (!slotId || !name || !bookingDate || !courtId) {
-      return res.status(400).json({ message: "missing required fields!" })
+    if (!courtId || !date) {
+      return res
+        .status(400)
+        .json({ message: "Court ID and Date are required" });
     }
 
+    const startOfDay = moment(date).set({
+      hour: 6,
+      minute: 0,
+      second: 0,
+      millisecond: 0,
+    });
+    const endOfDay = moment(date).set({
+      hour: 22,
+      minute: 0,
+      second: 0,
+      millisecond: 0,
+    });
 
-    const user = await User.findOne({ name: name })
+    const slots = await Slot.find({
+      court: courtId,
+      startTime: { $gte: startOfDay.toDate(), $lte: endOfDay.toDate() },
+    }).sort({ startTime: 1 });
 
-    if (user) {
-      const booking = new Booking({
-        user: user._id,
-        slot: slotId,
-        court: courtId,
-        bookingDate,
-        paymentMode: paymentMode,
-        price
-      })
-      return res.status(200).json(booking)
-    }
+    console.log(slots, "slots");
 
-    
-  }
-  catch (error) {
-    console.log(error.message)
+    const uniqueSlots = Array.from(
+      new Map(slots.map((slot) => [slot.startTime.toString(), slot])).values()
+    );
+
+    res.json(uniqueSlots);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching slots", error });
   }
 }
-
 
 
 module.exports = {
@@ -1087,4 +1096,5 @@ module.exports = {
   editStatus,
   deleteAddons,
   editAddons,
+  getAllslots
 };

@@ -284,6 +284,7 @@ const CourtBooking = () => {
       return [...prev, { ...addOn, quantity }];
     });
   };
+  
 
   const handleSlotToggle = (slot) => {
     setSelectedSlots((prevSlots) => {

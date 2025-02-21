@@ -60,7 +60,7 @@ const SlotManagement = () => {
   });
   const [addcourt] = useAddcourtsMutation();
   const { data: courts, refetch } = useGetAllcourtsQuery();
-  const [editCourtStatus] = useEditCourtStatusMutation(); // Mutation for updating the court status
+  const [editCourtStatus] = useEditCourtStatusMutation();
   const [deleteCourt] = useDeleteCourtMutation();
 
   const handleDeleteCourt = async (court) => {
