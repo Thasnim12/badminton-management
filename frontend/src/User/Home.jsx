@@ -26,21 +26,72 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
 import { useSendMessageMutation, useViewBannerQuery } from "../Slices/UserApi";
 
-const CarouselWrapper = styled(Box)({
+const CarouselWrapper = styled(Box)(({ theme }) => ({
   width: "100%",
-  height: "400px", // Set the height same as HeroSection
+  height: "400px", // Default height
   textAlign: "center",
   overflow: "hidden",
-  // marginTop: "5px", // Adjust if needed
-});
 
-const StyledCarousel = styled(Carousel)({
+  [theme.breakpoints.down("xl")]: {
+    height: "380px", // Slightly reduced for large screens
+  },
+
+  [theme.breakpoints.between(900, 1157)]: {
+    height: "100%", // Allow dynamic height
+    minHeight: "350px",
+  },
+
+  [theme.breakpoints.between("sm", "md")]: {
+    height: "auto", // Dynamic height for mid-range screens
+    minHeight: "350px",
+  },
+
+  [theme.breakpoints.down("sm")]: {
+    height: "300px",
+  },
+
+  [theme.breakpoints.down("xs")]: {
+    height: "250px",
+  },
+
+  [theme.breakpoints.down(600)]: {
+    height: "220px", // Extra small screens
+  },
+}));
+
+const StyledCarousel = styled(Carousel)(({ theme }) => ({
   "& .carousel .slide img": {
+    width: "100%",
     height: "400px",
     objectFit: "cover",
-  },
-});
 
+    [theme.breakpoints.down("xl")]: {
+      height: "380px",
+    },
+
+    [theme.breakpoints.between(900, 1157)]: {
+      height: "100%",
+      minHeight: "350px",
+    },
+
+    [theme.breakpoints.between("sm", "md")]: {
+      height: "auto",
+      minHeight: "350px",
+    },
+
+    [theme.breakpoints.down("sm")]: {
+      height: "300px",
+    },
+
+    [theme.breakpoints.down("xs")]: {
+      height: "250px",
+    },
+
+    [theme.breakpoints.down(600)]: {
+      height: "220px",
+    },
+  },
+}));
 const QuoteSection = styled(Box)({
   padding: "40px 0",
   textAlign: "center",
@@ -121,7 +172,7 @@ const validationSchema = yup.object().shape({
 
 const HomePage = () => {
   const { userInfo } = useSelector((state) => state.userAuth);
-  const [banner, setBanner] = useState('')
+  const [banner, setBanner] = useState("");
   const handleJoinClick = (e) => {
     e.preventDefault();
     console.log("Button clicked, userInfo:", userInfo);
@@ -176,7 +227,6 @@ const HomePage = () => {
     }
   }, [data]);
 
-
   const onSubmit = async (data) => {
     try {
       await sendMessage(data).unwrap();
@@ -195,7 +245,7 @@ const HomePage = () => {
     }
   };
 
-  console.log(banner, 'banner')
+  console.log(banner, "banner");
   return (
     <>
       <Header />
@@ -212,22 +262,25 @@ const HomePage = () => {
               .flatMap((item) =>
                 item.imageUrl.map((image, index) => ({
                   image,
-                  order: item.order[index], 
+                  order: item.order[index],
                   _id: `${item._id}-${index}`,
                 }))
               )
-              .sort((a, b) => a.order - b.order) 
+              .sort((a, b) => a.order - b.order)
               .map((item) => (
                 <div key={item._id}>
                   <img
                     src={`https://res.cloudinary.com/dj0rho12o/image/upload/${item.image}`}
                     alt={`Banner ${item.order}`}
-                    style={{ width: '100%', height: '400px', objectFit: 'cover' }}
+                    style={{
+                      width: "100%",
+                      height: "400px",
+                      objectFit: "cover",
+                    }}
                   />
                 </div>
               ))}
         </StyledCarousel>
-
       </CarouselWrapper>
 
       <QuoteSection>
@@ -362,52 +415,56 @@ const HomePage = () => {
 
       {/* Get Involved Section */}
       <InvolvedSection>
-      <Typography variant="h4" gutterBottom align="center">
-        How You Can Get Involved
-      </Typography>
-      <Grid container spacing={4} justifyContent="center">
-        <Grid item xs={12} sm={6} md={4}>
-          <PaperCard>
-            <Typography variant="h6">Participate</Typography>
-            <Typography variant="body1" sx={{ flexGrow: 1 }}>
-              Join our tournaments and show your skills on the court while
-              helping those in need.
-            </Typography>
-            <Button variant="outlined" color="primary" onClick={handleJoinClick}>
-              {userInfo ? "Book Now" : "Join now"}
-            </Button>
-          </PaperCard>
-        </Grid>
-        <Grid item xs={12} sm={6} md={4}>
-          <PaperCard>
-            <Typography variant="h6">Sponsor</Typography>
-            <Typography variant="body1" sx={{ flexGrow: 1 }}>
-              Become a sponsor of our tournaments and show your support for a
-              good cause.
-            </Typography>
-            <Link to="/donate">
-              <Button variant="outlined" color="primary">
-                Sponsor
+        <Typography variant="h4" gutterBottom align="center">
+          How You Can Get Involved
+        </Typography>
+        <Grid container spacing={4} justifyContent="center">
+          <Grid item xs={12} sm={6} md={4}>
+            <PaperCard>
+              <Typography variant="h6">Participate</Typography>
+              <Typography variant="body1" sx={{ flexGrow: 1 }}>
+                Join our tournaments and show your skills on the court while
+                helping those in need.
+              </Typography>
+              <Button
+                variant="outlined"
+                color="primary"
+                onClick={handleJoinClick}
+              >
+                {userInfo ? "Book Now" : "Join now"}
               </Button>
-            </Link>
-          </PaperCard>
+            </PaperCard>
+          </Grid>
+          <Grid item xs={12} sm={6} md={4}>
+            <PaperCard>
+              <Typography variant="h6">Sponsor</Typography>
+              <Typography variant="body1" sx={{ flexGrow: 1 }}>
+                Become a sponsor of our tournaments and show your support for a
+                good cause.
+              </Typography>
+              <Link to="/donate">
+                <Button variant="outlined" color="primary">
+                  Sponsor
+                </Button>
+              </Link>
+            </PaperCard>
+          </Grid>
+          <Grid item xs={12} sm={6} md={4}>
+            <PaperCard>
+              <Typography variant="h6">Donate</Typography>
+              <Typography variant="body1" sx={{ flexGrow: 1 }}>
+                Even if you can’t participate in the tournaments, your donations
+                will go a long way in making a difference in someone’s life.
+              </Typography>
+              <Link to="/donate">
+                <Button variant="outlined" color="primary">
+                  Donate Now
+                </Button>
+              </Link>
+            </PaperCard>
+          </Grid>
         </Grid>
-        <Grid item xs={12} sm={6} md={4}>
-          <PaperCard>
-            <Typography variant="h6">Donate</Typography>
-            <Typography variant="body1" sx={{ flexGrow: 1 }}>
-              Even if you can’t participate in the tournaments, your donations
-              will go a long way in making a difference in someone’s life.
-            </Typography>
-            <Link to="/donate">
-              <Button variant="outlined" color="primary">
-                Donate Now
-              </Button>
-            </Link>
-          </PaperCard>
-        </Grid>
-      </Grid>
-    </InvolvedSection>
+      </InvolvedSection>
       {/* Scholarships for Education Section */}
 
       <Section>

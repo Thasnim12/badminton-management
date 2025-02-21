@@ -14,32 +14,47 @@ const ContentWrapper = styled(Box)({
 });
 
 const HeroSection = styled(Box)(({ theme }) => ({
-  backgroundImage: 'url("/Carousal1.jpg")', // Image path from the public folder
-  backgroundSize: "cover",
+  backgroundImage: 'url("/Carousal1.jpg")',
   backgroundPosition: "center",
   backgroundRepeat: "no-repeat",
-  padding: "80px 20px",
+  width: "100vw",
+  height: "400px", // Fixed height for desktop
+  backgroundSize: "cover", // Ensures full coverage without stretching
   color: "white",
-  height: "400px",
   textAlign: "center",
-  width: "100%",
-  // marginTop: "5px",
+  padding: "80px 20px",
 
-  [theme.breakpoints.down("md")]: {
-    padding: "60px 15px",
-    height: "350px",
+  [theme.breakpoints.down("xl")]: {
+    height: "380px", // Slightly reduced for large screens
+  },
+
+  [theme.breakpoints.between(900, 1157)]: {
+    height: "100%", // Allow dynamic height
+    minHeight: "350px",
+    backgroundSize: "100% 100%", // Stretches the image to fill height & width
+  },
+
+  [theme.breakpoints.between("sm", "md")]: {
+    height: "auto", // Dynamic height for mid-range screens
+    minHeight: "350px",
+    backgroundSize: "100% 100%", // Ensures full fit
   },
 
   [theme.breakpoints.down("sm")]: {
-    padding: "40px 10px",
     height: "300px",
-    backgroundSize: "contain", // Ensures full image visibility on smaller screens
+    backgroundSize: "100% 100%", // Ensures the image always fits without cut-off
+    padding: "40px 10px",
   },
 
   [theme.breakpoints.down("xs")]: {
     height: "250px",
+    backgroundSize: "100% 100%",
     padding: "30px 5px",
-    backgroundSize: "contain", // Further adjustments for extra small screens
+  },
+
+  [theme.breakpoints.down(600)]: {
+    height: "220px", // Extra small screens
+    backgroundSize: "100% 100%",
   },
 }));
 
