@@ -22,7 +22,7 @@ import {
   useGetAlladdonsQuery,
 } from "../../Slices/AdminApi";
 
-const Addaddons = ({ openForm, handleClose,  setSuccessMessage, setErrorMessage  }) => {
+const Addaddons = ({ openForm, handleClose, setSuccessMessage, setErrorMessage }) => {
   const [addons, { isLoading }] = useAddaddonsMutation();
   const { data, refetch } = useGetAlladdonsQuery();
   const [formData, setFormData] = useState({
@@ -37,7 +37,11 @@ const Addaddons = ({ openForm, handleClose,  setSuccessMessage, setErrorMessage 
   // const [errorMessage, setErrorMessage] = useState("");
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: name === "quantity" || name === "price" ? Number(value) : value,
+    });
   };
 
   const handleCheckboxChange = (e) => {
@@ -56,6 +60,8 @@ const Addaddons = ({ openForm, handleClose,  setSuccessMessage, setErrorMessage 
       setFormData({ ...formData, item_image: file });
     }
   };
+
+
 
   const handleAddons = async (e) => {
     e.preventDefault();
@@ -129,13 +135,21 @@ const Addaddons = ({ openForm, handleClose,  setSuccessMessage, setErrorMessage 
             <Grid item xs={12}>
               <TextField
                 name="price"
-                label="Price"
+                label="Single Unit Price"
                 variant="outlined"
                 fullWidth
                 value={formData.price}
                 onChange={handleChange}
               />
             </Grid>
+
+            {formData.quantity && formData.price && (
+              <Grid item xs={12}>
+                <Typography variant="subtitle1" fontWeight="bold">
+                  Total Price: ₹{(formData.quantity * formData.price).toFixed(2)}
+                </Typography>
+              </Grid>
+            )}
 
             {/* Checkboxes for Item Type */}
             <Grid item xs={12}>
