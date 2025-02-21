@@ -16,7 +16,7 @@ const ContentWrapper = styled(Box)({
 const HeroSection = styled(Box)(({ theme }) => ({
   width: "100vw",
   height: "400px", // Fixed height
-  backgroundImage: 'url("/Carousal2.jpg")',
+  backgroundImage: 'url("/bookings.jpg")',
   backgroundPosition: "center",
   backgroundRepeat: "no-repeat",
   backgroundSize: "100% 100%", // Stretches image to fit width & height
@@ -69,7 +69,7 @@ const Bookings = () => {
       navigate("/book-now");
       setTimeout(() => {
         window.scrollTo(0, 0);
-      }, 100); // 
+      }, 100); //
     }
   };
   return (

@@ -1,4 +1,4 @@
-import React, { useState,useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   TextField,
   Button,
@@ -6,6 +6,8 @@ import {
   Typography,
   Container,
   Link,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import {
   LockOutlined,
@@ -15,8 +17,7 @@ import {
 } from "@mui/icons-material"; // Added Visibility icons
 import { useNavigate } from "react-router-dom";
 import { setCredentials } from "../../Slices/AdminSlice";
-import { useDispatch,useSelector } from "react-redux";
-
+import { useDispatch, useSelector } from "react-redux";
 
 import { useLoginadminMutation } from "../../Slices/AdminApi";
 import * as Yup from "yup";
@@ -27,20 +28,23 @@ const validationSchema = Yup.object({
   name: Yup.string()
     .min(3, "Name must be at least 3 characters long")
     .required("Name is required"),
-    passkey: Yup.string().required("Password is required"),
+  passkey: Yup.string().required("Password is required"),
 });
 
 const AdminLogin = () => {
-
   const navigate = useNavigate();
   const [loginAdmin, { isLoading: isLoggingIn, error: loginError }] =
     useLoginadminMutation();
   const { enqueueSnackbar } = useSnackbar();
-  const disaptch = useDispatch();
+  const dispatch = useDispatch();
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "error",
+  });
 
-
-  const adminInfo = useSelector((state)=>state.adminAuth)
-console.log(adminInfo, "admin")
+  const adminInfo = useSelector((state) => state.adminAuth);
+  console.log(adminInfo, "admin");
 
   const [showPassword, setShowPassword] = useState(false);
 
@@ -48,20 +52,20 @@ console.log(adminInfo, "admin")
     const { name, passkey } = values;
     try {
       const response = await loginAdmin({ name, passkey }).unwrap();
-      if(response.admin){
+      if (response.admin) {
         const admin = response.admin;
-        const name = admin.name;
-        disaptch(setCredentials({ name }))
-        navigate('/admin')
+        dispatch(setCredentials({ name: admin.name }));
+        navigate("/admin");
       }
     } catch (error) {
       console.error("Admin login failed:", error);
-      enqueueSnackbar("Admin login failed. Please check your credentials.", {
-        variant: "error",
+      setSnackbar({
+        open: true,
+        message: "Admin login failed. Please check your credentials.",
+        severity: "error",
       });
     }
   };
-
 
   return (
     <div>
@@ -154,6 +158,20 @@ console.log(adminInfo, "admin")
             </Formik>
           </Card>
         </Container>
+
+        <Snackbar
+          open={snackbar.open}
+          autoHideDuration={4000}
+          onClose={() => setSnackbar({ ...snackbar, open: false })}
+          anchorOrigin={{ vertical: "top", horizontal: "right" }}
+        >
+          <Alert
+            onClose={() => setSnackbar({ ...snackbar, open: false })}
+            severity={snackbar.severity}
+          >
+            {snackbar.message}
+          </Alert>
+        </Snackbar>
       </div>
     </div>
   );

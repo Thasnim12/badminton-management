@@ -15,6 +15,9 @@ import {
   Drawer,
   Divider,
   Snackbar,
+  Radio,
+  RadioGroup,
+  FormControlLabel,
   Alert,
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -103,7 +106,7 @@ const CourtBooking = () => {
     });
 
     selectedAddOns.forEach((addOn) => {
-      total += addOn.price;
+      total += addOn.quantity * addOn.price;
     });
 
     return total;
@@ -265,12 +268,20 @@ const CourtBooking = () => {
     }
   };
 
-  const handleAddOnToggle = (addOn) => {
+  const handleAddOnToggle = (addOn, quantity) => {
     setSelectedAddOns((prev) => {
       const exists = prev.find((item) => item._id === addOn._id);
-      return exists
-        ? prev.filter((item) => item._id !== addOn._id)
-        : [...prev, addOn];
+
+      if (quantity === 0) {
+        return prev.filter((item) => item._id !== addOn._id);
+      }
+
+      if (exists) {
+        return prev.map((item) =>
+          item._id === addOn._id ? { ...item, quantity } : item
+        );
+      }
+      return [...prev, { ...addOn, quantity }];
     });
   };
 
@@ -283,11 +294,22 @@ const CourtBooking = () => {
     });
   };
 
+  useEffect(() => {
+    if (courts.length > 0) {
+      setSelectedCourt(courts[0]._id);
+      setSelectedImage(courts[0].court_image);
+    }
+  }, [courts]);
+
   const handleCourtChange = (e) => {
-    const court = e.target.value;
-    setSelectedImage(court.court_image);
-    setSelectedCourt(court._id);
-    setOpenDrawer(true);
+    const selectedCourtId = e.target.value;
+    const court = courts.find((c) => c._id === selectedCourtId);
+
+    if (court) {
+      setSelectedImage(court.court_image);
+      setSelectedCourt(court._id);
+      setOpenDrawer(true);
+    }
   };
 
   const handleClickOpen = () => {
@@ -323,17 +345,7 @@ const CourtBooking = () => {
           sx={{ maxWidth: "80%", marginLeft: "10px", padding: "5px" }}
         >
           <Grid container spacing={2}>
-            {/* Left Panel - DetailsCard */}
-            <Grid
-              item
-              xs={12}
-              md={4}
-              sx={{ height: { xs: "auto", md: "100vh" }, marginTop: "3px" }}
-            >
-              <DetailsCard />
-            </Grid>
-
-            {/* Right Panel - Booking Section */}
+            {/* Right Panel - Booking Section (Now on the Left) */}
             <Grid
               item
               xs={12}
@@ -378,40 +390,41 @@ const CourtBooking = () => {
                     <DatePicker
                       value={selectedDate}
                       onChange={setSelectedDate}
+                      minDate={dayjs()} // Disable past dates
                     />
                   </LocalizationProvider>
 
                   {/* Court Select */}
-                  <Select
-                    fullWidth
-                    value={
-                      courts.find((court) => court._id === selectedCourt) || ""
-                    }
+                  <RadioGroup
+                    value={selectedCourt}
                     onChange={handleCourtChange}
-                    sx={{ mt: 2 }}
+                    sx={{
+                      mt: 2,
+                      display: "flex",
+                      flexDirection: "row",
+                      gap: 2,
+                    }} // Align side by side
                   >
                     {courtsLoading ? (
-                      <MenuItem disabled>Loading courts...</MenuItem>
+                      <Typography>Loading courts...</Typography>
                     ) : (
                       courts?.map((court) => (
-                        <MenuItem
+                        <FormControlLabel
                           key={court._id}
-                          value={court}
-                          disabled={!court.isActive}
-                        >
-                          {court.court_name}{" "}
-                          {!court.isActive ? "(Inactive)" : ""}
-                        </MenuItem>
+                          value={court._id}
+                          control={<Radio disabled={!court.isActive} />}
+                          label={`${court.court_name} ${!court.isActive ? "(Inactive)" : ""}`}
+                        />
                       ))
                     )}
-                  </Select>
+                  </RadioGroup>
 
                   {/* Court Image */}
                   <CardMedia
                     component="img"
-                    height="150"
+                    height="300px"
                     image={`https://res.cloudinary.com/dj0rho12o/image/upload/${selectedImage}`}
-                    sx={{ marginTop: 2}}
+                    sx={{ marginTop: 2 }}
                     alt="Court Image"
                   />
                 </Card>
@@ -482,6 +495,16 @@ const CourtBooking = () => {
                   </Button>
                 </Card>
               </Grid>
+            </Grid>
+
+            {/* Left Panel - DetailsCard (Now on the Right) */}
+            <Grid
+              item
+              xs={12}
+              md={4}
+              sx={{ height: { xs: "auto", md: "100vh" }, marginTop: "3px" }}
+            >
+              <DetailsCard />
             </Grid>
           </Grid>
         </Grid>
@@ -587,7 +610,9 @@ const CourtBooking = () => {
                 {selectedAddOns.map((addon, index) => (
                   <Typography key={index} gutterBottom>
                     {addon.item_name}
-                    <span style={{ float: "right" }}>₹{addon.price}</span>
+                    <span style={{ float: "right" }}>
+                      ₹{addon.quantity * addon.price}
+                    </span>
                   </Typography>
                 ))}
               </>

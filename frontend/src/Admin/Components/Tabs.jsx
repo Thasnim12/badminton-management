@@ -129,76 +129,81 @@ export default function ScrollableTabsButtonVisible() {
   );
 
   return (
-    <Box sx={{ flexGrow: 1, bgcolor: "background.paper", margin: 5 }}>
-      {isLoadingBookings ? (
-        <Typography variant="h6" align="center">
-          Loading bookings...
-        </Typography>
-      ) : (
-        <>
-          <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
-            <Button
-              startIcon={<FileDownloadIcon />}
-              onClick={handleDownload}
-              sx={{ ml: 1, backgroundColor: "#2c387e", color: "white" }}
-            >
-              Download CSV
-            </Button>
-          </Box>
-
-          {/* Booking Summary Cards */}
-          <Grid container spacing={3} sx={{ marginBottom: 3 }}>
-            {[
-              { label: "Total Bookings", value: summaryBookings.length },
-              { label: "Pending Bookings", value: pendingBookings.length },
-              { label: "Completed Bookings", value: completedBookings.length },
-              { label: "Failed Bookings", value: failedBookings.length },
-            ].map((stat, index) => (
-              <Grid item xs={12} sm={3} key={index}>
-                <Card>
-                  <CardContent>
-                    <Typography variant="h6" align="center">
-                      {stat.label}
-                    </Typography>
-                    <Typography variant="h4" align="center">
-                      {stat.value || 0}
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
-
-          {/* Tabs */}
-          <Tabs
-            value={value}
-            onChange={handleChange}
-            variant="scrollable"
-            scrollButtons
-            aria-label="Booking Tabs"
+    <Box sx={{ flexGrow: 1, bgcolor: "background.paper", m: { xs: 2, sm: 5 } }}>
+    {isLoadingBookings ? (
+      <Typography variant="h6" align="center">
+        Loading bookings...
+      </Typography>
+    ) : (
+      <>
+        {/* Download Button */}
+        <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
+          <Button
+            startIcon={<FileDownloadIcon />}
+            onClick={handleDownload}
+            sx={{
+              ml: 1,
+              backgroundColor: "#2c387e",
+              color: "white",
+              width: { xs: "100%", sm: "auto" }, // Full width on mobile
+            }}
           >
-            <Tab label="Summary" />
-            <Tab label="Pending" />
-            <Tab label="Completed" />
-            <Tab label="Failed" />
-          </Tabs>
-
-          {/* Table */}
-          {renderTable(paginatedBookings)}
-
-          {/* Pagination */}
-          {totalRecords > 0 && (
-            <Box sx={{ display: "flex", justifyContent: "center", mt: 3 }}>
-              <Pagination
-                count={totalPages}
-                page={page}
-                color="primary"
-                onChange={(event, value) => setPage(value)}
-              />
-            </Box>
-          )}
-        </>
-      )}
-    </Box>
+            Download CSV
+          </Button>
+        </Box>
+  
+        {/* Booking Summary Cards */}
+        <Grid container spacing={3} sx={{ marginBottom: 3 }}>
+          {[
+            { label: "Total Bookings", value: summaryBookings.length },
+            { label: "Pending Bookings", value: pendingBookings.length },
+            { label: "Completed Bookings", value: completedBookings.length },
+            { label: "Failed Bookings", value: failedBookings.length },
+          ].map((stat, index) => (
+            <Grid item xs={12} sm={6} md={3} key={index}>
+              <Card sx={{ textAlign: "center", py: 2 }}>
+                <CardContent>
+                  <Typography variant="h6">{stat.label}</Typography>
+                  <Typography variant="h4">{stat.value || 0}</Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+  
+        {/* Tabs */}
+        <Tabs
+          value={value}
+          onChange={handleChange}
+          variant="scrollable"
+          scrollButtons
+          allowScrollButtonsMobile
+          aria-label="Booking Tabs"
+          sx={{ mb: 2 }}
+        >
+          <Tab label="Summary" />
+          <Tab label="Pending" />
+          <Tab label="Completed" />
+          <Tab label="Failed" />
+        </Tabs>
+  
+        {/* Table */}
+        <Box sx={{ overflowX: "auto" }}>{renderTable(paginatedBookings)}</Box>
+  
+        {/* Pagination */}
+        {totalRecords > 0 && (
+          <Box sx={{ display: "flex", justifyContent: "center", mt: 3 }}>
+            <Pagination
+              count={totalPages}
+              page={page}
+              color="primary"
+              onChange={(event, value) => setPage(value)}
+            />
+          </Box>
+        )}
+      </>
+    )}
+  </Box>
+  
   );
 }

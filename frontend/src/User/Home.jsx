@@ -10,7 +10,7 @@ import {
   Snackbar,
   Alert,
 } from "@mui/material";
-import { styled } from "@mui/system";
+import { height, styled } from "@mui/system";
 import Header from "./Global/Header";
 import Footer from "./Global/Footer";
 import { useSelector } from "react-redux";
@@ -28,7 +28,7 @@ import { useSendMessageMutation, useViewBannerQuery } from "../Slices/UserApi";
 
 const CarouselWrapper = styled(Box)(({ theme }) => ({
   width: "100vw",
-  height: "400px", // Allow height to adjust dynamically
+  // height: "400px", // Allow height to adjust dynamically
   minHeight: "300px", // Ensures it doesn't get too small
   display: "flex",
   justifyContent: "center",
@@ -53,8 +53,9 @@ const StyledCarousel = styled(Carousel)({
   },
   "& .carousel .slide img": {
     width: "100%",
-    height: "400px",
+    // height: "400px",
     maxHeight: "400px",
+     objectFit: "contained",
   },
 });
 
@@ -315,7 +316,7 @@ const HomePage = () => {
             </Grid>
 
             <Grid item xs={12} md={7}>
-              <Typography variant="h4"gutterBottom>
+              <Typography variant="h4" gutterBottom>
                 Welcome to AVK Raja Yadav Trust!
               </Typography>
               <Typography variant="body1" paragraph>
