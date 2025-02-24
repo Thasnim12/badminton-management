@@ -271,7 +271,7 @@ const generateSlots = async (req, res) => {
             court: courtId,
             startTime: startTime.toDate(),
             endTime: endTime.toDate(),
-            price: 200,
+            price: 1,
             isBooked: false,
           });
 

@@ -56,6 +56,7 @@ const createBooking = async (req, res) => {
 
         if (addons && addons.length > 0) {
             for (const addon of addons) {
+                console.log(addon, "sale")
                 const addonItem = await Addons.findById(addon.addonId);
                 if (!addonItem) {
                     return res.status(400).json({ message: `Addon ${addon.addonId} not found` });

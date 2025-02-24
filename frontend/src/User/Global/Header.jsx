@@ -64,7 +64,7 @@ const Header = () => {
     { text: "Contact", to: "/contact" },
     { text: "Donate", to: "/donate" },
     { text: "Book Now", to: "/bookings" },
-    { text: "Members", to: "/members" },
+    // { text: "Members", to: "/members" },
   ];
 
   return (
@@ -79,16 +79,17 @@ const Header = () => {
             alignItems: "center",
           }}
         >
-          <img
-            src="/Logo.png"
-            alt="Logo"
-            style={{
-              width: "60px",
-              height: "60px",
-              borderRadius: "50%",
-              marginRight: "8px",
-            }}
-          />
+   <img
+  src="/Logo.png"
+  alt="Logo"
+  style={{
+    width: "80px",  // Increased from 60px to 80px
+    height: "80px", // Increased from 60px to 80px
+    borderRadius: "50%",
+    marginRight: "8px",
+  }}
+/>
+
           {/* Add your logo or title here */}
           AVK Raja Yadav Trust
         </Typography>

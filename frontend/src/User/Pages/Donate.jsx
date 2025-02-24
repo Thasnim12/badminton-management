@@ -451,9 +451,9 @@ const Donate = () => {
                 required
               >
                 <MenuItem value="education">Sponsor for Education</MenuItem>
-                <MenuItem value="welfare">Sponsor for Welfare</MenuItem>
-                <MenuItem value="food">Food</MenuItem>
-                <MenuItem value="shelters">Shelters</MenuItem>
+                <MenuItem value="welfare">Sponsor for Underprivileged Children</MenuItem>
+                <MenuItem value="books">Sponsor for Books</MenuItem>
+                {/* <MenuItem value="shelters">Shelters</MenuItem> */}
               </Select>
             </FormControl>
 

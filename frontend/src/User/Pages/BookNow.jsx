@@ -227,11 +227,12 @@ const CourtBooking = () => {
       }
 
       console.log("Razorpay Key:", process.env.REACT_APP_RAZORPAY_KEY_ID);
-
+      console.log(selectedAddOns, " select");
       const formattedAddons = selectedAddOns.map((addon) => ({
         addonId: addon._id,
         quantity: 1,
-        type: "rent",
+        type: addon.item_type.includes("For Sale") ? "buy" : addon.item_type.includes("For Rent") ? "rent" : "unknown",
+
       }));
 
       if (typeof window.Razorpay === "undefined") {
