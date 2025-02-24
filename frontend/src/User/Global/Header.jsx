@@ -14,7 +14,7 @@ import {
   Avatar,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
-import { Link, useNavigate,useLocation  } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
 
@@ -79,17 +79,16 @@ const Header = () => {
             alignItems: "center",
           }}
         >
-   <img
-  src="/Logo.png"
-  alt="Logo"
-  style={{
-    width: "80px",  // Increased from 60px to 80px
-    height: "80px", // Increased from 60px to 80px
-    borderRadius: "50%",
-    marginRight: "8px",
-  }}
-/>
-
+          <img
+            src="/Logo.png"
+            alt="Logo"
+            style={{
+              width: "80px", // Increased from 60px to 80px
+              height: "80px", // Increased from 60px to 80px
+              borderRadius: "50%",
+              marginRight: "8px",
+            }}
+          />
           {/* Add your logo or title here */}
           AVK Raja Yadav Trust
         </Typography>
