@@ -68,6 +68,7 @@ const CourtBooking = () => {
   const [selectedAddOns, setSelectedAddOns] = useState([]);
   const [open, setOpen] = useState(false);
   const [alert, setAlert] = useState(null);
+  const [alertSeverity, setAlertSeverity] = useState("error");
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [selectedImage, setSelectedImage] = useState("");
   const [openUserDialog, setOpenUserDialog] = useState(false);
@@ -104,10 +105,12 @@ const CourtBooking = () => {
       setOpenUserDialog(false);
       handleBooking(); // Proceed to booking after details are filled
     } else {
-      setOpenSnackbar(true); // Set error message
+      setAlert("Please fill all the required fields."); 
+      setAlertSeverity("error");
+      setOpenSnackbar(true); // Open the snackbar
     }
   };
-
+  
   const [bookingData, setBookingData] = useState({
     courtId: "",
     slotId: [],
@@ -266,11 +269,16 @@ const CourtBooking = () => {
               razorpay_signature: response.razorpay_signature,
               payment_method: response.method,
             }).unwrap();
+        
             console.log(verificationResponse, "response");
+        
             if (verificationResponse.success) {
+              setAlert("Payment successful! Thanks for your booking.");
+              setAlertSeverity("success");
+              setOpenSnackbar(true);
+        
               setBookingHistory({
-                court: courts.find((court) => court._id === selectedCourt)
-                  ?.court_name,
+                court: courts.find((court) => court._id === selectedCourt)?.court_name,
                 date: selectedDate.format("YYYY-MM-DD"),
                 slots: selectedSlots.map((slot) => ({
                   startTime: dayjs(slot.startTime).format("h:mm A"),
@@ -280,12 +288,16 @@ const CourtBooking = () => {
                 totalAmount: calculateTotalAmount(),
                 status: "Confirmed",
               });
+        
               handleClickOpen();
             }
           } catch (error) {
+            setAlert("Payment failed. Please try again.");
+            setAlertSeverity("error");
+            setOpenSnackbar(true);
             console.log(error.message);
           }
-        },
+        }, 
         prefill: {
           name: "User Name",
           email: "user@example.com",
@@ -356,11 +368,14 @@ const CourtBooking = () => {
 
   const handleClickOpen = () => {
     if (selectedSlots.length === 0) {
-      setOpenSnackbar(true);
+      setAlert("Please select a time slot for booking."); // Set dynamic alert message
+      setAlertSeverity("error");
+      setOpenSnackbar(true); // Open the snackbar
     } else {
       setOpen(true);
     }
   };
+  
   const handleClose = () => {
     setSelectedSlots([]);
     setSelectedAddOns([]);
@@ -542,8 +557,8 @@ const CourtBooking = () => {
 
                   {/* Proceed Button (Responsive Sizing) */}
                   <Button
-                    variant="outlined"
-                    color="success"
+                    variant="contained"
+                    color="primary"
                     sx={{
                       marginTop: 2,
                       alignSelf: { xs: "stretch", sm: "flex-end" }, // Full width on mobile, right-aligned on larger screens
@@ -577,10 +592,10 @@ const CourtBooking = () => {
       >
         <Alert
           onClose={handleCloseSnackbar}
-          severity="error"
+          severity={alertSeverity}
           sx={{ width: "100%" }}
         >
-          Please Select all the fields
+          {alert}
         </Alert>
       </Snackbar>
       <AddOnsDrawer
@@ -687,12 +702,12 @@ const CourtBooking = () => {
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose} variant="outlined" color="error">
+          <Button onClick={handleClose} variant="contained" color="error">
             Cancel
           </Button>
           <Button
             onClick={handleConfirmPay}
-            variant="outlined"
+            variant="contained"
             color="primary"
             disabled={processing}
           >
@@ -751,13 +766,13 @@ const CourtBooking = () => {
           </Grid>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose} color="error" variant="outlined">
+          <Button onClick={handleClose} color="error" variant="contained">
             Cancel
           </Button>
           <Button
             onClick={handleSubmitDetails}
             color="primary"
-            variant="outlined"
+            variant="contained"
           >
             Submit
           </Button>

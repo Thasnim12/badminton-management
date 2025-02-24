@@ -108,6 +108,9 @@ const Footer = () => {
               © {new Date().getFullYear()} AVK Raja Yadav Trust | All Rights
               Reserved
             </Typography>
+            <Typography variant="body2" sx={{ fontSize: "12px", mt: 0.5 }}>
+              Developed by Tunepath Technologies
+            </Typography>
           </Box>
         </Container>
       </Box>
