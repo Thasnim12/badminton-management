@@ -6,10 +6,11 @@ const bookingSchema = mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User", 
     },
-    nonRegisteredusers: {
+    guestDetails: {
       name: { type: String },
       email: { type: String },
       phone: { type: String },
+      city: { type: String },
     },
     name: {
       type: String

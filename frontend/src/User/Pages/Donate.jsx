@@ -148,7 +148,7 @@ const Donate = () => {
         key: process.env.REACT_APP_RAZORPAY_KEY_ID,
         amount: order.amount,
         currency: order.currency,
-        name: "Awinco Donations",
+        name: "AVK Raja Yadav Trust Donations",
         description: "Support our community",
         order_id: order.id,
         handler: async (response) => {
@@ -451,9 +451,9 @@ const Donate = () => {
                 required
               >
                 <MenuItem value="education">Sponsor for Education</MenuItem>
-                <MenuItem value="welfare">Sponsor for Welfare</MenuItem>
-                <MenuItem value="food">Food</MenuItem>
-                <MenuItem value="shelters">Shelters</MenuItem>
+                <MenuItem value="welfare">Sponsor for Underprivileged Children</MenuItem>
+                <MenuItem value="books">Sponsor for Books</MenuItem>
+                {/* <MenuItem value="shelters">Shelters</MenuItem> */}
               </Select>
             </FormControl>
 

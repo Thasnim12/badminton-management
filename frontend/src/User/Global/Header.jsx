@@ -14,7 +14,7 @@ import {
   Avatar,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
-import { Link, useNavigate,useLocation  } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
 
@@ -64,7 +64,7 @@ const Header = () => {
     { text: "Contact", to: "/contact" },
     { text: "Donate", to: "/donate" },
     { text: "Book Now", to: "/bookings" },
-    { text: "Members", to: "/members" },
+    // { text: "Members", to: "/members" },
   ];
 
   return (
@@ -83,8 +83,8 @@ const Header = () => {
             src="/Logo.png"
             alt="Logo"
             style={{
-              width: "60px",
-              height: "60px",
+              width: "80px", // Increased from 60px to 80px
+              height: "80px", // Increased from 60px to 80px
               borderRadius: "50%",
               marginRight: "8px",
             }}

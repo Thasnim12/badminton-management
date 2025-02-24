@@ -111,7 +111,7 @@ const AddOnsDrawer = ({
                       {addOn.item_name}
                     </Typography>
                     <Typography variant="body2" color="gray">
-                      ₹{addOn.price} | Available: {availableQuantity}
+                      ₹{addOn.price} | Available: {availableQuantity} | {addOn.item_type}
                     </Typography>
 
                     {/* Quantity Controls */}

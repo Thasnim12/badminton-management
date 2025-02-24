@@ -366,7 +366,7 @@ const getSlots = async (req, res) => {
     const availableSlots = await Slot.find({
       court: courtId,
       startTime: { $gte: startOfDay.toDate(), $lte: endOfDay.toDate() },
-    });
+    }).sort({ startTime: 1 });
 
     console.log("Raw Slots from DB:", availableSlots.map(slot => slot.startTime));
 

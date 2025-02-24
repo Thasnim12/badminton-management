@@ -63,6 +63,7 @@ const CourtBooking = () => {
   const [openHistoryModal, setOpenHistoryModal] = useState(false);
   const navigate = useNavigate();
   const [selectedDate, setSelectedDate] = useState(dayjs());
+  const [openCalendar, setOpenCalendar] = useState(false); // Control the DatePicker
   const [selectedCourt, setSelectedCourt] = useState("");
   const [openDrawer, setOpenDrawer] = useState(false);
   const [selectedAddOns, setSelectedAddOns] = useState([]);
@@ -226,11 +227,12 @@ const CourtBooking = () => {
       }
 
       console.log("Razorpay Key:", process.env.REACT_APP_RAZORPAY_KEY_ID);
-
+      console.log(selectedAddOns, " select");
       const formattedAddons = selectedAddOns.map((addon) => ({
         addonId: addon._id,
         quantity: 1,
-        type: "rent",
+        type: addon.item_type.includes("For Sale") ? "buy" : addon.item_type.includes("For Rent") ? "rent" : "unknown",
+
       }));
 
       if (typeof window.Razorpay === "undefined") {
@@ -255,7 +257,7 @@ const CourtBooking = () => {
         key: process.env.REACT_RAZORPAY_KEY_ID,
         amount: calculateTotalAmount() * 100,
         currency: "INR",
-        name: "Awinco Donations",
+        name: "AVK Raja Yadav Trust Donations",
         description: "Support our community",
         order_id: orderId,
 
@@ -278,7 +280,8 @@ const CourtBooking = () => {
               setOpenSnackbar(true);
 
               setBookingHistory({
-                court: courts.find((court) => court._id === selectedCourt)?.court_name,
+                court: courts.find((court) => court._id === selectedCourt)
+                  ?.court_name,
                 date: selectedDate.format("YYYY-MM-DD"),
                 slots: selectedSlots.map((slot) => ({
                   startTime: dayjs(slot.startTime).format("h:mm A"),
@@ -447,13 +450,20 @@ const CourtBooking = () => {
                   <LocalizationProvider dateAdapter={AdapterDayjs}>
                     <DatePicker
                       value={selectedDate}
-                      onChange={setSelectedDate}
+                      onChange={(newDate) => {
+                        setSelectedDate(newDate);
+                        setOpen(false); // Close picker after selecting a date
+                      }}
                       minDate={dayjs()} // Disable past dates
                       format="DD/MM/YYYY"
+                      open={openCalendar}
+                      onOpen={() => setOpenCalendar(true)}
+                      onClose={() => setOpenCalendar(false)}
                       slots={{
                         textField: (params) => (
                           <TextField
                             {...params}
+                            onClick={() => setOpenCalendar(true)} // Open picker on click anywhere
                             InputProps={{
                               ...params.InputProps,
                               endAdornment: (

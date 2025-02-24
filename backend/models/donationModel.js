@@ -20,7 +20,7 @@ const donationSchema = mongoose.Schema({
   },
   donation_type: {
     type: String,
-    enum: ["education", "welfare", "food", "shelters"],
+    enum: ["education", "welfare", "books"],
     required: true,
   },
   amount: {
