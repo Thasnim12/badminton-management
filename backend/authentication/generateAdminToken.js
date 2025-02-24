@@ -1,8 +1,4 @@
 const jwt = require('jsonwebtoken');
-const dotenv = require('dotenv')
-
-dotenv.config();
-
 
 const generateAdminToken = (res,adminId) => {
 
@@ -14,6 +10,8 @@ const generateAdminToken = (res,adminId) => {
     const token = jwt.sign({ id: adminId }, process.env.JWT_ADMIN_SECRET, {
         expiresIn: '30d',
     });
+
+    console.log(token,'token')
 
     res.cookie('adminjwt', token, {
         httpOnly: true,

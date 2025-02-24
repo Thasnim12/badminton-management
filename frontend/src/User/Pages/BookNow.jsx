@@ -105,12 +105,12 @@ const CourtBooking = () => {
       setOpenUserDialog(false);
       handleBooking(); // Proceed to booking after details are filled
     } else {
-      setAlert("Please fill all the required fields."); 
+      setAlert("Please fill all the required fields.");
       setAlertSeverity("error");
       setOpenSnackbar(true); // Open the snackbar
     }
   };
-  
+
   const [bookingData, setBookingData] = useState({
     courtId: "",
     slotId: [],
@@ -269,14 +269,14 @@ const CourtBooking = () => {
               razorpay_signature: response.razorpay_signature,
               payment_method: response.method,
             }).unwrap();
-        
+
             console.log(verificationResponse, "response");
-        
+
             if (verificationResponse.success) {
               setAlert("Payment successful! Thanks for your booking.");
               setAlertSeverity("success");
               setOpenSnackbar(true);
-        
+
               setBookingHistory({
                 court: courts.find((court) => court._id === selectedCourt)?.court_name,
                 date: selectedDate.format("YYYY-MM-DD"),
@@ -288,7 +288,7 @@ const CourtBooking = () => {
                 totalAmount: calculateTotalAmount(),
                 status: "Confirmed",
               });
-        
+
               handleClickOpen();
             }
           } catch (error) {
@@ -297,7 +297,7 @@ const CourtBooking = () => {
             setOpenSnackbar(true);
             console.log(error.message);
           }
-        }, 
+        },
         prefill: {
           name: "User Name",
           email: "user@example.com",
@@ -375,7 +375,7 @@ const CourtBooking = () => {
       setOpen(true);
     }
   };
-  
+
   const handleClose = () => {
     setSelectedSlots([]);
     setSelectedAddOns([]);
@@ -546,8 +546,8 @@ const CourtBooking = () => {
                               disabled={slot.isBooked}
                               onClick={() => handleSlotToggle(slot)}
                             >
-                              {moment(slot.startTime).format("hh:mm A")} -{" "}
-                              {moment(slot.endTime).format("hh:mm A")}
+                              {moment.utc(slot.startTime).format("hh:mm A")} -{" "}
+                              {moment.utc(slot.endTime).format("hh:mm A")}
                             </Button>
                           </Grid>
                         ))

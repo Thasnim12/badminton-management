@@ -354,40 +354,29 @@ const getSlots = async (req, res) => {
     const { courtId, date } = req.query;
 
     if (!courtId || !date) {
-      return res
-        .status(400)
-        .json({ message: "Court ID and Date are required" });
+      return res.status(400).json({ message: "Court ID and Date are required" });
     }
 
-    const startOfDay = moment(date).set({
-      hour: 6,
-      minute: 0,
-      second: 0,
-      millisecond: 0,
-    });
-    const endOfDay = moment(date).set({
-      hour: 22,
-      minute: 0,
-      second: 0,
-      millisecond: 0,
-    });
+    const startOfDay = moment.utc(date).startOf('day').set({ hour: 10, minute: 0, second: 0, millisecond: 0 });
+    const endOfDay = moment.utc(date).startOf('day').set({ hour: 22, minute: 0, second: 0, millisecond: 0 });
 
-    const slots = await Slot.find({
+    console.log("Start Time (UTC):", startOfDay.toDate());
+    console.log("End Time (UTC):", endOfDay);
+
+    const availableSlots = await Slot.find({
       court: courtId,
       startTime: { $gte: startOfDay.toDate(), $lte: endOfDay.toDate() },
-    }).sort({ startTime: 1 });
+    });
 
-    console.log(slots, "slots");
+    console.log("Raw Slots from DB:", availableSlots.map(slot => slot.startTime));
 
-    const uniqueSlots = Array.from(
-      new Map(slots.map((slot) => [slot.startTime.toString(), slot])).values()
-    );
-
-    res.json(uniqueSlots);
+    res.json(availableSlots);
   } catch (error) {
+    console.error("Error fetching available slots:", error);
     res.status(500).json({ message: "Error fetching slots", error });
   }
 };
+
 
 const getAddons = async (req, res) => {
   try {

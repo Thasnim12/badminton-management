@@ -47,6 +47,7 @@ const adminLogin = async (req, res) => {
       console.log(admin._id, "id");
 
       const token = generateAdminToken(res, admin._id);
+      console.log(token,'tok')
 
       return res.status(200).json({
         admin,
@@ -62,6 +63,8 @@ const adminLogin = async (req, res) => {
           .status(401)
           .json({ message: "Unauthorized, Invalid credentials" });
       }
+
+      console.log('hey')
 
       const hashedPasskey = await bcrypt.hash(passkey, 10);
 
@@ -228,7 +231,7 @@ const generateSlots = async (req, res) => {
   try {
     const { courtId } = req.body;
     const today = moment().startOf("day");
-    const endDate = moment(today).add(6, "days").endOf("day");
+    const endDate = moment(today).add(30, "days").endOf("day");
 
     await Slot.deleteMany({
       court: courtId,
