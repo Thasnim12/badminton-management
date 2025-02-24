@@ -149,7 +149,7 @@ const Contact = () => {
                 helperText={errors.message ? errors.message.message : ""}
               />
               <Button
-                variant="outlined"
+                variant="contained"
                 color="primary"
                 fullWidth
                 type="submit"

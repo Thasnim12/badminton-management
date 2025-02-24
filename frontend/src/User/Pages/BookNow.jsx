@@ -13,6 +13,7 @@ import {
   DialogContent,
   DialogActions,
   Drawer,
+  TextField,
   Divider,
   Snackbar,
   Radio,
@@ -59,13 +60,51 @@ const CourtBooking = () => {
   const [openDialog, setOpenDialog] = useState(false);
   const [openHistoryModal, setOpenHistoryModal] = useState(false);
   const navigate = useNavigate();
-  const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedDate, setSelectedDate] = useState(dayjs());
   const [selectedCourt, setSelectedCourt] = useState("");
   const [openDrawer, setOpenDrawer] = useState(false);
   const [selectedAddOns, setSelectedAddOns] = useState([]);
   const [open, setOpen] = useState(false);
   const [alert, setAlert] = useState(null);
+  const [openSnackbar, setOpenSnackbar] = useState(false);
   const [selectedImage, setSelectedImage] = useState("");
+  const [openUserDialog, setOpenUserDialog] = useState(false);
+  const [userDetails, setUserDetails] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    city: "",
+  });
+
+  const handleInputChange = (e) => {
+    setUserDetails({ ...userDetails, [e.target.name]: e.target.value });
+  };
+
+  const validateUserDetails = () => {
+    return (
+      userDetails.name &&
+      userDetails.email &&
+      userDetails.phone &&
+      userDetails.city
+    );
+  };
+
+  const handleConfirmPay = () => {
+    if (validateUserDetails()) {
+      handleBooking(); // Proceed with booking
+    } else {
+      setOpenUserDialog(true); // Show dialog if details are missing
+    }
+  };
+
+  const handleSubmitDetails = () => {
+    if (validateUserDetails()) {
+      setOpenUserDialog(false);
+      handleBooking(); // Proceed to booking after details are filled
+    } else {
+      setOpenSnackbar(true); // Set error message
+    }
+  };
 
   const [bookingData, setBookingData] = useState({
     courtId: "",
@@ -79,7 +118,7 @@ const CourtBooking = () => {
   const [verifyBooking] = useVerifyBookingMutation();
   const [bookingHistory, setBookingHistory] = useState(null);
   const [processing, setProcessing] = useState(false);
-  const [openSnackbar, setOpenSnackbar] = useState(false);
+
   const { data, isLoading: courtsLoading } = useGetAllcourtsQuery();
   const courts = data?.court || [];
 
@@ -202,6 +241,7 @@ const CourtBooking = () => {
         slotId: selectedSlots.map((slot) => slot._id),
         amount: calculateTotalAmount(),
         addons: formattedAddons,
+        details: userDetails,
       }).unwrap();
 
       const { orderId, bookingId } = bookingResponse;
@@ -284,7 +324,6 @@ const CourtBooking = () => {
       return [...prev, { ...addOn, quantity }];
     });
   };
-  
 
   const handleSlotToggle = (slot) => {
     setSelectedSlots((prevSlots) => {
@@ -321,8 +360,12 @@ const CourtBooking = () => {
     }
   };
   const handleClose = () => {
-    setOpen(false);
+    setSelectedSlots([]); 
+    setSelectedAddOns([]); 
+    setOpen(false); 
+    setOpenUserDialog(false);
   };
+  
 
   const handleCloseSnackbar = () => {
     setOpenSnackbar(false);
@@ -392,6 +435,7 @@ const CourtBooking = () => {
                       value={selectedDate}
                       onChange={setSelectedDate}
                       minDate={dayjs()} // Disable past dates
+                      format="DD/MM/YYYY"
                     />
                   </LocalizationProvider>
 
@@ -633,7 +677,7 @@ const CourtBooking = () => {
             Cancel
           </Button>
           <Button
-            onClick={handleBooking}
+            onClick={handleConfirmPay}
             variant="outlined"
             color="primary"
             disabled={processing}
@@ -642,6 +686,73 @@ const CourtBooking = () => {
           </Button>
         </DialogActions>
       </BootstrapDialog>
+
+      {/* User Details Dialog */}
+      <Dialog open={openUserDialog} onClose={() => setOpenUserDialog(false)}>
+        <DialogTitle>Enter Your Details</DialogTitle>
+        <DialogContent>
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Name"
+                name="name"
+                value={userDetails.name}
+                onChange={handleInputChange}
+                required
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Email"
+                name="email"
+                type="email"
+                value={userDetails.email}
+                onChange={handleInputChange}
+                required
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Phone Number"
+                name="phone"
+                type="tel"
+                value={userDetails.phone}
+                onChange={handleInputChange}
+                required
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="City"
+                name="city"
+                value={userDetails.city}
+                onChange={handleInputChange}
+                required
+              />
+            </Grid>
+          </Grid>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={handleClose}
+            color="error"
+            variant="outlined"
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSubmitDetails}
+            color="primary"
+            variant="outlined"
+          >
+            Submit
+          </Button>
+        </DialogActions>
+      </Dialog>
       <Footer />
     </>
   );

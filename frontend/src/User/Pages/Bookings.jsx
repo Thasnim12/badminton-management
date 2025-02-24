@@ -15,30 +15,30 @@ const ContentWrapper = styled(Box)({
 
 const HeroSection = styled(Box)(({ theme }) => ({
   width: "100vw",
-  height: "400px", // Fixed height
+  height: "calc(100vw / 4.8)", // Maintain aspect ratio (1920/400 = 4.8)
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "flex-start", // Align image to the top
+  overflow: "hidden",
   backgroundImage: 'url("/bookings.jpg")',
   backgroundPosition: "center",
   backgroundRepeat: "no-repeat",
-  backgroundSize: "100% 100%", // Stretches image to fit width & height
-  textAlign: "center",
-  padding: "80px 20px",
+  backgroundSize: "contain", // Ensures full image visibility without cropping
 
   [theme.breakpoints.down("lg")]: {
-    height: "380px", // Slightly reduce for large screens
+    height: "calc(100vw / 4.8)",
   },
 
   [theme.breakpoints.down("md")]: {
-    height: "350px", // Adjust for medium screens
+    height: "calc(100vw / 4.8)",
   },
 
   [theme.breakpoints.down("sm")]: {
-    height: "300px", // Reduce height on small screens
-    padding: "40px 10px",
+    height: "calc(100vw / 4.8)",
   },
 
   [theme.breakpoints.down("xs")]: {
-    height: "250px", // Reduce height for extra small screens
-    padding: "30px 5px",
+    height: "calc(100vw / 4.8)",
   },
 }));
 
@@ -64,14 +64,16 @@ const Bookings = () => {
 
   const handleBookingClick = () => {
     if (!isLoggedIn) {
-      setOpenSnackbar(true);
-    } else {
-      navigate("/book-now");
-      setTimeout(() => {
-        window.scrollTo(0, 0);
-      }, 100); //
+      setOpenSnackbar(true); // Show the snackbar
     }
+    
+    navigate("/book-now"); // Always navigate to book-now
+  
+    setTimeout(() => {
+      window.scrollTo(0, 0);
+    }, 100);
   };
+  
   return (
     <>
       <Header />
@@ -110,7 +112,7 @@ const Bookings = () => {
                 your desired session, show up, and play!
               </Typography>
               <Button
-                variant="outlined"
+                variant="contained"
                 color="primary"
                 size="large"
                 onClick={handleBookingClick}
@@ -139,7 +141,7 @@ const Bookings = () => {
                 hour to a whole day of playing.
               </Typography>
               <Button
-                variant="outlined"
+                variant="contained"
                 color="primary"
                 size="large"
                 onClick={handleBookingClick}
@@ -192,7 +194,7 @@ const Bookings = () => {
                 more effectively and accurately.
               </Typography>
               <Button
-                variant="outlined"
+                variant="contained"
                 color="primary"
                 size="large"
                 onClick={handleBookingClick}
@@ -251,7 +253,7 @@ const Bookings = () => {
 
       <Section>
         <Button
-          variant="outlined"
+          variant="contained"
           color="primary"
           size="large"
           onClick={handleBookingClick}

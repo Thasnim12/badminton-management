@@ -45,10 +45,7 @@ const AppRoutes = () => {
         <Route path="/about" element={<AboutUs />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route
-          path="/book-now"
-          element={<ProtectedRoute element={<BookingPage />} />}
-        />
+        <Route path="/book-now" element={<BookingPage />} />
         <Route path="/bookings" element={<Bookings />} />
 
         <Route path="/profile" element={<Profile />} />

@@ -83,7 +83,7 @@ const BookingHistory = () => {
         <Grid container spacing={2} justifyContent="flex-end">
           <Grid item>
             <Button
-              variant="outlined"
+              variant="contained"
               startIcon={<DownloadIcon />}
               onClick={downloadCSV}
             >

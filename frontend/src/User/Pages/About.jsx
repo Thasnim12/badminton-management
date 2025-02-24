@@ -15,34 +15,34 @@ const ContentWrapper = styled(Box)({
 
 const HeroSection = styled(Box)(({ theme }) => ({
   width: "100vw",
-  height: "400px", // Fixed height
-  backgroundImage: 'url("/Carousal1.jpg")',
-  backgroundPosition: "center",
-  backgroundRepeat: "no-repeat",
-  backgroundSize: "100% 100%", // Stretches image to fit width & height
-  textAlign: "center",
-  padding: "80px 20px",
+  height: "calc(100vw / 4.8)", // Maintain 1920x400 aspect ratio (400px height for 1920px width)
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "flex-start", // Align image to the top
+  overflow: "hidden",
 
   [theme.breakpoints.down("lg")]: {
-    height: "380px", // Slightly reduce for large screens
+    height: "calc(100vw / 4.8)", // Maintain aspect ratio
   },
 
   [theme.breakpoints.down("md")]: {
-    height: "350px", // Adjust for medium screens
+    height: "calc(100vw / 4.8)", 
   },
 
   [theme.breakpoints.down("sm")]: {
-    height: "300px", // Reduce height on small screens
-    padding: "40px 10px",
+    height: "calc(100vw / 4.8)", 
   },
 
   [theme.breakpoints.down("xs")]: {
-    height: "250px", // Reduce height for extra small screens
-    padding: "30px 5px",
+    height: "calc(100vw / 4.8)", 
   },
 }));
 
-
+const HeroImage = styled("img")({
+  width: "100%", // Full width
+  height: "100%", // Full height of the container
+  objectFit: "contain", // Ensure the whole image is visible without cropping
+});
 const Section = styled(Box)(({ theme }) => ({
   padding: "60px 20px",
   width: "100%",
@@ -86,18 +86,18 @@ const AboutUs = () => {
   const { userInfo } = useSelector((state) => state.userAuth);
   const handleJoinClick = (e) => {
     e.preventDefault();
-    console.log("Button clicked, userInfo:", userInfo);
-    if (userInfo) {
-      navigate("/bookings");
-    } else {
-      navigate("/register");
-    }
-    window.scrollTo(0, 0);
+    navigate("/book-now"); // Always navigate to bookings
+  
+    window.scrollTo(0, 0); // Scroll to top
   };
+  
   return (
     <>
       <Header />
-      <HeroSection />
+      <HeroSection>
+      <HeroImage src="/Carousal1.jpg" alt="Hero Banner" />
+    </HeroSection>
+
       
       <Section>
         <Container maxWidth="lg">
@@ -210,11 +210,11 @@ const AboutUs = () => {
                 helping those in need.
               </Typography>
               <Button
-                variant="outlined"
+                variant="contained"
                 color="primary"
                 onClick={handleJoinClick}
               >
-                {userInfo ? "Book Now" : "Join now"}
+               Book a court
               </Button>
             </PaperCard>
           </Grid>
@@ -226,7 +226,7 @@ const AboutUs = () => {
                 good cause.
               </Typography>
               <Link to="/donate"  onClick={() => window.scrollTo(0, 0)}>
-                <Button variant="outlined" color="primary">
+                <Button variant="contained" color="primary">
                   Sponsor
                 </Button>
               </Link>
@@ -240,7 +240,7 @@ const AboutUs = () => {
                 will go a long way in making a difference in someone’s life.
               </Typography>
               <Link to="/donate"  onClick={() => window.scrollTo(0, 0)}>
-                <Button variant="outlined" color="primary">
+                <Button variant="contained" color="primary">
                   Donate Now
                 </Button>
               </Link>
@@ -264,7 +264,7 @@ const AboutUs = () => {
           </Typography>
 
           <Link to="/donate"  onClick={() => window.scrollTo(0, 0)}>
-            <Button variant="outlined" color="primary">
+            <Button variant="contained" color="primary">
               Make a change
             </Button>
           </Link>
