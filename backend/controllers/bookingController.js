@@ -21,9 +21,10 @@ const createBooking = async (req, res) => {
         console.log("RAZORPAY_KEY_SECRET:", process.env.RAZORPAY_KEY_SECRET);
 
         const { courtId, slotId, amount, addons } = req.body;
-        const userId = req.user._id;
+        const { details } = req.body;
+        console.log(details,'details')
 
-        if (!userId && !guestDetails) {
+        if (!req?.user?._id && !details) {
             return res.status(400).json({
                 message: "Guest details required for non-registered users"
             });
@@ -105,13 +106,14 @@ const createBooking = async (req, res) => {
             },    
         };
 
-        if (userId) {
-            bookingData.user = userId;
+        if (req?.user?._id) {
+            bookingData.user = req?.user?._id;
         } else {
             bookingData.guestDetails = {
-                name: guestDetails.name,
-                email: guestDetails.email,
-                phone: guestDetails.phone
+                name: details.name,
+                email: details.email,
+                phone: details.phone,
+                city:details.city,
             };
         }
 

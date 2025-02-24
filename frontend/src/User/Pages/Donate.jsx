@@ -349,7 +349,7 @@ const Donate = () => {
                 title: "Empowering Communities Through Compassion",
                 description:
                   "Charity isn’t just about giving; it’s about empowering. Every contribution you make helps build stronger communities, fostering growth, dignity, and endless possibilities.",
-                imgSrc: "",
+                imgSrc: "https://youthjunctioninc.net.au/wp-content/uploads/2023/07/Untitled_design_1-1.png",
               },
               {
                 title: "Transparency You Can Believe In",

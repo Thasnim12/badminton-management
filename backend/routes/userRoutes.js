@@ -36,14 +36,14 @@ userroute.post("/donation", createDonation);
 userroute.post("/verify-donation", verifyPayment);
 userroute.post("/google-login", googleLogin);
 userroute.post("/send-message", sendMessage);
-userroute.post("/booking", authenticateUser, createBooking);
-userroute.post("/verify-booking", authenticateUser, verifyBookingPayment);
+userroute.post("/booking", createBooking);
+userroute.post("/verify-booking", verifyBookingPayment);
 
 // Get route
-userroute.get("/get-courts", authenticateUser, getCourts);
-userroute.get("/get-slots", authenticateUser, getSlots);
-userroute.get("/get-addons", authenticateUser, getAddons);
-userroute.get("/user-history", authenticateUser, getBookingHistory);
+userroute.get("/get-courts", getCourts);
+userroute.get("/get-slots", getSlots);
+userroute.get("/get-addons", getAddons);
+userroute.get("/user-history", getBookingHistory);
 userroute.get("/banner", displayBanner);
 userroute.get("/get-staffs-users", getAllStaffsForUsers);
 

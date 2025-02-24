@@ -177,7 +177,7 @@ const Login = () => {
                 {isLoggingIn ? "Logging in..." : "Log In"}
               </Button>
 
-              <div>
+              {/* <div>
                 <Button
                   variant="outlined"
                   color="primary"
@@ -190,7 +190,7 @@ const Login = () => {
                     ? "Logging in with Google..."
                     : "Sign in with Google"}
                 </Button>
-              </div>
+              </div> */}
 
               <div style={{ marginTop: "20px", textAlign: "center" }}>
                 <Typography variant="body2">

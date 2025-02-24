@@ -22,7 +22,6 @@ const authenticateAdmin = async (req, res, next) => {
         }
 
         req.admin = admin;
-        req.role = "admin";
         next();
     } catch (error) {
         console.error('Auth error:', error);

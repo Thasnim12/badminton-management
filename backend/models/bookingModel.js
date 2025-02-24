@@ -49,12 +49,10 @@ const bookingSchema = mongoose.Schema(
     }],
     bookingDate: {
       type: Date,
-      required: true,
     },
     bookingType: {  
       type: String,
       enum: ["Online", "Offline"],  
-      required: true,
       default: "Online",
     },
     payment: {
@@ -64,7 +62,6 @@ const bookingSchema = mongoose.Schema(
       amount: { type: Number, required: true },
       method: { 
         type: String, 
-        enum: ["Razorpay", "Cash", "UPI", "Card", "Bank Transfer"], 
       },
       currency: { type: String, default: "INR" },
       status: {
