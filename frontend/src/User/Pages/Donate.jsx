@@ -145,7 +145,7 @@ const Donate = () => {
       const { order } = response;
 
       const options = {
-        key: process.env.REACT_RAZORPAY_KEY_ID,
+        key: process.env.REACT_APP_RAZORPAY_KEY_ID,
         amount: order.amount,
         currency: order.currency,
         name: "Awinco Donations",

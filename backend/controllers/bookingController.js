@@ -23,6 +23,12 @@ const createBooking = async (req, res) => {
         const { courtId, slotId, amount, addons } = req.body;
         const userId = req.user._id;
 
+        if (!userId && !guestDetails) {
+            return res.status(400).json({
+                message: "Guest details required for non-registered users"
+            });
+        }
+
         if (!Array.isArray(slotId)) {
             return res.status(400).json({ message: "slotId must be an array" });
         }
@@ -37,7 +43,7 @@ const createBooking = async (req, res) => {
             return false;
         });
 
-        console.log(invalidSlot,'slot')
+        console.log(invalidSlot, 'slot')
 
         if (invalidSlot) {
             return res.status(400).json({ message: "slots are already booked or unavailable" });
@@ -85,11 +91,9 @@ const createBooking = async (req, res) => {
             receipt: `receipt_${Date.now()}`,
         };
 
-        const order = await razorpay.orders.create(options);
-        console.log(order, 'order')
+        const order = await razorpay.orders.create(options);   
 
-        const newBooking = new Booking({
-            user: userId,
+        const bookingData = {
             court: courtId,
             slot: slotId,
             bookingDate: new Date(),
@@ -98,10 +102,20 @@ const createBooking = async (req, res) => {
                 razorpayOrderId: order.id,
                 amount: totalAmount,
                 status: "Pending",
-                method: order.method
-            },
-        });
+            },    
+        };
 
+        if (userId) {
+            bookingData.user = userId;
+        } else {
+            bookingData.guestDetails = {
+                name: guestDetails.name,
+                email: guestDetails.email,
+                phone: guestDetails.phone
+            };
+        }
+
+        const newBooking = new Booking(bookingData);
         await newBooking.save();
 
         res.status(200).json({
@@ -149,11 +163,13 @@ const verifyBookingPayment = async (req, res) => {
                     rentalEndTime.setHours(rentalEndTime.getHours() + 1);
 
                     const addonRental = new Rental({
-                        addon: addon._id,
+                        addon: addon.addon,
                         booking: booking._id,
                         quantity: addon.quantity,
                         rentelTime: rentalEndTime,
-                    })
+                        user: booking.user || null,
+                        guestDetails: booking.guestDetails || null
+                    });
 
                     await addonRental.save();
                 }
@@ -175,7 +191,7 @@ const verifyBookingPayment = async (req, res) => {
             { isBooked: true }
         );
 
-        console.log(updatedresult,'result')
+        console.log(updatedresult, 'result')
 
         res.status(200).json({ success: true, message: "Payment verified, booking confirmed!" });
     } catch (error) {
@@ -187,8 +203,8 @@ const verifyBookingPayment = async (req, res) => {
 const getBookings = async (req, res) => {
     try {
         const bookings = await Booking.find({})
-            .populate("slot",'startTime endTime') 
-            .populate("court",'court_name') 
+            .populate("slot", 'startTime endTime')
+            .populate("court", 'court_name')
             .populate("user", "name")
 
         if (!bookings || bookings.length === 0) {
@@ -205,51 +221,51 @@ const getBookings = async (req, res) => {
 
 const downloadBookings = async (req, res) => {
     try {
-      const bookings = await Booking.find()
-        .populate("user", "name email")
-        .populate("court", "name")
-        .populate("slot", "startTime endTime")
-        .populate("addons.addon", "name");
-  
-      if (!bookings.length) {
-        return res.status(404).json({ message: "No bookings found" });
-      }
-  
-      const csvStream = fastCsv.format({ headers: true });
-  
-      const readableStream = new Readable({
-        read() {},
-      });
-  
-      res.setHeader("Content-Disposition", "attachment; filename=bookings.csv");
-      res.setHeader("Content-Type", "text/csv");
-  
-      csvStream.pipe(res);
-  
-      bookings.forEach((booking) => {
-        csvStream.write({
-          "Booking ID": booking._id,
-          "User Name": booking.user?.name || "N/A",
-          "User Email": booking.user?.email || "N/A",
-          "Court Name": booking.court?.court_name || "N/A",
-          "Slot Time": booking.slot.map(s => `${s.startTime} - ${s.endTime}`).join(", "),
-          "Booking Date": booking.bookingDate.toISOString().split("T")[0],
-          "Payment Status": booking.payment.status,
-          "Payment Amount": booking.payment.amount,
-          "Add-ons": booking.addons.map(a => `${a.addon?.name} (x${a.quantity})`).join(", ") || "None",
-          "Total Add-ons Price": booking.addons.reduce((total, a) => total + (a.totalPrice || 0), 0),
-          "Cancelled": booking.isCancelled ? "Yes" : "No",
-        });
-      });
-  
-      csvStream.end();
-    } catch (error) {
-      console.error("Error generating CSV:", error);
-      res.status(500).json({ message: "Internal server error" });
-    }
-  };
+        const bookings = await Booking.find()
+            .populate("user", "name email")
+            .populate("court", "name")
+            .populate("slot", "startTime endTime")
+            .populate("addons.addon", "name");
 
-  const createOfflineBooking = async (req, res) => {
+        if (!bookings.length) {
+            return res.status(404).json({ message: "No bookings found" });
+        }
+
+        const csvStream = fastCsv.format({ headers: true });
+
+        const readableStream = new Readable({
+            read() { },
+        });
+
+        res.setHeader("Content-Disposition", "attachment; filename=bookings.csv");
+        res.setHeader("Content-Type", "text/csv");
+
+        csvStream.pipe(res);
+
+        bookings.forEach((booking) => {
+            csvStream.write({
+                "Booking ID": booking._id,
+                "User Name": booking.user?.name || "N/A",
+                "User Email": booking.user?.email || "N/A",
+                "Court Name": booking.court?.court_name || "N/A",
+                "Slot Time": booking.slot.map(s => `${s.startTime} - ${s.endTime}`).join(", "),
+                "Booking Date": booking.bookingDate.toISOString().split("T")[0],
+                "Payment Status": booking.payment.status,
+                "Payment Amount": booking.payment.amount,
+                "Add-ons": booking.addons.map(a => `${a.addon?.name} (x${a.quantity})`).join(", ") || "None",
+                "Total Add-ons Price": booking.addons.reduce((total, a) => total + (a.totalPrice || 0), 0),
+                "Cancelled": booking.isCancelled ? "Yes" : "No",
+            });
+        });
+
+        csvStream.end();
+    } catch (error) {
+        console.error("Error generating CSV:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+const createOfflineBooking = async (req, res) => {
     try {
         const { courtId, slotId, amount, addons, paymentMethod, userId, phoneno, userName } = req.body;
 
@@ -278,7 +294,7 @@ const downloadBookings = async (req, res) => {
             await user.save();
         }
 
-        const userIdToUse = user._id; 
+        const userIdToUse = user._id;
 
         const slotPromises = slotId.map(id => Slot.findById(id));
         const slots = await Promise.all(slotPromises);

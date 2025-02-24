@@ -235,7 +235,7 @@ const generateSlots = async (req, res) => {
       isBooked: false,
       startTime: {
         $gte: today.toDate(),
-        $lt: moment(today).add(7, "days").toDate(),
+        $lt: moment(today).add(30, "days").toDate(),
       },
     });
 
@@ -254,10 +254,10 @@ const generateSlots = async (req, res) => {
       ])
     );
 
-    for (let day = 0; day < 7; day++) {
+    for (let day = 0; day < 30; day++) {
       const currentDate = moment(today).add(day, "days");
 
-      for (let hour = 6; hour < 22; hour++) {
+      for (let hour = 10; hour < 22; hour++) {
         const startTime = moment(currentDate)
           .set("hour", hour)
           .set("minute", 0)

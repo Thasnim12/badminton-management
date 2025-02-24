@@ -5,7 +5,11 @@ const bookingSchema = mongoose.Schema(
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User", 
-      required: true,
+    },
+    nonRegisteredusers: {
+      name: { type: String },
+      email: { type: String },
+      phone: { type: String },
     },
     name: {
       type: String
@@ -61,7 +65,6 @@ const bookingSchema = mongoose.Schema(
       method: { 
         type: String, 
         enum: ["Razorpay", "Cash", "UPI", "Card", "Bank Transfer"], 
-        required: true 
       },
       currency: { type: String, default: "INR" },
       status: {
