@@ -159,7 +159,10 @@ const Donate = () => {
               razorpay_signature: response.razorpay_signature,
             }).unwrap();
 
-            setAlert({ message: verifyRes.message, severity: "success" });
+            setAlert({
+              message: `Donation successful! You have donated ₹${verifyRes.order.amount}.`,
+              severity: "success",
+            });
             resetForm();
             setOpenDialog(false);
             navigate("/donate");
@@ -206,24 +209,23 @@ const Donate = () => {
     backgroundPosition: "center",
     backgroundRepeat: "no-repeat",
     backgroundSize: "contain", // Ensures full image visibility without cropping
-  
+
     [theme.breakpoints.down("lg")]: {
       height: "calc(100vw / 4.8)",
     },
-  
+
     [theme.breakpoints.down("md")]: {
       height: "calc(100vw / 4.8)",
     },
-  
+
     [theme.breakpoints.down("sm")]: {
       height: "calc(100vw / 4.8)",
     },
-  
+
     [theme.breakpoints.down("xs")]: {
       height: "calc(100vw / 4.8)",
     },
   }));
-  
 
   const Section = styled(Box)(({ theme }) => ({
     padding: "30px 20px",
@@ -349,7 +351,8 @@ const Donate = () => {
                 title: "Empowering Communities Through Compassion",
                 description:
                   "Charity isn’t just about giving; it’s about empowering. Every contribution you make helps build stronger communities, fostering growth, dignity, and endless possibilities.",
-                imgSrc: "https://youthjunctioninc.net.au/wp-content/uploads/2023/07/Untitled_design_1-1.png",
+                imgSrc:
+                  "https://youthjunctioninc.net.au/wp-content/uploads/2023/07/Untitled_design_1-1.png",
               },
               {
                 title: "Transparency You Can Believe In",
