@@ -168,7 +168,7 @@ const Login = () => {
 
               <Button
                 type="submit"
-                variant="outlined"
+                variant="contained"
                 color="primary"
                 fullWidth
                 sx={{ marginTop: 2 }}
@@ -179,7 +179,7 @@ const Login = () => {
 
               <div>
                 <Button
-                  variant="outlined"
+                  variant="contained"
                   color="primary"
                   fullWidth
                   sx={{ marginTop: 2 }}

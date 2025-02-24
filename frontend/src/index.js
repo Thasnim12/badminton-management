@@ -20,7 +20,7 @@ if (appElement) {
         <Provider store={store}>
         <SnackbarProvider maxSnack={3}>
           <App />
-          </SnackbarProvider>,
+          </SnackbarProvider>
         </Provider>
       </GoogleOAuthProvider>
     </React.StrictMode>

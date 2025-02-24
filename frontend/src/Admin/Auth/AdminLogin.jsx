@@ -145,7 +145,7 @@ const AdminLogin = () => {
 
                   <Button
                     type="submit"
-                    variant="outlined"
+                    variant="contained"
                     color="primary"
                     fullWidth
                     sx={{ marginTop: 2 }}
