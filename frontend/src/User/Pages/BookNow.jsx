@@ -257,7 +257,7 @@ const CourtBooking = () => {
         key: process.env.REACT_RAZORPAY_KEY_ID,
         amount: calculateTotalAmount() * 100,
         currency: "INR",
-        name: "Awinco Donations",
+        name: "AVK Raja Yadav Trust Donations",
         description: "Support our community",
         order_id: orderId,
 
