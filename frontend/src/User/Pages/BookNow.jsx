@@ -542,8 +542,8 @@ const CourtBooking = () => {
 
                   {/* Proceed Button (Responsive Sizing) */}
                   <Button
-                    variant="outlined"
-                    color="success"
+                    variant="contained"
+                    color="primary"
                     sx={{
                       marginTop: 2,
                       alignSelf: { xs: "stretch", sm: "flex-end" }, // Full width on mobile, right-aligned on larger screens
@@ -687,12 +687,12 @@ const CourtBooking = () => {
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose} variant="outlined" color="error">
+          <Button onClick={handleClose} variant="contained" color="error">
             Cancel
           </Button>
           <Button
             onClick={handleConfirmPay}
-            variant="outlined"
+            variant="contained"
             color="primary"
             disabled={processing}
           >
@@ -751,13 +751,13 @@ const CourtBooking = () => {
           </Grid>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose} color="error" variant="outlined">
+          <Button onClick={handleClose} color="error" variant="contained">
             Cancel
           </Button>
           <Button
             onClick={handleSubmitDetails}
             color="primary"
-            variant="outlined"
+            variant="contained"
           >
             Submit
           </Button>
