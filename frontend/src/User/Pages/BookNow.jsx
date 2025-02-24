@@ -63,6 +63,7 @@ const CourtBooking = () => {
   const [openHistoryModal, setOpenHistoryModal] = useState(false);
   const navigate = useNavigate();
   const [selectedDate, setSelectedDate] = useState(dayjs());
+  const [openCalendar, setOpenCalendar] = useState(false); // Control the DatePicker
   const [selectedCourt, setSelectedCourt] = useState("");
   const [openDrawer, setOpenDrawer] = useState(false);
   const [selectedAddOns, setSelectedAddOns] = useState([]);
@@ -105,12 +106,12 @@ const CourtBooking = () => {
       setOpenUserDialog(false);
       handleBooking(); // Proceed to booking after details are filled
     } else {
-      setAlert("Please fill all the required fields."); 
+      setAlert("Please fill all the required fields.");
       setAlertSeverity("error");
       setOpenSnackbar(true); // Open the snackbar
     }
   };
-  
+
   const [bookingData, setBookingData] = useState({
     courtId: "",
     slotId: [],
@@ -269,16 +270,17 @@ const CourtBooking = () => {
               razorpay_signature: response.razorpay_signature,
               payment_method: response.method,
             }).unwrap();
-        
+
             console.log(verificationResponse, "response");
-        
+
             if (verificationResponse.success) {
               setAlert("Payment successful! Thanks for your booking.");
               setAlertSeverity("success");
               setOpenSnackbar(true);
-        
+
               setBookingHistory({
-                court: courts.find((court) => court._id === selectedCourt)?.court_name,
+                court: courts.find((court) => court._id === selectedCourt)
+                  ?.court_name,
                 date: selectedDate.format("YYYY-MM-DD"),
                 slots: selectedSlots.map((slot) => ({
                   startTime: dayjs(slot.startTime).format("h:mm A"),
@@ -288,7 +290,7 @@ const CourtBooking = () => {
                 totalAmount: calculateTotalAmount(),
                 status: "Confirmed",
               });
-        
+
               handleClickOpen();
             }
           } catch (error) {
@@ -297,7 +299,7 @@ const CourtBooking = () => {
             setOpenSnackbar(true);
             console.log(error.message);
           }
-        }, 
+        },
         prefill: {
           name: "User Name",
           email: "user@example.com",
@@ -375,7 +377,7 @@ const CourtBooking = () => {
       setOpen(true);
     }
   };
-  
+
   const handleClose = () => {
     setSelectedSlots([]);
     setSelectedAddOns([]);
@@ -447,13 +449,20 @@ const CourtBooking = () => {
                   <LocalizationProvider dateAdapter={AdapterDayjs}>
                     <DatePicker
                       value={selectedDate}
-                      onChange={setSelectedDate}
+                      onChange={(newDate) => {
+                        setSelectedDate(newDate);
+                        setOpen(false); // Close picker after selecting a date
+                      }}
                       minDate={dayjs()} // Disable past dates
                       format="DD/MM/YYYY"
+                      open={openCalendar}
+                      onOpen={() => setOpenCalendar(true)}
+                      onClose={() => setOpenCalendar(false)}
                       slots={{
                         textField: (params) => (
                           <TextField
                             {...params}
+                            onClick={() => setOpenCalendar(true)} // Open picker on click anywhere
                             InputProps={{
                               ...params.InputProps,
                               endAdornment: (
