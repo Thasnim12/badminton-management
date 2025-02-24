@@ -246,7 +246,10 @@ const Profile = () => {
                 <Grid container spacing={3} alignItems="center">
                   <Grid item xs={12} display="flex" justifyContent="center">
                     <Avatar
-                      src={`https://res.cloudinary.com/dj0rho12o/image/upload/${user.profileImage}` || "/default-profile.jpg"}
+                      src={
+                        `https://res.cloudinary.com/dj0rho12o/image/upload/${user.profileImage}` ||
+                        "/default-profile.jpg"
+                      }
                       sx={{ width: 100, height: 100 }}
                     />
                   </Grid>
@@ -308,8 +311,8 @@ const Profile = () => {
                       }
                       variant="outlined"
                       disabled={!isEditing}
-                      autoFocus={focusedField === "name"} 
-                      onFocus={() => setFocusedField("name")} 
+                      autoFocus={focusedField === "name"}
+                      onFocus={() => setFocusedField("name")}
                     />
                   </Grid>
 
@@ -338,8 +341,8 @@ const Profile = () => {
                       }
                       variant="outlined"
                       disabled={!isEditing}
-                      autoFocus={focusedField === "mobile"} 
-                      onFocus={() => setFocusedField("mobile")} 
+                      autoFocus={focusedField === "mobile"}
+                      onFocus={() => setFocusedField("mobile")}
                     />
                   </Grid>
 
@@ -364,7 +367,7 @@ const Profile = () => {
                       </>
                     ) : (
                       <Button
-                        variant="outlined"
+                        variant="contained"
                         color="primary"
                         onClick={() => setIsEditing(true)}
                       >

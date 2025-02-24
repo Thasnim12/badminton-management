@@ -13,15 +13,21 @@ import {
   DialogContent,
   DialogActions,
   Drawer,
+  TextField,
   Divider,
   Snackbar,
+  Radio,
+  RadioGroup,
+  FormControlLabel,
   Alert,
+  InputAdornment,
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { skipToken } from "@reduxjs/toolkit/query";
 import { styled } from "@mui/material/styles";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { CalendarToday } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import IconButton from "@mui/material/IconButton";
@@ -56,13 +62,51 @@ const CourtBooking = () => {
   const [openDialog, setOpenDialog] = useState(false);
   const [openHistoryModal, setOpenHistoryModal] = useState(false);
   const navigate = useNavigate();
-  const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedDate, setSelectedDate] = useState(dayjs());
   const [selectedCourt, setSelectedCourt] = useState("");
   const [openDrawer, setOpenDrawer] = useState(false);
   const [selectedAddOns, setSelectedAddOns] = useState([]);
   const [open, setOpen] = useState(false);
   const [alert, setAlert] = useState(null);
+  const [openSnackbar, setOpenSnackbar] = useState(false);
   const [selectedImage, setSelectedImage] = useState("");
+  const [openUserDialog, setOpenUserDialog] = useState(false);
+  const [userDetails, setUserDetails] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    city: "",
+  });
+
+  const handleInputChange = (e) => {
+    setUserDetails({ ...userDetails, [e.target.name]: e.target.value });
+  };
+
+  const validateUserDetails = () => {
+    return (
+      userDetails.name &&
+      userDetails.email &&
+      userDetails.phone &&
+      userDetails.city
+    );
+  };
+
+  const handleConfirmPay = () => {
+    if (validateUserDetails()) {
+      handleBooking(); // Proceed with booking
+    } else {
+      setOpenUserDialog(true); // Show dialog if details are missing
+    }
+  };
+
+  const handleSubmitDetails = () => {
+    if (validateUserDetails()) {
+      setOpenUserDialog(false);
+      handleBooking(); // Proceed to booking after details are filled
+    } else {
+      setOpenSnackbar(true); // Set error message
+    }
+  };
 
   const [bookingData, setBookingData] = useState({
     courtId: "",
@@ -76,7 +120,7 @@ const CourtBooking = () => {
   const [verifyBooking] = useVerifyBookingMutation();
   const [bookingHistory, setBookingHistory] = useState(null);
   const [processing, setProcessing] = useState(false);
-  const [openSnackbar, setOpenSnackbar] = useState(false);
+
   const { data, isLoading: courtsLoading } = useGetAllcourtsQuery();
   const courts = data?.court || [];
 
@@ -103,7 +147,7 @@ const CourtBooking = () => {
     });
 
     selectedAddOns.forEach((addOn) => {
-      total += addOn.price;
+      total += addOn.quantity * addOn.price;
     });
 
     return total;
@@ -199,6 +243,7 @@ const CourtBooking = () => {
         slotId: selectedSlots.map((slot) => slot._id),
         amount: calculateTotalAmount(),
         addons: formattedAddons,
+        details: userDetails,
       }).unwrap();
 
       const { orderId, bookingId } = bookingResponse;
@@ -268,11 +313,11 @@ const CourtBooking = () => {
   const handleAddOnToggle = (addOn, quantity) => {
     setSelectedAddOns((prev) => {
       const exists = prev.find((item) => item._id === addOn._id);
-  
+
       if (quantity === 0) {
         return prev.filter((item) => item._id !== addOn._id);
       }
-  
+
       if (exists) {
         return prev.map((item) =>
           item._id === addOn._id ? { ...item, quantity } : item
@@ -281,7 +326,6 @@ const CourtBooking = () => {
       return [...prev, { ...addOn, quantity }];
     });
   };
-  
 
   const handleSlotToggle = (slot) => {
     setSelectedSlots((prevSlots) => {
@@ -292,11 +336,22 @@ const CourtBooking = () => {
     });
   };
 
+  useEffect(() => {
+    if (courts.length > 0) {
+      setSelectedCourt(courts[0]._id);
+      setSelectedImage(courts[0].court_image);
+    }
+  }, [courts]);
+
   const handleCourtChange = (e) => {
-    const court = e.target.value;
-    setSelectedImage(court.court_image);
-    setSelectedCourt(court._id);
-    setOpenDrawer(true);
+    const selectedCourtId = e.target.value;
+    const court = courts.find((c) => c._id === selectedCourtId);
+
+    if (court) {
+      setSelectedImage(court.court_image);
+      setSelectedCourt(court._id);
+      setOpenDrawer(true);
+    }
   };
 
   const handleClickOpen = () => {
@@ -307,7 +362,10 @@ const CourtBooking = () => {
     }
   };
   const handleClose = () => {
+    setSelectedSlots([]);
+    setSelectedAddOns([]);
     setOpen(false);
+    setOpenUserDialog(false);
   };
 
   const handleCloseSnackbar = () => {
@@ -332,17 +390,7 @@ const CourtBooking = () => {
           sx={{ maxWidth: "80%", marginLeft: "10px", padding: "5px" }}
         >
           <Grid container spacing={2}>
-            {/* Left Panel - DetailsCard */}
-            <Grid
-              item
-              xs={12}
-              md={4}
-              sx={{ height: { xs: "auto", md: "100vh" }, marginTop: "3px" }}
-            >
-              <DetailsCard />
-            </Grid>
-
-            {/* Right Panel - Booking Section */}
+            {/* Right Panel - Booking Section (Now on the Left) */}
             <Grid
               item
               xs={12}
@@ -365,7 +413,6 @@ const CourtBooking = () => {
                   <Typography variant="h6" fontWeight="bold">
                     Select Court & Date
                   </Typography>
-
                   {/* Add button (Responsive Positioning) */}
                   <Button
                     variant="outlined"
@@ -381,46 +428,62 @@ const CourtBooking = () => {
                   >
                     Add Ons
                   </Button>
-
                   {/* Date Picker */}
                   <LocalizationProvider dateAdapter={AdapterDayjs}>
                     <DatePicker
                       value={selectedDate}
                       onChange={setSelectedDate}
+                      minDate={dayjs()} // Disable past dates
+                      format="DD/MM/YYYY"
+                      slots={{
+                        textField: (params) => (
+                          <TextField
+                            {...params}
+                            InputProps={{
+                              ...params.InputProps,
+                              endAdornment: (
+                                <InputAdornment position="end">
+                                  <CalendarToday
+                                    style={{ cursor: "pointer" }}
+                                  />
+                                </InputAdornment>
+                              ),
+                            }}
+                          />
+                        ),
+                      }}
                     />
                   </LocalizationProvider>
-
                   {/* Court Select */}
-                  <Select
-                    fullWidth
-                    value={
-                      courts.find((court) => court._id === selectedCourt) || ""
-                    }
+                  <RadioGroup
+                    value={selectedCourt}
                     onChange={handleCourtChange}
-                    sx={{ mt: 2 }}
+                    sx={{
+                      mt: 2,
+                      display: "flex",
+                      flexDirection: "row",
+                      gap: 2,
+                    }} // Align side by side
                   >
                     {courtsLoading ? (
-                      <MenuItem disabled>Loading courts...</MenuItem>
+                      <Typography>Loading courts...</Typography>
                     ) : (
                       courts?.map((court) => (
-                        <MenuItem
+                        <FormControlLabel
                           key={court._id}
-                          value={court}
-                          disabled={!court.isActive}
-                        >
-                          {court.court_name}{" "}
-                          {!court.isActive ? "(Inactive)" : ""}
-                        </MenuItem>
+                          value={court._id}
+                          control={<Radio disabled={!court.isActive} />}
+                          label={`${court.court_name} ${!court.isActive ? "(Inactive)" : ""}`}
+                        />
                       ))
                     )}
-                  </Select>
-
+                  </RadioGroup>
                   {/* Court Image */}
                   <CardMedia
                     component="img"
-                    height="150"
+                    height="300px"
                     image={`https://res.cloudinary.com/dj0rho12o/image/upload/${selectedImage}`}
-                    sx={{ marginTop: 2}}
+                    sx={{ marginTop: 2 }}
                     alt="Court Image"
                   />
                 </Card>
@@ -491,6 +554,16 @@ const CourtBooking = () => {
                   </Button>
                 </Card>
               </Grid>
+            </Grid>
+
+            {/* Left Panel - DetailsCard (Now on the Right) */}
+            <Grid
+              item
+              xs={12}
+              md={4}
+              sx={{ height: { xs: "auto", md: "100vh" }, marginTop: "3px" }}
+            >
+              <DetailsCard />
             </Grid>
           </Grid>
         </Grid>
@@ -596,7 +669,9 @@ const CourtBooking = () => {
                 {selectedAddOns.map((addon, index) => (
                   <Typography key={index} gutterBottom>
                     {addon.item_name}
-                    <span style={{ float: "right" }}>₹{addon.price}</span>
+                    <span style={{ float: "right" }}>
+                      ₹{addon.quantity * addon.price}
+                    </span>
                   </Typography>
                 ))}
               </>
@@ -616,7 +691,7 @@ const CourtBooking = () => {
             Cancel
           </Button>
           <Button
-            onClick={handleBooking}
+            onClick={handleConfirmPay}
             variant="outlined"
             color="primary"
             disabled={processing}
@@ -625,6 +700,69 @@ const CourtBooking = () => {
           </Button>
         </DialogActions>
       </BootstrapDialog>
+
+      {/* User Details Dialog */}
+      <Dialog open={openUserDialog} onClose={() => setOpenUserDialog(false)}>
+        <DialogTitle>Enter Your Details</DialogTitle>
+        <DialogContent>
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Name"
+                name="name"
+                value={userDetails.name}
+                onChange={handleInputChange}
+                required
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Email"
+                name="email"
+                type="email"
+                value={userDetails.email}
+                onChange={handleInputChange}
+                required
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Phone Number"
+                name="phone"
+                type="tel"
+                value={userDetails.phone}
+                onChange={handleInputChange}
+                required
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="City"
+                name="city"
+                value={userDetails.city}
+                onChange={handleInputChange}
+                required
+              />
+            </Grid>
+          </Grid>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose} color="error" variant="outlined">
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSubmitDetails}
+            color="primary"
+            variant="outlined"
+          >
+            Submit
+          </Button>
+        </DialogActions>
+      </Dialog>
       <Footer />
     </>
   );

@@ -14,7 +14,7 @@ import {
   Avatar,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate,useLocation  } from "react-router-dom";
 import { useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
 
@@ -24,6 +24,7 @@ const Header = () => {
   const [userInfo, setUserInfo] = useState(null);
   const navigate = useNavigate();
   const theme = useTheme();
+  const location = useLocation(); // Get current route
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
   useEffect(() => {
@@ -33,6 +34,10 @@ const Header = () => {
       setUserInfo(JSON.parse(storedUser));
     }
   }, []);
+
+  useEffect(() => {
+    window.scrollTo(0, 0); // Scroll to top on route change
+  }, [location]); // Runs when route changes
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);

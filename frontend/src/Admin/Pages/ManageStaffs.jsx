@@ -68,7 +68,7 @@ export default function ManageStaffs({ openForm, handleClose, setSnackbar }) {
       setSnackbar({
         open: true,
         message: "Please check all required fields",
-        severity: "error",
+        type: "error",
       });
       return;
     }
@@ -80,7 +80,7 @@ export default function ManageStaffs({ openForm, handleClose, setSnackbar }) {
       setSnackbar({
         open: true,
         message: "Staff added successfully!",
-        severity: "success",
+        type: "success",
       });
       handleClose();
     } catch (error) {
@@ -88,19 +88,19 @@ export default function ManageStaffs({ openForm, handleClose, setSnackbar }) {
         setSnackbar({
           open: true,
           message: "Email already exists!",
-          severity: "error",
+          type: "error",
         });
       } else if (error?.data?.message?.includes("employee_id")) {
         setSnackbar({
           open: true,
           message: "Employee ID already exists!",
-          severity: "error",
+          type: "error",
         });
       } else {
         setSnackbar({
           open: true,
           message: error?.data?.message || "Error adding staff",
-          severity: "error",
+          type: "error",
         });
       }
     }

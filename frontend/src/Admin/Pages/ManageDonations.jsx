@@ -160,7 +160,7 @@ const ManageDonations = () => {
                     }}
                   >
                     <VolunteerActivismIcon sx={{ mr: 1 }} />
-                    Total Donations
+                    Total
                   </Typography>
                   <Typography variant="h4">
                     ₹{totalDonations.toFixed(2)}

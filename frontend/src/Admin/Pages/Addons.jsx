@@ -135,15 +135,16 @@ const Addons = () => {
               { label: "Add ons", path: "/admin/manage-addons" },
             ]}
           />
-          <Box sx={{ marginTop: "25px" }}>
+          <Box sx={{ marginTop: "25px", px: 2 }}>
             <Grid container spacing={3} justifyContent="center">
-              <Grid item xs={3}>
+              <Grid item xs={12} sm={6} md={3}>
                 <Card
                   sx={{
                     display: "flex",
                     justifyContent: "center",
                     alignItems: "center",
                     textAlign: "center",
+                    width: "100%",
                   }}
                 >
                   <CardContent
@@ -161,7 +162,7 @@ const Addons = () => {
                         alignItems: "center",
                       }}
                     >
-                      <InventoryOutlinedIcon />
+                      <InventoryOutlinedIcon sx={{ mr: 1 }} />
                       Total
                     </Typography>
                     <Typography variant="h4">{totalAddons}</Typography>
@@ -169,13 +170,14 @@ const Addons = () => {
                 </Card>
               </Grid>
 
-              <Grid item xs={3}>
+              <Grid item xs={12} sm={6} md={3}>
                 <Card
                   sx={{
                     display: "flex",
                     justifyContent: "center",
                     alignItems: "center",
                     textAlign: "center",
+                    width: "100%",
                   }}
                 >
                   <CardContent
@@ -201,13 +203,14 @@ const Addons = () => {
                 </Card>
               </Grid>
 
-              <Grid item xs={3}>
+              <Grid item xs={12} sm={6} md={3}>
                 <Card
                   sx={{
                     display: "flex",
                     justifyContent: "center",
                     alignItems: "center",
                     textAlign: "center",
+                    width: "100%",
                   }}
                 >
                   <CardContent
@@ -254,13 +257,11 @@ const Addons = () => {
           </Grid>
 
           {/* Display loading or error messages */}
-          {isLoading ? (
-            <p>Loading add-ons...</p>
-          ) : error ? (
-            <p>Error fetching add-ons</p>
-          ) : (
-            <TableContainer sx={{ marginTop: "25px" }} component={Paper}>
-              <Table sx={{ minWidth: 650 }} aria-label="addons table">
+
+          <TableContainer sx={{ marginTop: "25px" }} component={Paper}>
+            {/* Responsive Scrollable Box */}
+            <Box sx={{ overflowX: "auto" }}>
+              <Table sx={{ minWidth: 800 }} aria-label="addons table">
                 <TableHead>
                   <TableRow>
                     <TableCell align="center">Image</TableCell>
@@ -284,6 +285,7 @@ const Addons = () => {
                             objectFit: "cover",
                             borderRadius: "5px",
                             cursor: "pointer",
+                            maxWidth: "100%",
                           }}
                           onClick={() =>
                             handleImageClick(
@@ -342,8 +344,8 @@ const Addons = () => {
                   ))}
                 </TableBody>
               </Table>
-            </TableContainer>
-          )}
+            </Box>
+          </TableContainer>
 
           {/* Pagination Component */}
           <Pagination

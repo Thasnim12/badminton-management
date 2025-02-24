@@ -10,7 +10,7 @@ import {
   Snackbar,
   Alert,
 } from "@mui/material";
-import { styled } from "@mui/system";
+import { height, styled } from "@mui/system";
 import Header from "./Global/Header";
 import Footer from "./Global/Footer";
 import { useSelector } from "react-redux";
@@ -28,19 +28,18 @@ import { useSendMessageMutation, useViewBannerQuery } from "../Slices/UserApi";
 
 const CarouselWrapper = styled(Box)(({ theme }) => ({
   width: "100vw",
-  height: "400px", // Allow height to adjust dynamically
-  minHeight: "300px", // Ensures it doesn't get too small
+  height: "calc(100vw / 4.8)", // Maintain 1920x400 aspect ratio dynamically
   display: "flex",
   justifyContent: "center",
   alignItems: "center",
   overflow: "hidden",
 
   [theme.breakpoints.down("md")]: {
-    minHeight: "250px",
+    height: "calc(100vw / 4.8)",
   },
 
   [theme.breakpoints.down("sm")]: {
-    minHeight: "200px",
+    height: "calc(100vw / 4.8)",
   },
 }));
 
@@ -53,41 +52,59 @@ const StyledCarousel = styled(Carousel)({
   },
   "& .carousel .slide img": {
     width: "100%",
-    height: "400px",
-    maxHeight: "400px",
+    height: "calc(100vw / 4.8)", // Maintain aspect ratio dynamically
+    objectFit: "contain", // Ensure full image visibility without cropping
   },
 });
 
 const QuoteSection = styled(Box)(({ theme }) => ({
-  padding: "40px 0", // Default padding for larger screens
-  textAlign: "center",
+  padding: "40px 20px",
   display: "flex",
-  justifyContent: "center",
   alignItems: "center",
+  justifyContent: "center",
+  textAlign: "left",
+  gap: "30px",
 
   [theme.breakpoints.down("md")]: {
-    padding: "0 0", // Reduce padding for medium screens
-  },
-
-  [theme.breakpoints.down("sm")]: {
-    padding: "0 0", // Minimal padding for smaller screens
+    flexDirection: "column",
+    textAlign: "center",
   },
 }));
 
 const QuoteImage = styled(Box)({
-  width: "100px",
-  height: "100px",
+  width: "120px",
+  height: "120px",
   borderRadius: "50%",
   overflow: "hidden",
-  marginRight: "20px",
+  flexShrink: 0,
 });
 
-const QuoteText = styled(Box)({
+const QuoteTextContainer = styled(Box)(({ theme }) => ({
   maxWidth: "600px",
-  fontStyle: "italic",
-  fontSize: "1.2rem",
-  color: "#555",
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "flex-start",
+
+  [theme.breakpoints.down("md")]: {
+    alignItems: "center",
+    textAlign: "center",
+  },
+}));
+
+const ButtonContainer = styled(Box)({
+  display: "flex",
+  justifyContent: "center", // Ensures buttons are centered
+  alignItems: "center",
+  gap: "12px",
+  flexWrap: "wrap",
+  width: "100%",
+  marginTop: "10px",
 });
+
+const StyledButton = styled(Button)({
+  minWidth: "160px", // Ensures buttons have the same width
+});
+
 const Section = styled(Box)({
   marginBottom: "20px",
   padding: "60px 0",
@@ -149,15 +166,11 @@ const HomePage = () => {
   const [banner, setBanner] = useState("");
   const handleJoinClick = (e) => {
     e.preventDefault();
-    console.log("Button clicked, userInfo:", userInfo);
-    if (userInfo) {
-      navigate("/bookings");
-    } else {
-      navigate("/register");
-    }
-
-    window.scrollTo(0, 0);
+    navigate("/book-now"); 
+  
+    window.scrollTo(0, 0); 
   };
+  
   const {
     register,
     handleSubmit,
@@ -181,20 +194,13 @@ const HomePage = () => {
   const { data } = useViewBannerQuery();
 
   const handleBookingClick = () => {
-    if (!isLoggedIn) {
-      setAlert({
-        open: true,
-        message: "You need to log in to book a court!",
-        severity: "error",
-      });
-    } else {
-      navigate("/book-now");
-      setTimeout(() => {
-        window.scrollTo(0, 0);
-      }, 100);
-    }
+    navigate("/book-now"); // Always navigate to book-now
+  
+    setTimeout(() => {
+      window.scrollTo(0, 0);
+    }, 100);
   };
-
+  
   useEffect(() => {
     if (data && data.length > 0) {
       setBanner(data);
@@ -256,8 +262,8 @@ const HomePage = () => {
               ))}
         </StyledCarousel>
       </CarouselWrapper>
-
       <QuoteSection>
+        {/* Left Side: Image */}
         <QuoteImage>
           <img
             src="https://i0.wp.com/www.raptisrarebooks.com/images/192572/winston-churchill-the-greatest-figure-of-our-time-first-edition-signed.jpg?fit=1000%2C975&ssl=1"
@@ -265,35 +271,40 @@ const HomePage = () => {
             style={{ width: "100%", height: "100%", objectFit: "cover" }}
           />
         </QuoteImage>
-        <Box textAlign="center" mt={4}>
+
+        {/* Right Side: Quote & Buttons */}
+        <QuoteTextContainer>
           <Typography variant="h6" paragraph>
             "We make a living by what we get, but we make a life by what we
             give."
           </Typography>
-          <Typography variant="body2" color="textSecondary" mb={2}>
-            - Winston Churchill
-          </Typography>
 
-          {/* Buttons Section */}
-          <Box display="flex" justifyContent="center" gap={2} mt={2}>
-            <Button
+          {/* Centered Author Name */}
+          <Box textAlign="center" width="100%">
+            <Typography variant="body2" color="textSecondary" mb={2}>
+              - Winston Churchill
+            </Typography>
+          </Box>
+
+          {/* Centered Buttons */}
+          <ButtonContainer>
+            <StyledButton
               variant="contained"
               color="primary"
-              onClick={() => handleNavigation("/bookings")}
+              onClick={() => handleNavigation("/book-now")}
             >
               Book a Court
-            </Button>
-            <Button
+            </StyledButton>
+            <StyledButton
               variant="contained"
               color="primary"
               onClick={() => handleNavigation("/donate")}
             >
               Donate
-            </Button>
-          </Box>
-        </Box>
+            </StyledButton>
+          </ButtonContainer>
+        </QuoteTextContainer>
       </QuoteSection>
-
       <ToastContainer />
 
       {/* About Us Section */}
@@ -315,7 +326,7 @@ const HomePage = () => {
             </Grid>
 
             <Grid item xs={12} md={7}>
-              <Typography variant="h4"gutterBottom>
+              <Typography variant="h4" gutterBottom>
                 Welcome to AVK Raja Yadav Trust!
               </Typography>
               <Typography variant="body1" paragraph>
@@ -327,7 +338,7 @@ const HomePage = () => {
               </Typography>
               <Box display="flex" justifyContent="center" mt={2}>
                 <Button
-                  variant="outlined"
+                  variant="contained"
                   color="primary"
                   onClick={() => handleNavigation("/about")}
                 >
@@ -355,7 +366,7 @@ const HomePage = () => {
               </Typography>
               <Box display="flex" justifyContent="center" mt={2}>
                 <Button
-                  variant="outlined"
+                  variant="contained"
                   color="primary"
                   onClick={() => handleNavigation("/donate")}
                 >
@@ -413,7 +424,7 @@ const HomePage = () => {
               </Typography>
               <Box display="flex" justifyContent="center" mt={2}>
                 <Button
-                  variant="outlined"
+                  variant="contained"
                   color="primary"
                   onClick={handleBookingClick}
                 >
@@ -439,7 +450,7 @@ const HomePage = () => {
                 helping those in need.
               </Typography>
               <Button
-                variant="outlined"
+                variant="contained"
                 color="primary"
                 onClick={handleJoinClick}
               >
@@ -455,7 +466,7 @@ const HomePage = () => {
                 good cause.
               </Typography>
               <Link to="/donate" onClick={() => window.scrollTo(0, 0)}>
-                <Button variant="outlined" color="primary">
+                <Button variant="contained" color="primary">
                   Sponsor
                 </Button>
               </Link>
@@ -469,7 +480,7 @@ const HomePage = () => {
                 will go a long way in making a difference in someone’s life.
               </Typography>
               <Link to="/donate" onClick={() => window.scrollTo(0, 0)}>
-                <Button variant="outlined" color="primary">
+                <Button variant="contained" color="primary">
                   Donate Now
                 </Button>
               </Link>
@@ -496,7 +507,7 @@ const HomePage = () => {
               </Typography>
               <Box display="flex" justifyContent="center" mt={2}>
                 <Link to="/donate" onClick={() => window.scrollTo(0, 0)}>
-                  <Button variant="outlined" color="primary">
+                  <Button variant="contained" color="primary">
                     Make a change
                   </Button>
                 </Link>
@@ -559,7 +570,7 @@ const HomePage = () => {
                     helperText={errors.message ? errors.message.message : ""}
                   />
                   <Button
-                    variant="outlined"
+                    variant="contained"
                     color="primary"
                     fullWidth
                     type="submit"

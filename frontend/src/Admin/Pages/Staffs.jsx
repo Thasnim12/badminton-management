@@ -56,7 +56,6 @@ const Staffs = () => {
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
-    type: "success",
   });
   if (isLoading) return <Typography>Loading...</Typography>;
 

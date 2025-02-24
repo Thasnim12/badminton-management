@@ -161,6 +161,7 @@ const Donate = () => {
 
             setAlert({ message: verifyRes.message, severity: "success" });
             resetForm();
+            setOpenDialog(false);
             navigate("/donate");
           } catch (error) {
             setAlert({
@@ -196,37 +197,36 @@ const Donate = () => {
 
   const HeroSection = styled(Box)(({ theme }) => ({
     width: "100vw",
-    height: "400px", // Fixed height
+    height: "calc(100vw / 4.8)", // Maintain 1920x400 aspect ratio (400px height for 1920px width)
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "flex-start", // Align image to the top
+    overflow: "hidden",
     backgroundImage: 'url("/Carousal3.jpg")',
     backgroundPosition: "center",
     backgroundRepeat: "no-repeat",
-    backgroundSize: "100% 100%", // Stretches image to fit width & height
-    textAlign: "center",
-    padding: "80px 20px",
+    backgroundSize: "contain", // Ensures full image visibility without cropping
   
     [theme.breakpoints.down("lg")]: {
-      height: "380px", // Slightly reduce for large screens
+      height: "calc(100vw / 4.8)",
     },
   
     [theme.breakpoints.down("md")]: {
-      height: "350px", // Adjust for medium screens
+      height: "calc(100vw / 4.8)",
     },
   
     [theme.breakpoints.down("sm")]: {
-      height: "300px", // Reduce height on small screens
-      padding: "40px 10px",
+      height: "calc(100vw / 4.8)",
     },
   
     [theme.breakpoints.down("xs")]: {
-      height: "250px", // Reduce height for extra small screens
-      padding: "30px 5px",
+      height: "calc(100vw / 4.8)",
     },
   }));
   
-  
 
   const Section = styled(Box)(({ theme }) => ({
-    padding: "60px 20px",
+    padding: "30px 20px",
     width: "100%",
     textAlign: "center",
     backgroundColor: theme.palette.background.default,
@@ -236,7 +236,7 @@ const Donate = () => {
     <div>
       <Header />
       <HeroSection />
-    
+
       <Snackbar
         open={!!alert}
         autoHideDuration={3000}
@@ -251,88 +251,161 @@ const Donate = () => {
           {alert?.message}
         </Alert>
       </Snackbar>
-      <Typography variant="h2" color="white">
-        Support Our Cause
-      </Typography>
-      <Container maxWidth="lg" sx={{ padding: "40px 0" }}>
-        <Grid container spacing={4}>
-          <Grid item xs={12} md={6}>
-            <Typography variant="h5" gutterBottom>
-              Reason for This Cause
-            </Typography>
-            <Typography variant="h4" sx={{ marginBottom: "20px" }}>
-              How Your Donation Helps
-            </Typography>
-            <Typography
-              variant="body1"
-              sx={{ textAlign: "left", display: "inline-block" }}
-            >
-              • Provides medical aid for a child in need. <br />• Helps fund a
-              year of education for an underprivileged student. <br />• Supports
-              community development projects for a neighborhood.
-            </Typography>
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <Paper elevation={3} sx={{ padding: "20px", borderRadius: "10px" }}>
-              <Grid container spacing={3} justifyContent="center">
-                <Grid item xs={12}>
-                  <TextField
-                    fullWidth
-                    label="Donation Amount"
-                    type="number"
-                    value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
-                    required
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <FormControl fullWidth variant="outlined">
-                    <InputLabel>Currency</InputLabel>
-                    <Select
-                      value={currency}
-                      onChange={(e) => setCurrency(e.target.value)}
-                      label="Currency"
-                      required
-                    >
-                      {CURRENCY_LIST.map((curr) => (
-                        <MenuItem key={curr.code} value={curr.code}>
-                          {curr.name} ({curr.symbol})
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Grid>
+      <Container maxWidth="lg">
+        <Container sx={{ mt: 8 }}>
+          {/* Title */}
+          <Typography variant="h3" align="center" gutterBottom>
+            How Your Donation Helps
+          </Typography>
+          <Typography variant="h6" align="center" color="textSecondary">
+            Your generosity makes a real impact, supporting those in need and
+            empowering communities.
+          </Typography>
 
-                <Grid item xs={12}>
-                  <FormControl fullWidth>
-                    <InputLabel>Payment Method</InputLabel>
-                    <Select
-                      value={paymentMethod}
-                      onChange={(e) => setPaymentMethod(e.target.value)}
+          {/* Donation Form */}
+          <Grid container justifyContent="center">
+            <Grid item xs={12} md={6}>
+              <Paper
+                elevation={3}
+                sx={{ padding: "20px", borderRadius: "10px", mt: 4 }}
+              >
+                <Grid container spacing={3} justifyContent="center">
+                  <Grid item xs={12}>
+                    <TextField
+                      fullWidth
+                      label="Donation Amount"
+                      type="number"
+                      value={amount}
+                      onChange={(e) => setAmount(e.target.value)}
                       required
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <FormControl fullWidth variant="outlined">
+                      <InputLabel>Currency</InputLabel>
+                      <Select
+                        value={currency}
+                        onChange={(e) => setCurrency(e.target.value)}
+                        label="Currency"
+                        required
+                      >
+                        {CURRENCY_LIST.map((curr) => (
+                          <MenuItem key={curr.code} value={curr.code}>
+                            {curr.name} ({curr.symbol})
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <FormControl fullWidth variant="outlined">
+                      <InputLabel id="payment-method-label">
+                        Payment Method
+                      </InputLabel>
+                      <Select
+                        labelId="payment-method-label"
+                        id="payment-method"
+                        value={paymentMethod}
+                        onChange={(e) => setPaymentMethod(e.target.value)}
+                        label="Payment Method" // This is important for placeholder behavior
+                        required
+                      >
+                        <MenuItem value="Credit Card">Credit Card</MenuItem>
+                        <MenuItem value="Debit Card">Debit Card</MenuItem>
+                        <MenuItem value="Net Banking">Net Banking</MenuItem>
+                        <MenuItem value="UPI">UPI</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Grid>
+
+                  <Grid item xs={12} display="flex" justifyContent="center">
+                    <Button
+                      onClick={initiateDonation}
+                      variant="contained"
+                      color="primary"
+                      disabled={isLoading}
+                      sx={{ padding: "10px 20px" }}
                     >
-                      <MenuItem value="Credit Card">Credit Card</MenuItem>
-                      <MenuItem value="Debit Card">Debit Card</MenuItem>
-                      <MenuItem value="Net Banking">Net Banking</MenuItem>
-                      <MenuItem value="UPI">UPI</MenuItem>
-                    </Select>
-                  </FormControl>
+                      Donate Now
+                    </Button>
+                  </Grid>
                 </Grid>
-                <Grid item xs={12} display="flex" justifyContent="center">
-                  <Button
-                    onClick={initiateDonation}
-                    variant="contained"
-                    color="primary"
-                    disabled={isLoading}
-                    sx={{ padding: "10px 20px" }}
-                  >
-                    Donate Now
-                  </Button>
-                </Grid>
-              </Grid>
-            </Paper>
+              </Paper>
+            </Grid>
           </Grid>
-        </Grid>
+
+          {/* Sections */}
+
+          <Grid container spacing={6} sx={{ mt: 8 }}>
+            {[
+              {
+                title: "Building Hope, One Life at a Time",
+                description:
+                  "At the heart of every act of kindness lies trust—the foundation of meaningful change. We believe in creating a world where hope isn’t just a word, but a reality for those who need it most.",
+                imgSrc:
+                  "https://static.vecteezy.com/system/resources/thumbnails/007/112/820/small/silhouette-of-giving-a-helping-hand-hope-and-support-each-other-over-sunset-background-photo.jpg",
+              },
+              {
+                title: "Empowering Communities Through Compassion",
+                description:
+                  "Charity isn’t just about giving; it’s about empowering. Every contribution you make helps build stronger communities, fostering growth, dignity, and endless possibilities.",
+                imgSrc: "",
+              },
+              {
+                title: "Transparency You Can Believe In",
+                description:
+                  "Your trust matters to us. That’s why we ensure complete transparency, so you know exactly how your support is making an impact—turning your generosity into real, lasting change.",
+                imgSrc:
+                  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ0SbNE9Y2q3Bv64QQnYeeVKo61B6nAA3I3ug&s",
+              },
+              {
+                title: "Join Hands, Change Lives",
+                description:
+                  "Together, we can transform lives and inspire futures. Be a part of something bigger—where every small act of kindness creates ripples of hope across the world.",
+                imgSrc:
+                  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSUxLZSLTj4U7PpHMYcYT8pSChLpR3qwbJCzA&s",
+              },
+            ].map((section, index) => (
+              <Section key={index}>
+                <Grid
+                  container
+                  spacing={4}
+                  alignItems="center"
+                  direction={index % 2 === 0 ? "row" : "row-reverse"}
+                >
+                  <Grid
+                    item
+                    xs={12}
+                    md={5}
+                    display="flex"
+                    justifyContent="center"
+                  >
+                    <Box
+                      component="img"
+                      src={section.imgSrc}
+                      alt={section.title}
+                      sx={{
+                        width: "80%",
+                        maxWidth: "500px",
+                        borderRadius: "8px",
+                        boxShadow: "0px 4px 6px rgba(0,0,0,0.1)",
+                      }}
+                    />
+                  </Grid>
+                  <Grid item xs={12} md={7}>
+                    <Typography variant="h4" gutterBottom>
+                      {section.title}
+                    </Typography>
+                    <Typography variant="body1">
+                      {section.description}
+                    </Typography>
+                  </Grid>
+                </Grid>
+              </Section>
+            ))}
+          </Grid>
+        </Container>
+
         <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
           <DialogTitle>Enter Your Details</DialogTitle>
           <DialogContent>
@@ -364,11 +437,14 @@ const Donate = () => {
             />
             <br />
             <br />
-            <FormControl fullWidth>
-              <InputLabel>Donation Type</InputLabel>
+            <FormControl fullWidth variant="outlined">
+              <InputLabel id="donation-type-label">Donation Type</InputLabel>
               <Select
+                labelId="donation-type-label"
+                id="donation-type"
                 value={donationType}
                 onChange={(e) => setDonationType(e.target.value)}
+                label="Donation Type" // Ensures floating label behavior
                 required
               >
                 <MenuItem value="education">Sponsor for Education</MenuItem>
@@ -377,6 +453,7 @@ const Donate = () => {
                 <MenuItem value="shelters">Shelters</MenuItem>
               </Select>
             </FormControl>
+
             <br />
             <br />
           </DialogContent>
