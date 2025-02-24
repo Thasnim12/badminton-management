@@ -143,7 +143,7 @@ const CourtBooking = () => {
   const slots = slotsData || [];
   console.log(slots, "slots");
 
-  const calculateTotalAmount = () => {
+  const calculateTotalAmount = (includeGst = true) => {
     let total = 0;
 
     selectedSlots.forEach((slot) => {
@@ -153,6 +153,11 @@ const CourtBooking = () => {
     selectedAddOns.forEach((addOn) => {
       total += addOn.quantity * addOn.price;
     });
+
+    if (includeGst) {
+      const gst = (total * 18) / 100; // Correct GST Calculation
+      return total + gst;
+    }
 
     return total;
   };
@@ -231,8 +236,11 @@ const CourtBooking = () => {
       const formattedAddons = selectedAddOns.map((addon) => ({
         addonId: addon._id,
         quantity: 1,
-        type: addon.item_type.includes("For Sale") ? "buy" : addon.item_type.includes("For Rent") ? "rent" : "unknown",
-
+        type: addon.item_type.includes("For Sale")
+          ? "buy"
+          : addon.item_type.includes("For Rent")
+            ? "rent"
+            : "unknown",
       }));
 
       if (typeof window.Razorpay === "undefined") {
@@ -707,7 +715,22 @@ const CourtBooking = () => {
             {/* Total Amount */}
             <Typography variant="h6">
               Total Amount
-              <span style={{ float: "right" }}>₹{calculateTotalAmount()}</span>
+              <span style={{ float: "right" }}>
+                ₹{calculateTotalAmount(false)}
+              </span>
+            </Typography>
+            <Typography variant="h6">
+              GST (18%)
+              <span style={{ float: "right" }}>
+                ₹{(calculateTotalAmount(false) * 18) / 100}
+              </span>
+            </Typography>
+
+            <Typography variant="h6" style={{ fontWeight: "bold" }}>
+              Grand Total
+              <span style={{ float: "right" }}>
+                ₹{calculateTotalAmount(true)}
+              </span>
             </Typography>
           </Box>
         </DialogContent>
