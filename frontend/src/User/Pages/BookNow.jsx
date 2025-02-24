@@ -20,12 +20,14 @@ import {
   RadioGroup,
   FormControlLabel,
   Alert,
+  InputAdornment,
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { skipToken } from "@reduxjs/toolkit/query";
 import { styled } from "@mui/material/styles";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { CalendarToday } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import IconButton from "@mui/material/IconButton";
@@ -360,12 +362,11 @@ const CourtBooking = () => {
     }
   };
   const handleClose = () => {
-    setSelectedSlots([]); 
-    setSelectedAddOns([]); 
-    setOpen(false); 
+    setSelectedSlots([]);
+    setSelectedAddOns([]);
+    setOpen(false);
     setOpenUserDialog(false);
   };
-  
 
   const handleCloseSnackbar = () => {
     setOpenSnackbar(false);
@@ -412,7 +413,6 @@ const CourtBooking = () => {
                   <Typography variant="h6" fontWeight="bold">
                     Select Court & Date
                   </Typography>
-
                   {/* Add button (Responsive Positioning) */}
                   <Button
                     variant="outlined"
@@ -428,7 +428,6 @@ const CourtBooking = () => {
                   >
                     Add Ons
                   </Button>
-
                   {/* Date Picker */}
                   <LocalizationProvider dateAdapter={AdapterDayjs}>
                     <DatePicker
@@ -436,9 +435,25 @@ const CourtBooking = () => {
                       onChange={setSelectedDate}
                       minDate={dayjs()} // Disable past dates
                       format="DD/MM/YYYY"
+                      slots={{
+                        textField: (params) => (
+                          <TextField
+                            {...params}
+                            InputProps={{
+                              ...params.InputProps,
+                              endAdornment: (
+                                <InputAdornment position="end">
+                                  <CalendarToday
+                                    style={{ cursor: "pointer" }}
+                                  />
+                                </InputAdornment>
+                              ),
+                            }}
+                          />
+                        ),
+                      }}
                     />
                   </LocalizationProvider>
-
                   {/* Court Select */}
                   <RadioGroup
                     value={selectedCourt}
@@ -463,7 +478,6 @@ const CourtBooking = () => {
                       ))
                     )}
                   </RadioGroup>
-
                   {/* Court Image */}
                   <CardMedia
                     component="img"
@@ -737,11 +751,7 @@ const CourtBooking = () => {
           </Grid>
         </DialogContent>
         <DialogActions>
-          <Button
-            onClick={handleClose}
-            color="error"
-            variant="outlined"
-          >
+          <Button onClick={handleClose} color="error" variant="outlined">
             Cancel
           </Button>
           <Button
