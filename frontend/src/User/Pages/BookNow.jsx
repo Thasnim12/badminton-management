@@ -413,42 +413,42 @@ const CourtBooking = () => {
         <Grid
           container
           spacing={2}
-          sx={{ maxWidth: "80%", marginLeft: "10px", padding: "5px" }}
+          sx={{
+            width: "100%",
+            maxWidth: "1200px",
+            margin: "0 auto",
+            padding: "10px",
+          }}
         >
-          <Grid container spacing={2}>
-            {/* Right Panel - Booking Section (Now on the Left) */}
+          <Grid container spacing={2} sx={{ flexWrap: "wrap" }}>
+            {/* Booking Section */}
             <Grid
               item
               xs={12}
               md={8}
               container
               spacing={2}
-              sx={{ marginTop: "3px", height: { xs: "auto", md: "90vh" } }}
+              sx={{
+                marginTop: "3px",
+                height: { xs: "auto", md: "auto" },
+              }}
             >
               {/* Select Court & Date */}
               <Grid item xs={12}>
                 <Card
-                  sx={{
-                    padding: 3,
-                    display: "flex",
-                    flexDirection: "column",
-                    height: "100%",
-                    position: "relative",
-                  }}
+                  sx={{ padding: 3, display: "flex", flexDirection: "column" }}
                 >
                   <Typography variant="h6" fontWeight="bold">
                     Select Court & Date
                   </Typography>
-                  {/* Add button (Responsive Positioning) */}
+                  {/* Add Ons Button */}
                   <Button
                     variant="outlined"
                     startIcon={<AddCircleOutlineIcon />}
                     sx={{
-                      position: { xs: "relative", md: "absolute" },
-                      top: { md: 10 },
-                      right: { md: 10 },
-                      marginTop: { xs: 2, md: 0 }, // Adds margin on mobile to avoid overlap
-                      width: { xs: "100%", sm: "auto" }, // Full width button on small screens
+                      position: "relative",
+                      marginTop: 2,
+                      width: { xs: "100%", sm: "auto" },
                     }}
                     onClick={handleOpenDrawer}
                   >
@@ -460,9 +460,9 @@ const CourtBooking = () => {
                       value={selectedDate}
                       onChange={(newDate) => {
                         setSelectedDate(newDate);
-                        setOpen(false); // Close picker after selecting a date
+                        setOpen(false);
                       }}
-                      minDate={dayjs()} // Disable past dates
+                      minDate={dayjs()}
                       format="DD/MM/YYYY"
                       open={openCalendar}
                       onOpen={() => setOpenCalendar(true)}
@@ -471,7 +471,8 @@ const CourtBooking = () => {
                         textField: (params) => (
                           <TextField
                             {...params}
-                            onClick={() => setOpenCalendar(true)} // Open picker on click anywhere
+                            fullWidth
+                            onClick={() => setOpenCalendar(true)}
                             InputProps={{
                               ...params.InputProps,
                               endAdornment: (
@@ -487,6 +488,7 @@ const CourtBooking = () => {
                       }}
                     />
                   </LocalizationProvider>
+
                   {/* Court Select */}
                   <RadioGroup
                     value={selectedCourt}
@@ -494,9 +496,9 @@ const CourtBooking = () => {
                     sx={{
                       mt: 2,
                       display: "flex",
-                      flexDirection: "row",
+                      flexWrap: "wrap",
                       gap: 2,
-                    }} // Align side by side
+                    }}
                   >
                     {courtsLoading ? (
                       <Typography>Loading courts...</Typography>
@@ -506,17 +508,25 @@ const CourtBooking = () => {
                           key={court._id}
                           value={court._id}
                           control={<Radio disabled={!court.isActive} />}
-                          label={`${court.court_name} ${!court.isActive ? "(Inactive)" : ""}`}
+                          label={`${court.court_name} ${
+                            !court.isActive ? "(Inactive)" : ""
+                          }`}
                         />
                       ))
                     )}
                   </RadioGroup>
+
                   {/* Court Image */}
                   <CardMedia
                     component="img"
-                    height="300px"
+                    height="250px"
                     image={`https://res.cloudinary.com/dj0rho12o/image/upload/${selectedImage}`}
-                    sx={{ marginTop: 2 }}
+                    sx={{
+                      marginTop: 2,
+                      borderRadius: 2,
+                      objectFit: "cover",
+                      width: "100%",
+                    }}
                     alt="Court Image"
                   />
                 </Card>
@@ -525,17 +535,11 @@ const CourtBooking = () => {
               {/* Select Time Slot */}
               <Grid item xs={12}>
                 <Card
-                  sx={{
-                    padding: 3,
-                    display: "flex",
-                    flexDirection: "column",
-                    height: "100%",
-                  }}
+                  sx={{ padding: 3, display: "flex", flexDirection: "column" }}
                 >
                   <Typography variant="h6" fontWeight="bold">
                     Select Time Slot
                   </Typography>
-
                   {/* Time Slots Grid */}
                   <Box
                     sx={{
@@ -572,15 +576,11 @@ const CourtBooking = () => {
                       )}
                     </Grid>
                   </Box>
-
-                  {/* Proceed Button (Responsive Sizing) */}
+                  {/* Proceed Button */}
                   <Button
                     variant="contained"
                     color="primary"
-                    sx={{
-                      marginTop: 2,
-                      alignSelf: { xs: "stretch", sm: "flex-end" }, // Full width on mobile, right-aligned on larger screens
-                    }}
+                    sx={{ marginTop: 2, width: "100%" }}
                     onClick={handleClickOpen}
                   >
                     Proceed to Booking
@@ -589,12 +589,17 @@ const CourtBooking = () => {
               </Grid>
             </Grid>
 
-            {/* Left Panel - DetailsCard (Now on the Right) */}
+            {/* DetailsCard Section */}
             <Grid
               item
               xs={12}
               md={4}
-              sx={{ height: { xs: "auto", md: "100vh" }, marginTop: "3px" }}
+              sx={{
+                height: { xs: "auto", md: "auto" },
+                marginTop: "3px",
+                display: "flex",
+                justifyContent: "center",
+              }}
             >
               <DetailsCard />
             </Grid>
@@ -686,8 +691,8 @@ const CourtBooking = () => {
             </Typography>
             {selectedSlots.map((slot, index) => (
               <Typography key={index} gutterBottom>
-                {dayjs(slot.startTime).format("h:mm A")} -{" "}
-                {dayjs(slot.endTime).format("h:mm A")}
+                {moment.utc(slot.startTime).format("hh:mm A")} -{" "}
+                {moment.utc(slot.endTime).format("hh:mm A")}
                 <span style={{ float: "right" }}>₹{slot.price}</span>
               </Typography>
             ))}
