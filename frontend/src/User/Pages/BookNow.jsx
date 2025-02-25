@@ -493,11 +493,13 @@ const CourtBooking = () => {
                   <RadioGroup
                     value={selectedCourt}
                     onChange={handleCourtChange}
+                    row // This makes items appear in a row
                     sx={{
                       mt: 2,
                       display: "flex",
-                      flexWrap: "wrap",
-                      gap: 2,
+                      flexDirection: "row", // Ensures horizontal alignment
+                      flexWrap: "nowrap", // Prevents wrapping to a new line
+                      gap: 2, // Adds spacing between options
                     }}
                   >
                     {courtsLoading ? (
