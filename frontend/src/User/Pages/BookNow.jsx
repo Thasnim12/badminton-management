@@ -688,14 +688,16 @@ const CourtBooking = () => {
             <Typography variant="h6" gutterBottom>
               Selected Time Slots
             </Typography>
-            {selectedSlots.map((slot, index) => (
-              <Typography key={index} gutterBottom>
-                {momentTime.utc(slot.startTime).format("hh:mm A")} -{" "}
-                {momentTime.utc(slot.endTime).format("hh:mm A")}
-                <span style={{ float: "right" }}>₹{slot.price}</span>
-              </Typography>
-            ))}
-
+            {selectedSlots.map((slot, index) => {
+              const slotStartTime = moment(slot.startTime).tz("Asia/Kolkata");
+              return (
+                <Typography key={index} gutterBottom>
+                  {slotStartTime.format("hh:mm A")} -{" "}
+                  {moment(slot.endTime).tz("Asia/Kolkata").format("hh:mm A")}
+                  <span style={{ float: "right" }}>₹{slot.price}</span>
+                </Typography>
+              );
+            })}
             {/* Add-ons if any */}
             {selectedAddOns.length > 0 && (
               <>
