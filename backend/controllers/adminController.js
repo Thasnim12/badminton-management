@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const fs = require("fs");
 const path = require("path");
 const bcrypt = require("bcryptjs");
-const moment = require("moment");
+const moment = require("moment-timezone");
 const multer = require("multer");
 const Admin = require("../models/adminModel");
 const User = require("../models/userModel");
@@ -230,62 +230,67 @@ const getAllcourts = async (req, res) => {
 const generateSlots = async (req, res) => {
   try {
     const { courtId } = req.body;
-    const today = moment().startOf("day");
+    const today = moment().tz("Asia/Kolkata").startOf("day");
     const endDate = moment(today).add(30, "days").endOf("day");
 
-    await Slot.deleteMany({
-      court: courtId,
-      isBooked: false,
-      startTime: {
-        $gte: today.toDate(),
-        $lt: moment(today).add(30, "days").toDate(),
-      },
-    });
-
+    // Fetch existing slots only once
     const existingSlots = await Slot.find({
       court: courtId,
       startTime: { $gte: today.toDate(), $lte: endDate.toDate() },
     });
 
-    const slots = [];
-    const slotMap = new Map();
-
+    // Create a Map to track existing slots and avoid duplication
     const existingSlotMap = new Map(
       existingSlots.map((slot) => [
         `${courtId}-${moment(slot.startTime).format("YYYY-MM-DD-HH")}`,
-        slot,
+        slot._id, // Store the slot ID
       ])
     );
+
+    const slotsToInsert = [];
+    const slotsToDelete = [];
 
     for (let day = 0; day < 30; day++) {
       const currentDate = moment(today).add(day, "days");
 
       for (let hour = 10; hour < 22; hour++) {
-        const startTime = moment(currentDate)
+        const startTimeIST = moment(currentDate)
           .set("hour", hour)
           .set("minute", 0)
-          .utc();
-        const endTime = moment(startTime).add(1, "hour").utc();
+          .tz("Asia/Kolkata");
 
-        const slotKey = `${courtId}-${startTime.format("YYYY-MM-DD-HH")}`;
+        const endTimeIST = moment(startTimeIST).add(1, "hour");
 
-        if (!existingSlotMap.has(slotKey) && !slotMap.has(slotKey)) {
-          const slot = new Slot({
+        const startTimeUTC = startTimeIST.clone().utc();
+        const endTimeUTC = endTimeIST.clone().utc();
+
+        const slotKey = `${courtId}-${startTimeUTC.format("YYYY-MM-DD-HH")}`;
+
+        if (existingSlotMap.has(slotKey)) {
+          // If a duplicate exists, mark it for deletion (only unbooked ones)
+          const existingSlotId = existingSlotMap.get(slotKey);
+          slotsToDelete.push(existingSlotId);
+        } else {
+          // Insert new slot
+          slotsToInsert.push({
             court: courtId,
-            startTime: startTime.toDate(),
-            endTime: endTime.toDate(),
+            startTime: startTimeUTC.toDate(),
+            endTime: endTimeUTC.toDate(),
             price: 200,
             isBooked: false,
           });
-
-          slots.push(slot);
-          slotMap.set(slotKey, true);
         }
       }
     }
 
-    if (slots.length > 0) {
-      await Slot.insertMany(slots);
+    // Delete only unbooked duplicate slots
+    if (slotsToDelete.length > 0) {
+      await Slot.deleteMany({ _id: { $in: slotsToDelete }, isBooked: false });
+    }
+
+    // Insert only new slots
+    if (slotsToInsert.length > 0) {
+      await Slot.insertMany(slotsToInsert);
     }
 
     const allSlots = await Slot.find({
@@ -308,6 +313,7 @@ const generateSlots = async (req, res) => {
     });
   }
 };
+
 
 const getAllSlots = async (req, res) => {
   try {

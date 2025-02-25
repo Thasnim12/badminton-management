@@ -45,6 +45,7 @@ import {
 import AddOnsDrawer from "../Components/Drawer";
 import DetailsCard from "../Components/DetailsCard";
 import moment from "moment";
+import momentTime from "moment-timezone";
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   "& .MuiDialogContent-root": {
@@ -79,6 +80,8 @@ const CourtBooking = () => {
     phone: "",
     city: "",
   });
+  const [currentTime, setCurrentTime] = useState(moment().tz("Asia/Kolkata"));
+
 
   const handleInputChange = (e) => {
     setUserDetails({ ...userDetails, [e.target.name]: e.target.value });
@@ -175,24 +178,14 @@ const CourtBooking = () => {
     }));
   }, [selectedCourt, selectedDate, selectedSlots, selectedAddOns]);
 
-  const getBookingSummary = () => {
-    const selectedCourtDetails = courts.find(
-      (court) => court._id === selectedCourt
-    );
-    return {
-      court: selectedCourtDetails?.court_name || "",
-      date: selectedDate ? selectedDate.format("YYYY-MM-DD") : "",
-      slots: selectedSlots.map((slot) => ({
-        time: `${dayjs(slot.startTime).format("h:mm A")} - ${dayjs(slot.endTime).format("h:mm A")}`,
-        price: slot.price,
-      })),
-      addons: selectedAddOns.map((addon) => ({
-        name: addon.item_name,
-        price: addon.price,
-      })),
-      totalAmount: calculateTotalAmount(),
-    };
-  };
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setCurrentTime(moment().tz("Asia/Kolkata"));
+    }, 60000); // Update every minute
+
+    // Cleanup the interval on component unmount
+    return () => clearInterval(intervalId);
+  }, []);
 
   const courtImages = {
     "Court 1":
@@ -398,6 +391,8 @@ const CourtBooking = () => {
     setOpenSnackbar(false);
   };
 
+
+
   return (
     <>
       <Box
@@ -508,9 +503,8 @@ const CourtBooking = () => {
                           key={court._id}
                           value={court._id}
                           control={<Radio disabled={!court.isActive} />}
-                          label={`${court.court_name} ${
-                            !court.isActive ? "(Inactive)" : ""
-                          }`}
+                          label={`${court.court_name} ${!court.isActive ? "(Inactive)" : ""
+                            }`}
                         />
                       ))
                     )}
@@ -555,26 +549,29 @@ const CourtBooking = () => {
                       ) : slots?.length === 0 ? (
                         <Typography>No slots available.</Typography>
                       ) : (
-                        slots.map((slot) => (
-                          <Grid item xs={6} sm={4} md={4} key={slot._id}>
-                            <Button
-                              fullWidth
-                              variant={
-                                selectedSlots.some((s) => s._id === slot._id)
-                                  ? "contained"
-                                  : "outlined"
-                              }
-                              color={slot.isBooked ? "error" : "primary"}
-                              disabled={slot.isBooked}
-                              onClick={() => handleSlotToggle(slot)}
-                            >
-                              {moment.utc(slot.startTime).format("hh:mm A")} -{" "}
-                              {moment.utc(slot.endTime).format("hh:mm A")}
-                            </Button>
-                          </Grid>
-                        ))
+                        slots.map((slot) => {
+                          const slotStartTime = moment(slot.startTime).tz("Asia/Kolkata");
+                          const isPastSlot = slotStartTime.isBefore(currentTime);
+                          const isDisabled = isPastSlot || slot.isBooked;
+
+                          return (
+                            <Grid item xs={6} sm={4} md={4} key={slot._id}>
+                              <Button
+                                fullWidth
+                                variant={selectedSlots.some((s) => s._id === slot._id) ? "contained" : "outlined"}
+                                color={slot.isBooked ? "error" : "primary"}
+                                disabled={isDisabled}
+                                onClick={() => handleSlotToggle(slot)}
+                              >
+                                {slotStartTime.format("hh:mm A")} -{" "}
+                                {moment(slot.endTime).tz("Asia/Kolkata").format("hh:mm A")}
+                              </Button>
+                            </Grid>
+                          );
+                        })
                       )}
                     </Grid>
+
                   </Box>
                   {/* Proceed Button */}
                   <Button
@@ -691,8 +688,8 @@ const CourtBooking = () => {
             </Typography>
             {selectedSlots.map((slot, index) => (
               <Typography key={index} gutterBottom>
-                {moment.utc(slot.startTime).format("hh:mm A")} -{" "}
-                {moment.utc(slot.endTime).format("hh:mm A")}
+                {momentTime.utc(slot.startTime).format("hh:mm A")} -{" "}
+                {momentTime.utc(slot.endTime).format("hh:mm A")}
                 <span style={{ float: "right" }}>₹{slot.price}</span>
               </Typography>
             ))}

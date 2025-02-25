@@ -15,7 +15,7 @@ const { userUpload } = require("../helper/multer");
 const nodemailer = require("nodemailer");
 const Bookings = require("../models/bookingModel");
 const Banner = require("../models/bannerModel");
-const moment = require("moment");
+const moment = require("moment-timezone");
 require("dotenv").config();
 
 const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
@@ -357,26 +357,68 @@ const getSlots = async (req, res) => {
       return res.status(400).json({ message: "Court ID and Date are required" });
     }
 
-    const startOfDay = moment.utc(date).startOf('day').set({ hour: 10, minute: 0, second: 0, millisecond: 0 });
-    const endOfDay = moment.utc(date).startOf('day').set({ hour: 22, minute: 0, second: 0, millisecond: 0 });
+    // Validate courtId format before conversion
+    let id;
+    try {
+      // Only convert if it appears to be a valid ObjectId
+      if (mongoose.Types.ObjectId.isValid(courtId)) {
+        id = new mongoose.Types.ObjectId(courtId);
+      } else {
+        return res.status(400).json({ message: "Invalid Court ID format" });
+      }
+    } catch (err) {
+      return res.status(400).json({ message: "Invalid Court ID format" });
+    }
 
-    console.log("Start Time (UTC):", startOfDay.toDate());
-    console.log("End Time (UTC):", endOfDay);
+    const startOfDayIST = moment.tz(date, "Asia/Kolkata").startOf("day").set({ hour: 10, minute: 0, second: 0, millisecond: 0 });
+    const endOfDayIST = moment.tz(date, "Asia/Kolkata").startOf("day").set({ hour: 22, minute: 0, second: 0, millisecond: 0 });
+
+    const startOfDayUTC = startOfDayIST.clone().utc();
+    const endOfDayUTC = endOfDayIST.clone().utc();
+
+    console.log("Start Time (IST):", startOfDayIST.format());
+    console.log("End Time (IST):", endOfDayIST.format());
+    console.log("Start Time (UTC):", startOfDayUTC.format());
+    console.log("End Time (UTC):", endOfDayUTC.format());
+    console.log("Court ID:", id);
 
     const availableSlots = await Slot.find({
-      court: courtId,
-      startTime: { $gte: startOfDay.toDate(), $lte: endOfDay.toDate() },
+      court: id,
+      startTime: { $gte: startOfDayUTC.toDate(), $lte: endOfDayUTC.toDate() },
     }).sort({ startTime: 1 });
 
-    console.log("Raw Slots from DB:", availableSlots.map(slot => slot.startTime));
+    console.log(`Found ${availableSlots.length} slots initially`);
 
-    res.json(availableSlots);
+    // Create a Map to track unique slots by startTime
+    const uniqueSlotsMap = new Map();
+    
+    // Process each slot, keeping only one slot per unique startTime
+    availableSlots.forEach(slot => {
+      const startTimeKey = slot.startTime.getTime(); // Use timestamp as unique key
+      
+      // Only add if this startTime hasn't been seen
+      if (!uniqueSlotsMap.has(startTimeKey)) {
+        uniqueSlotsMap.set(startTimeKey, slot);
+      }
+    });
+    
+    // Convert map values to array
+    const uniqueSlots = Array.from(uniqueSlotsMap.values());
+
+    const formattedSlots = uniqueSlots.map(slot => ({
+      ...slot.toObject(),
+      startTimeIST: moment(slot.startTime).tz("Asia/Kolkata").format("YYYY-MM-DD hh:mm A"),
+      endTimeIST: moment(slot.endTime).tz("Asia/Kolkata").format("YYYY-MM-DD hh:mm A"),
+    }));
+    
+    console.log(`Found ${availableSlots.length} slots, reduced to ${formattedSlots.length} unique slots`);
+    
+    res.json(formattedSlots);
   } catch (error) {
     console.error("Error fetching available slots:", error);
     res.status(500).json({ message: "Error fetching slots", error });
   }
 };
-
 
 const getAddons = async (req, res) => {
   try {
