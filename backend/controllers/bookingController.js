@@ -208,12 +208,14 @@ const verifyBookingPayment = async (req, res) => {
         };
         await booking.save();
 
+        const courtName = booking.court ? booking.court.court_name || booking.court.court_name : "N/A";
+
         const bookingDetails = `
       Booking Confirmation:
       - Name: ${booking.user ? booking.user.name : booking.guestDetails.name}
       - Phone: ${booking.user ? booking.user.phone : booking.guestDetails.phone}
       - Email: ${booking.user ? booking.user.email : booking.guestDetails.email}
-      - Court: ${booking.court.court_name}
+      - Court: ${courtName}
       - Date: ${new Date(booking.bookingDate).toLocaleDateString()}
       - Slots: ${booking.slot.map(slot => `${convertToIST(slot.startTime)} - ${convertToIST(slot.endTime)}`).join(', ')}
       - Amount Paid: ${booking.payment.amount}
