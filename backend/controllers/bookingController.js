@@ -148,7 +148,7 @@ const verifyBookingPayment = async (req, res) => {
         const { bookingId, razorpay_payment_id, razorpay_order_id, razorpay_signature, payment_method } = req.body;
         console.log(req.body, 'verify')
 
-        const booking = await Booking.findById(bookingId).populate("slot");
+        const booking = await Booking.findById(bookingId).populate("slot").populate("court"); 
         if (!booking) return res.status(404).json({ message: "Booking not found" });
 
         const generated_signature = crypto
