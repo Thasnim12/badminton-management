@@ -1,5 +1,6 @@
 const { Readable } = require("stream");
 const fastCsv = require("fast-csv");
+const nodemailer = require('nodemailer')
 const Booking = require('../models/bookingModel')
 const Slot = require('../models/slotModel')
 const Razorpay = require("razorpay");
@@ -15,6 +16,15 @@ const razorpay = new Razorpay({
     key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: process.env.USER_EMAIL,
+        pass: process.env.USER_PASSWORD,
+    },
+});
+
+
 const createBooking = async (req, res) => {
     try {
         console.log("RAZORPAY_KEY_ID:", process.env.RAZORPAY_KEY_ID);
@@ -22,7 +32,7 @@ const createBooking = async (req, res) => {
 
         const { courtId, slotId, amount, addons } = req.body;
         const { details } = req.body;
-        console.log(details,'details')
+        console.log(details, 'details')
 
         if (!req?.user?._id && !details) {
             return res.status(400).json({
@@ -93,7 +103,7 @@ const createBooking = async (req, res) => {
             receipt: `receipt_${Date.now()}`,
         };
 
-        const order = await razorpay.orders.create(options);   
+        const order = await razorpay.orders.create(options);
 
         const bookingData = {
             court: courtId,
@@ -104,7 +114,7 @@ const createBooking = async (req, res) => {
                 razorpayOrderId: order.id,
                 amount: totalAmount,
                 status: "Pending",
-            },    
+            },
         };
 
         if (req?.user?._id) {
@@ -114,7 +124,7 @@ const createBooking = async (req, res) => {
                 name: details.name,
                 email: details.email,
                 phone: details.phone,
-                city:details.city,
+                city: details.city,
             };
         }
 
@@ -138,7 +148,7 @@ const verifyBookingPayment = async (req, res) => {
         const { bookingId, razorpay_payment_id, razorpay_order_id, razorpay_signature, payment_method } = req.body;
         console.log(req.body, 'verify')
 
-        const booking = await Booking.findById(bookingId);
+        const booking = await Booking.findById(bookingId).populate("slot");
         if (!booking) return res.status(404).json({ message: "Booking not found" });
 
         const generated_signature = crypto
@@ -179,6 +189,15 @@ const verifyBookingPayment = async (req, res) => {
             }
         }
 
+        await Slot.updateMany(
+            { _id: { $in: booking.slot } },
+            { isBooked: true }
+        );
+
+        const convertToIST = (utcDate) => {
+            return new Date(utcDate).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
+        };
+
         booking.payment = {
             razorpayOrderId: razorpay_order_id,
             razorpayPaymentId: razorpay_payment_id,
@@ -189,12 +208,35 @@ const verifyBookingPayment = async (req, res) => {
         };
         await booking.save();
 
-        const updatedresult = await Slot.updateMany(
-            { _id: { $in: booking.slot } },
-            { isBooked: true }
-        );
+        const bookingDetails = `
+      Booking Confirmation:
+      - Name: ${booking.user ? booking.user.name : booking.guestDetails.name}
+      - Phone: ${booking.user ? booking.user.phone : booking.guestDetails.phone}
+      - Email: ${booking.user ? booking.user.email : booking.guestDetails.email}
+      - Court: ${booking.court.court_name}
+      - Date: ${new Date(booking.bookingDate).toLocaleDateString()}
+      - Slots: ${booking.slot.map(slot => `${convertToIST(slot.startTime)} - ${convertToIST(slot.endTime)}`).join(', ')}
+      - Amount Paid: ${booking.payment.amount}
+      - Payment Method: ${booking.payment.method}
+    `;
 
-        console.log(updatedresult, 'result')
+        const userMailOptions = {
+            from: process.env.USER_EMAIL,
+            to: booking.user ? booking.user.email : booking.guestDetails.email,
+            subject: 'Booking Confirmation',
+            text: `Dear ${booking.user ? booking.user.name : booking.guestDetails.name},\n\nYour booking has been confirmed.\n\n${bookingDetails}\n\nThank you!`,
+        };
+
+        const adminMailOptions = {
+            from: process.env.USER_EMAIL,
+            to: process.env.USER_EMAIL,
+            subject: 'New Booking Confirmed',
+            text: `A new booking has been confirmed.\n\n${bookingDetails}`,
+        };
+
+        await transporter.sendMail(userMailOptions);
+        await transporter.sendMail(adminMailOptions);
+
 
         res.status(200).json({ success: true, message: "Payment verified, booking confirmed!" });
     } catch (error) {
@@ -270,111 +312,48 @@ const downloadBookings = async (req, res) => {
 
 const createOfflineBooking = async (req, res) => {
     try {
-        const { courtId, slotId, amount, addons, paymentMethod, userId, phoneno, userName } = req.body;
+        const { phoneno, userName, courtId, slotIds, amount, addons, paymentMethod, bookingDate, email } = req.body;
 
-        if (!req.admin) {
-            return res.status(403).json({ message: "Access denied. Only admins can create offline bookings." });
-        }
+        let user = await User.findOne({ phone: phoneno });
 
-        if (!phoneno) {
-            return res.status(400).json({ message: "Phone number is required for offline booking." });
-        }
-
-        if (!Array.isArray(slotId)) {
-            return res.status(400).json({ message: "slotId must be an array" });
-        }
-
-        let user = await User.findOne({ phoneno });
-
+        let guestDetails = null;
         if (!user) {
-            user = new User({
-                name: userName || "Guest User",
-                phoneno,
-                role: "user",
-                isGuest: true,
-            });
-
-            await user.save();
+            guestDetails = {
+                name: userName,
+                phone: phoneno,
+                email: email,
+                city: city
+            };
         }
 
-        const userIdToUse = user._id;
-
-        const slotPromises = slotId.map(id => Slot.findById(id));
-        const slots = await Promise.all(slotPromises);
-
-        const invalidSlot = slots.find(slot => !slot || slot.isBooked);
-        if (invalidSlot) {
-            return res.status(400).json({ message: "Some slots are already booked or unavailable" });
-        }
-
-        let totalAmount = amount;
-        const validatedAddons = [];
-
-        if (addons && addons.length > 0) {
-            for (const addon of addons) {
-                const addonItem = await Addons.findById(addon.addonId);
-                if (!addonItem) {
-                    return res.status(400).json({ message: `Addon ${addon.addonId} not found` });
-                }
-
-                if (!addonItem.item_type.includes(addon.type === 'rent' ? 'For Rent' : 'For Sale')) {
-                    return res.status(400).json({
-                        message: `Addon ${addonItem.item_name} is not available for ${addon.type}`
-                    });
-                }
-
-                if (addon.type === 'buy' && addonItem.quantity < addon.quantity) {
-                    return res.status(400).json({
-                        message: `Insufficient quantity for ${addonItem.item_name}`
-                    });
-                }
-
-                const addonCost = addonItem.price * addon.quantity;
-                totalAmount += addonCost;
-
-                validatedAddons.push({
-                    addon: addon.addonId,
-                    quantity: addon.quantity,
-                    type: addon.type,
-                    price: addonItem.price,
-                    totalPrice: addonCost
-                });
-            }
-        }
-
-        let paymentDetails = {
-            amount: totalAmount,
-            method: paymentMethod || "Cash",
-            status: "Completed",
-        };
-
+        // Create the booking
         const newBooking = new Booking({
-            user: userIdToUse,
+            user: user ? user._id : null,
+            guestDetails,
             court: courtId,
-            slot: slotId,
-            bookingDate: new Date(),
-            addons: validatedAddons,
-            bookingType: "Offline",
-            payment: paymentDetails,
-        });
-
-        await newBooking.save();
-
-        res.status(200).json({
-            success: true,
-            message: "Offline booking created successfully.",
-            bookingId: newBooking._id,
-            user: {
-                id: user._id,
-                name: user.name,
-                phoneno: user.phoneno,
-                isGuest: user.isGuest,
+            slot: slotIds,
+            addons,
+            bookingDate,
+            bookingType: 'Offline',
+            payment: {
+                amount,
+                method: paymentMethod,
+                status: 'Completed',
             },
+            isCancelled: false,
         });
 
+        const savedBooking = await newBooking.save();
+
+        await Slot.updateMany(
+            { _id: { $in: slotIds } },
+            { $set: { isBooked: true } }
+        );
+
+        res.status(201).json({ message: 'Booking created successfully', booking: savedBooking });
     } catch (error) {
-        console.error("Error in createOfflineBooking:", error);
-        res.status(500).json({ message: "Internal server error" });
+        console.error('Error creating booking:', error);
+        res.status(500).json({ message: 'Internal server error' });
     }
 };
 

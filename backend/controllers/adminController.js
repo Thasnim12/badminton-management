@@ -233,17 +233,15 @@ const generateSlots = async (req, res) => {
     const today = moment().tz("Asia/Kolkata").startOf("day");
     const endDate = moment(today).add(30, "days").endOf("day");
 
-    // Fetch existing slots only once
     const existingSlots = await Slot.find({
       court: courtId,
       startTime: { $gte: today.toDate(), $lte: endDate.toDate() },
     });
 
-    // Create a Map to track existing slots and avoid duplication
     const existingSlotMap = new Map(
       existingSlots.map((slot) => [
         `${courtId}-${moment(slot.startTime).format("YYYY-MM-DD-HH")}`,
-        slot._id, // Store the slot ID
+        slot._id,
       ])
     );
 
@@ -267,11 +265,9 @@ const generateSlots = async (req, res) => {
         const slotKey = `${courtId}-${startTimeUTC.format("YYYY-MM-DD-HH")}`;
 
         if (existingSlotMap.has(slotKey)) {
-          // If a duplicate exists, mark it for deletion (only unbooked ones)
           const existingSlotId = existingSlotMap.get(slotKey);
           slotsToDelete.push(existingSlotId);
         } else {
-          // Insert new slot
           slotsToInsert.push({
             court: courtId,
             startTime: startTimeUTC.toDate(),
@@ -283,12 +279,10 @@ const generateSlots = async (req, res) => {
       }
     }
 
-    // Delete only unbooked duplicate slots
     if (slotsToDelete.length > 0) {
       await Slot.deleteMany({ _id: { $in: slotsToDelete }, isBooked: false });
     }
 
-    // Insert only new slots
     if (slotsToInsert.length > 0) {
       await Slot.insertMany(slotsToInsert);
     }
