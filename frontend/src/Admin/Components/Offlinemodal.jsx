@@ -4,6 +4,7 @@ import {
     DialogContentText, DialogTitle, MenuItem, Select, InputLabel, FormControl, CircularProgress
 } from '@mui/material';
 import { useGetAllcourtsQuery, useGetSlotsQuery } from '../../Slices/UserApi';
+import { useOfflinebookingsMutation } from '../../Slices/AdminApi';
 import moment from 'moment'
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -14,11 +15,14 @@ export default function OfflineBookingModal({ open, setOpen, handleSubmit }) {
     const [selectedCourt, setSelectedCourt] = React.useState('');
     const [selectedDate, setSelectedDate] = React.useState(null);
 
-    // Fetch available slots when court & date are selected
     const { data: slotsData, isLoading } = useGetSlotsQuery(
         selectedCourt && selectedDate ? { courtId: selectedCourt, date: selectedDate.format("YYYY-MM-DD") } : {},
         { skip: !selectedCourt || !selectedDate }
     );
+
+    const [createOfflineBooking] = useOfflinebookingsMutation();
+
+    console.log(slotsData)
 
     const [formData, setFormData] = React.useState({
         phoneno: '',
@@ -58,10 +62,15 @@ export default function OfflineBookingModal({ open, setOpen, handleSubmit }) {
         setSelectedDate(newDate);
     };
 
-    const handleFormSubmit = (event) => {
+    const handleFormSubmit = async (event) => {
         event.preventDefault();
-        handleSubmit(formData);
-        handleClose();
+        try {
+            const response = await createOfflineBooking(formData).unwrap();
+            console.log("Booking created:", response);
+            handleClose();
+        } catch (error) {
+            console.error("Error creating booking:", error);
+        }
     };
 
     return (
@@ -72,27 +81,14 @@ export default function OfflineBookingModal({ open, setOpen, handleSubmit }) {
                     Fill in the details to create an offline booking.
                 </DialogContentText>
 
-                {/* Phone Number */}
-                <TextField
-                    autoFocus
-                    required
-                    margin="dense"
-                    name="phoneno"
-                    label="Phone Number"
-                    type="text"
-                    fullWidth
-                    value={formData.phoneno}
-                    onChange={handleChange}
-                />
-
                 {/* User Name (Optional) */}
                 <TextField
                     margin="dense"
-                    name="userName"
-                    label="User Name (Optional)"
-                    type="text"
+                    name="email"
+                    label="email"
+                    type="email"
                     fullWidth
-                    value={formData.userName}
+                    value={formData.email}
                     onChange={handleChange}
                 />
 
@@ -123,31 +119,38 @@ export default function OfflineBookingModal({ open, setOpen, handleSubmit }) {
                     <InputLabel>Available Slots</InputLabel>
                     <Select multiple name="slotId" value={formData.slotId} onChange={handleSlotChange}>
                         {slotsData?.length > 0 ? (
-                            slotsData.map((slot) => {
-                                const localStartTime = new Date(slot.startTime).toLocaleTimeString([], {
-                                    hour: '2-digit',
-                                    minute: '2-digit',
-                                    hour12: true,  // Ensures AM/PM format
-                                });
+                            slotsData
+                                .filter(slot => {
+                                    const slotStartTime = new Date(slot.startTime);
+                                    const now = new Date();
 
-                                const localEndTime = new Date(slot.endTime).toLocaleTimeString([], {
-                                    hour: '2-digit',
-                                    minute: '2-digit',
-                                    hour12: true,
-                                });
+                                    return !slot.isBooked && slotStartTime > now;
+                                })
+                                .map(slot => {
+                                    const localStartTime = new Date(slot.startTime).toLocaleTimeString([], {
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                        hour12: true,
+                                    });
 
-                                return (
-                                    <MenuItem key={slot._id} value={slot._id}>
-                                        {localStartTime} - {localEndTime}
-                                    </MenuItem>
-                                );
-                            })
+                                    const localEndTime = new Date(slot.endTime).toLocaleTimeString([], {
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                        hour12: true,
+                                    });
+
+                                    return (
+                                        <MenuItem key={slot._id} value={slot._id}>
+                                            {localStartTime} - {localEndTime}
+                                        </MenuItem>
+                                    );
+                                })
                         ) : (
                             <MenuItem disabled>No slots available</MenuItem>
                         )}
-
                     </Select>
                 </FormControl>
+
 
                 {/* Amount */}
                 <TextField
@@ -160,19 +163,6 @@ export default function OfflineBookingModal({ open, setOpen, handleSubmit }) {
                     onChange={handleChange}
                 />
 
-                {/* Add-ons (Optional) */}
-                <FormControl fullWidth margin="dense">
-                    <InputLabel>Add-ons</InputLabel>
-                    <Select
-                        multiple
-                        name="addons"
-                        value={formData.addons}
-                        onChange={(e) => setFormData({ ...formData, addons: e.target.value })}
-                    >
-                        <MenuItem value="racket">Racket Rental</MenuItem>
-                        <MenuItem value="shuttle">Shuttle Cock</MenuItem>
-                    </Select>
-                </FormControl>
 
                 {/* Payment Method */}
                 <FormControl fullWidth margin="dense">

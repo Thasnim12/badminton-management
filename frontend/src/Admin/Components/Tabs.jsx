@@ -18,16 +18,17 @@ import {
   Pagination,
 } from "@mui/material";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
-import { useManageCsvMutation, useGetBookingsQuery } from "../../Slices/AdminApi";
+import { useManageCsvMutation, useGetBookingsQuery, useOfflinebookingsMutation } from "../../Slices/AdminApi";
 import Offlinemodal from "./Offlinemodal";
 
-const RECORDS_PER_PAGE = 7; // Limit to 7 records per page
+const RECORDS_PER_PAGE = 7;
 
 export default function ScrollableTabsButtonVisible() {
   const [value, setValue] = useState(0);
   const [page, setPage] = useState(1);
   const [manageCsv] = useManageCsvMutation();
   const { data, isLoading: isLoadingBookings } = useGetBookingsQuery();
+  const [ offline ] = useOfflinebookingsMutation();
   const [open,setOpen] = useState(false)
 
   const handleChange = (event, newValue) => {
@@ -101,7 +102,7 @@ export default function ScrollableTabsButtonVisible() {
                 <TableCell align="center">
                   {booking.payment?.razorpayOrderId}
                 </TableCell>
-                <TableCell align="center">{booking.user?.name || "N/A"}</TableCell>
+                <TableCell align="center">{booking.guestDetails?.name || booking.user.name || "N/A"}</TableCell>
                 <TableCell align="center">{booking.court?.court_name || "N/A"}</TableCell>
                 <TableCell align="center">
                   {booking.slot

@@ -48,7 +48,7 @@ const adminroute = express.Router();
 //Get route
 adminroute.get('/users', authenticateAdmin, getAllusers)
 adminroute.get('/courts',authenticateAdmin, getAllcourts)
-adminroute.get('/slots/:courtId', authenticateAdmin,getAllSlots)
+adminroute.get('/slots/:courtId',getAllSlots)
 adminroute.get('/addons', authenticateAdmin, getAlladdons)
 adminroute.get("/admin-profile", authenticateAdmin, getAdminDetails);
 adminroute.get("/users", authenticateAdmin, getAllusers);
@@ -72,7 +72,7 @@ adminroute.post("/staffs", authenticateAdmin, addStaff);
 adminroute.post('/addons', authenticateAdmin, manageAddons)
 adminroute.post('/banner', authenticateAdmin, addBanner)
 adminroute.post('/add-user', authenticateAdmin, addUser)
-adminroute.post('/offline-bookings', authenticateAdmin, createOfflineBooking)
+adminroute.post('/offline-bookings', createOfflineBooking)
 
 //Edit route
 adminroute.put("/users/:userId", authenticateAdmin, manageUsers);
@@ -87,5 +87,6 @@ adminroute.delete("/staffs/:id", authenticateAdmin, deleteStaff);
 adminroute.delete('/delete-court', authenticateAdmin,deleteCourt)
 adminroute.delete('/delete-banner/:bannerId', authenticateAdmin, deleteBanner)
 adminroute.delete('/delete-addons/:addonsId', authenticateAdmin, deleteAddons)
+
 
 module.exports = adminroute;

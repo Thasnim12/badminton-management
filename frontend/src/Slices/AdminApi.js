@@ -73,6 +73,13 @@ export const adminApi = createApi({
         method: "PUT",
       }),
     }),
+    offlinebookings: builder.mutation({
+      query: (formData) => ({
+        url: `/offline-bookings`,
+        method: "POST",
+        body:formData
+      }),
+    }),
     manageslots: builder.mutation({
       query: (data) => ({
         url: `/slots`,
@@ -247,7 +254,8 @@ export const {
   useEditCourtStatusMutation,
   useDeleteCourtMutation,
   useEditAddonMutation,
-  useGetSlotsQuery
+  useGetSlotsQuery,
+  useOfflinebookingsMutation
 } = adminApi;
 
 export default adminApi;

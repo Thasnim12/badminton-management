@@ -47,7 +47,7 @@ const adminLogin = async (req, res) => {
       console.log(admin._id, "id");
 
       const token = generateAdminToken(res, admin._id);
-      console.log(token,'tok')
+      console.log(token, 'tok')
 
       return res.status(200).json({
         admin,
@@ -1070,6 +1070,7 @@ const getAllslots = async (req, res) => {
 }
 
 
+
 module.exports = {
   adminLogin,
   adminLogout,
@@ -1099,5 +1100,5 @@ module.exports = {
   editStatus,
   deleteAddons,
   editAddons,
-  getAllslots
+  getAllslots,
 };

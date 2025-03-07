@@ -148,7 +148,7 @@ const verifyBookingPayment = async (req, res) => {
         const { bookingId, razorpay_payment_id, razorpay_order_id, razorpay_signature, payment_method } = req.body;
         console.log(req.body, 'verify')
 
-        const booking = await Booking.findById(bookingId).populate("slot").populate("court"); 
+        const booking = await Booking.findById(bookingId).populate("slot").populate("court");
         if (!booking) return res.status(404).json({ message: "Booking not found" });
 
         const generated_signature = crypto
@@ -314,50 +314,63 @@ const downloadBookings = async (req, res) => {
 
 const createOfflineBooking = async (req, res) => {
     try {
-        const { phoneno, userName, courtId, slotIds, amount, addons, paymentMethod, bookingDate, email } = req.body;
+        const { email, courtId, slotId, amount, transactionId, bookingDate,paymentMethod } = req.body;
 
-        let user = await User.findOne({ phone: phoneno });
-
-        let guestDetails = null;
-        if (!user) {
-            guestDetails = {
-                name: userName,
-                phone: phoneno,
-                email: email,
-                city: city
-            };
+        if (!Array.isArray(slotId)) {
+            return res.status(400).json({ message: "slotId must be an array" });
         }
 
-        // Create the booking
-        const newBooking = new Booking({
-            user: user ? user._id : null,
-            guestDetails,
-            court: courtId,
-            slot: slotIds,
-            addons,
-            bookingDate,
-            bookingType: 'Offline',
-            payment: {
-                amount,
-                method: paymentMethod,
-                status: 'Completed',
-            },
-            isCancelled: false,
+        const user = await User.findOne({ email: email });
+
+        if (!user) {
+            return res
+                .status(404)
+                .json({ message: "User not found in the offline mode!" });
+        }
+
+        const slotPromises = slotId.map(id => Slot.findById(id));
+        const slots = await Promise.all(slotPromises);
+
+        const invalidSlot = slots.find((slot, index) => {
+            if (!slot || slot.isBooked) {
+                return true;
+            }
+            return false;
         });
 
-        const savedBooking = await newBooking.save();
+        if (invalidSlot) {
+            return res.status(400).json({ message: "slots are already booked or unavailable" });
+        }
+
+
+        
+        const bookingData = {
+            court: courtId,
+            slot: slotId,
+            bookingDate: new Date(),
+            payment: {
+                razorpayOrderId: transactionId,
+                method:paymentMethod,
+                amount: amount,
+            },
+        };
+        
+        const newBooking = new Booking(bookingData);
+        await newBooking.save();
+
 
         await Slot.updateMany(
-            { _id: { $in: slotIds } },
+            { _id: { $in: slotId } },
             { $set: { isBooked: true } }
         );
 
-        res.status(201).json({ message: 'Booking created successfully', booking: savedBooking });
+        res.status(201).json({ message: 'Booking created successfully', booking: newBooking });
     } catch (error) {
         console.error('Error creating booking:', error);
         res.status(500).json({ message: 'Internal server error' });
     }
 };
+
 
 
 
