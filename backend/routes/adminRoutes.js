@@ -72,7 +72,7 @@ adminroute.post("/staffs", authenticateAdmin, addStaff);
 adminroute.post('/addons', authenticateAdmin, manageAddons)
 adminroute.post('/banner', authenticateAdmin, addBanner)
 adminroute.post('/add-user', authenticateAdmin, addUser)
-adminroute.post('/offline-bookings', createOfflineBooking)
+adminroute.post('/offline-bookings', authenticateAdmin,createOfflineBooking)
 
 //Edit route
 adminroute.put("/users/:userId", authenticateAdmin, manageUsers);
